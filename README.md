@@ -4,7 +4,7 @@ This repo is a minor project for practicing and inner using for gene set express
 Input a set of gene, the result will represent the TCGA cancer expression, CCLE cancer cell line expression and GTEx normal tissue expression.
 
 > Follow the [instruction guide](./instruction-guide.md) to build the shiny app.
-
 >fuxin join project.
-
 >xiamx join project
+
+
