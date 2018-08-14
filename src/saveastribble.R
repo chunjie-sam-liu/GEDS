@@ -33,43 +33,40 @@ thyroid <- read_tsv(file.path(CCLE_path, "result", "thyroid"), col_names = TRUE)
 unknown <- read_tsv(file.path(CCLE_path, "result", "unknown"), col_names = TRUE)
 upper_aerodigestive_tract <- read_tsv(file.path(CCLE_path, "result", "upper_aerodigestive_tract"), col_names = TRUE)
 urinary_tract <- read_tsv(file.path(CCLE_path, "result", "urinary_tract"), col_names = TRUE)
-CCLE_tibble <- list(adrenal_cortex=adrenal_cortex,
-     autonomic_ganglia=autonomic_ganglia,
-     biliary_tract=biliary_tract,
-     bone=bone,
-     brain=brain,
-     breast=breast,
-     central_nervous_system=central_nervous_system,
-     cervix=cervix,
-     endometrium=endometrium,
-     eye=eye,
-     haematopoietic_and_lymphoid_tissue=haematopoietic_and_lymphoid_tissue,
-     intestine=intestine,
-     kidney=kidney,
-     liver=liver,
-     lung=lung,
-     oesophagus=oesophagus,
-     ovary=ovary,
-     pancreas=pancreas,
-     placenta=placenta,
-     pleura=pleura,
-     prostate=prostate,
-     salivary_gland=salivary_gland,
-     skin=skin,
-     soft_tissue=soft_tissue,
-     stomach=stomach,
-     synovium=synovium,
-     thyroid=thyroid,
-     unknown=unknown,
-     upper_aerodigestive_tract=upper_aerodigestive_tract,
-     urinary_tract=urinary_tract
-) %>% tibble::enframe(name="tissue",value="expression")
-CCLE_tibble %>% readr::write_rds(path = file.path(CCLE_path,"result", 'CCLE_expr.rds.gz'), compress = "gz")
+CCLE_tibble <- list(
+  adrenal_cortex = adrenal_cortex,
+  autonomic_ganglia = autonomic_ganglia,
+  biliary_tract = biliary_tract,
+  bone = bone,
+  brain = brain,
+  breast = breast,
+  central_nervous_system = central_nervous_system,
+  cervix = cervix,
+  endometrium = endometrium,
+  eye = eye,
+  haematopoietic_and_lymphoid_tissue = haematopoietic_and_lymphoid_tissue,
+  intestine = intestine,
+  kidney = kidney,
+  liver = liver,
+  lung = lung,
+  oesophagus = oesophagus,
+  ovary = ovary,
+  pancreas = pancreas,
+  placenta = placenta,
+  pleura = pleura,
+  prostate = prostate,
+  salivary_gland = salivary_gland,
+  skin = skin,
+  soft_tissue = soft_tissue,
+  stomach = stomach,
+  synovium = synovium,
+  thyroid = thyroid,
+  unknown = unknown,
+  upper_aerodigestive_tract = upper_aerodigestive_tract,
+  urinary_tract = urinary_tract
+) %>% tibble::enframe(name = "tissue", value = "expression")
+CCLE_tibble %>% readr::write_rds(path = file.path(CCLE_path, "result", "CCLE_expr.rds.gz"), compress = "gz")
 
 
 
 # change name -------------------------------------------------------------
-
-
-
-
