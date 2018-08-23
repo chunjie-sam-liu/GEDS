@@ -13,7 +13,7 @@ config$version <- "0.0.1"
 # default getwd()
 # in development mode, change the config$wd to your working directory
 
-config$wd <- "/home/liucj/github/GSEXPR"
+config$wd <- "/data/xiamx/github/GSEXPR"
 #config$wd <- 
 
 # Databases ---------------------------------------------------------------
