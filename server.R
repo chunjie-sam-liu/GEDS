@@ -12,7 +12,10 @@ server <- function(input, output, session) {
   
   # welcome
   source(file = file.path(config$serv, "welcome_server.R"), local = TRUE)
+  source(file = file.path(config$serv, "init_server.R"), local = TRUE)
+  source(file = file.path(config$serv, "functions_server.R"), local = TRUE)
 }
+
 
 
 # shiny server ------------------------------------------------------------

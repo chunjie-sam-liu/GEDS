@@ -7,6 +7,8 @@ fn_welcome_msg <- function() {
   )
 }
 
+# introduction ------------------------------------------------------------
+
 fn_introduction <- function() {
   column(
     width = 12, offset = 0,
@@ -19,13 +21,14 @@ fn_introduction <- function() {
   )
 }
 
+
+# analysis ----------------------------------------------------------------
+
 fn_analysis <-  function(){
   column(
     width =12, offset = 0,
-    dashboardBody(
-        tabBox(
-          title = "",
-          id = "tabset1", height = "140px",
+        shinydashboard::tabBox(
+          title = "",id = "tabset1", height = "140px",width=12,
           tabPanel("mRNA", 
                    column(
                      width = 12, offset = 0,
@@ -43,7 +46,7 @@ fn_analysis <-  function(){
                    column(
                      width = 12, offset = 0,
                      shinyWidgets::searchInput(
-                       inputId = "input_protin_set",
+                       inputId = "input_protein_set",
                        label = "",
                        placeholder = 'Please input protein set separated by space or " , "or " ; "',
                        btnSearch = icon("search"),
@@ -66,9 +69,57 @@ fn_analysis <-  function(){
                    )
           )
         )
+  )
+}
+
+# multi cancer types input ------------------------------------------------
+
+fn_mRNA_select <- function(){
+  shiny::fluidRow(
+    column(
+      width = 8,
+      multiInput(
+        inputId = "select_analysis", label = "Select Analysis (Selected in right)",
+        choices = "list"
+      ),
+      shinyjs::hide(switchInput(
+        inputId = "select_dataset", label = "Dataset", value = FALSE,
+        onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      ))
     )
   )
 }
+fn_protein_select <- function(){
+  shiny::fluidRow(
+    column(
+      width = 8,
+      multiInput(
+        inputId = "select_analysis2", label = "Select Analysis (Selected in right)",
+        choices = "lis2"
+      ),
+      shinyjs::hide(switchInput(
+        inputId = "select_dataset2", label = "Dataset", value = FALSE,
+        onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      ))
+    )
+  )
+}
+fn_miRNA_select <- function(){
+  shiny::fluidRow(
+    column(
+      width = 8,
+      multiInput(
+        inputId = "select_analysis3", label = "Select Analysis (Selected in right)",
+        choices = "list3"
+      ),
+      shinyjs::hide(switchInput(
+        inputId = "select_dataset3", label = "Dataset", value = FALSE,
+        onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      ))
+    )
+  )
+}
+# figure ------------------------------------------------------------------
 
 fn_feature_figure <- function(){
   column(
