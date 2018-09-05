@@ -73,49 +73,157 @@ fn_analysis <-  function(){
 }
 
 # multi cancer types input ------------------------------------------------
-
-fn_mRNA_select <- function(){
+fn_gene_select <- function(){
+  shiny::fluidRow(
+    shiny::uiOutput(outputId = "ui_mRNA_TCGA_select")#,
+    #shiny::uiOutput(outputId = "ui_mRNA_GTEX_select"),
+    #shiny::uiOutput(outputId = "ui_mRNA_CCLE_select"),
+    #shiny::uiOutput(outputId = "ui_mRNA_HPA_tissue_select"),
+    #shiny::uiOutput(outputId = "ui_mRNA_HPA_cellline_select")
+    )
+}
+fn_mRNA_TCGA_select <- function(.TCGA){
   shiny::fluidRow(
     column(
-      width = 8,
-      multiInput(
-        inputId = "select_analysis", label = "Select Analysis (Selected in right)",
-        choices = "list"
-      ),
-      shinyjs::hide(switchInput(
-        inputId = "select_dataset", label = "Dataset", value = FALSE,
-        onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-      ))
+      width = 12, offset=1,
+      shinydashboard::box(
+        width = 10,
+        status = "primary",
+        solidHeader = TRUE,
+        title="Select TCGA Cancer Types",
+        checkboxGroupButtons(
+          inputId = "select_mRNA_TCGA",label = "",status = "primary", size = "lg",
+          choices = .TCGA,
+          checkIcon = list(yes = icon("ok", lib = "glyphicon" ),no = icon("remove",lib = "glyphicon"))
+        ),
+        shinyjs::hide(switchInput(
+          inputId = "select_dataset1", label = "Dataset", value = FALSE,
+          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+        )))
     )
   )
 }
-fn_protein_select <- function(){
+fn_mRNA_GTEX_select <- function(.GTEX){
   shiny::fluidRow(
     column(
-      width = 8,
-      multiInput(
-        inputId = "select_analysis2", label = "Select Analysis (Selected in right)",
-        choices = "lis2"
-      ),
-      shinyjs::hide(switchInput(
-        inputId = "select_dataset2", label = "Dataset", value = FALSE,
-        onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-      ))
+      width = 12, offset = 1,
+      shinydashboard::box(
+        width = 10,
+        status = "danger",
+        solidHeader = TRUE,
+        title="Select GTEX Tissues",
+        checkboxGroupButtons(
+          inputId = "select_mRNA_GTEX",label = "",status = "danger", size = "lg",
+          choices = .GTEX,
+          checkIcon = list(yes = icon("ok", lib = "glyphicon" ),no = icon("remove",lib = "glyphicon"))
+        ),
+        shinyjs::hide(switchInput(
+          inputId = "select_dataset2", label = "Dataset", value = FALSE,
+          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      )))
     )
   )
 }
-fn_miRNA_select <- function(){
+fn_mRNA_CCLE_select <- function(.CCLE){
   shiny::fluidRow(
     column(
-      width = 8,
-      multiInput(
-        inputId = "select_analysis3", label = "Select Analysis (Selected in right)",
-        choices = "list3"
-      ),
-      shinyjs::hide(switchInput(
-        inputId = "select_dataset3", label = "Dataset", value = FALSE,
-        onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-      ))
+      width = 12, offset = 1,
+      shinydashboard::box(
+        width = 10,
+        status = "warning",
+        solidHeader = TRUE,
+        title="Select CCLE Tissues",
+        checkboxGroupButtons(
+          inputId = "select_mRNA_CCLE",label = "",status = "warning", size = "lg",
+          choices = .CCLE,
+          checkIcon = list(yes = icon("ok", lib = "glyphicon" ),no = icon("remove",lib = "glyphicon"))
+        ),
+        shinyjs::hide(switchInput(
+          inputId = "select_dataset3", label = "Dataset", value = FALSE,
+          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      )))
+    )
+  )
+}
+fn_mRNA_HPA_tissue_select <- function(.HPA_tissue){
+  shiny::fluidRow(
+    column(
+      width = 12, offset = 1,
+      shinydashboard::box(
+        width = 10,
+        status = "success",
+        solidHeader = TRUE,
+        title="Select HPA Tissues",
+        checkboxGroupButtons(
+          inputId = "select_mRNA_HPA_tissue",label = "",status = "success", size = "lg",
+          choices = .HPA_tissue,
+          checkIcon = list(yes = icon("ok", lib = "glyphicon" ),no = icon("remove",lib = "glyphicon"))
+        ),
+        shinyjs::hide(switchInput(
+          inputId = "select_dataset4", label = "Dataset", value = FALSE,
+          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      )))
+    )
+  )
+}
+fn_mRNA_HPA_cellline_select <- function(.HPA_cellline){
+  shiny::fluidRow(
+    column(
+      width = 12, offset = 1,
+      shinydashboard::box(
+        width = 10,
+        status = "info",
+        solidHeader = TRUE,
+        title="Select HPA celllines",
+        checkboxGroupButtons(
+          inputId = "select_mRNA_HPA_cellline",label = "",status = "info", size = "lg",
+          choices = .HPA_cellline,
+          checkIcon = list(yes = icon("ok", lib = "glyphicon" ),no = icon("remove",lib = "glyphicon"))
+        ),
+        shinyjs::hide(switchInput(
+          inputId = "select_dataset5", label = "Dataset", value = FALSE,
+          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      )))
+    )
+  )
+}
+fn_protein_select <- function(.protein){
+  shiny::fluidRow(
+    column(
+      width = 12, offset = 1,
+      shinydashboard::box(
+        width = 10,
+        status = "primary",
+        solidHeader = TRUE,
+        title="Select TCGA Cancer Types",
+        checkboxGroupButtons(
+          inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg",
+          choices = .protein
+        ),
+        shinyjs::hide(switchInput(
+          inputId = "select_dataset6", label = "Dataset", value = FALSE,
+          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      )))
+    )
+  )
+}
+fn_miRNA_select <- function(.miRNA){
+  shiny::fluidRow(
+    column(
+      width = 12, offset = 1,
+      shinydashboard::box(
+        width = 10,
+        status = "primary",
+        solidHeader = TRUE,
+        title="Select TCGA Cancer Types",
+        checkboxGroupButtons(
+          inputId = "select_miRNA_TCGA", label = "", status = "primary", size = "lg",
+          choices = .miRNA
+        ),
+        shinyjs::hide(switchInput(
+          inputId = "select_dataset7", label = "Dataset", value = FALSE,
+          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+      )))
     )
   )
 }

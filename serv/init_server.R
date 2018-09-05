@@ -66,6 +66,10 @@ gene_set <- reactiveValues(
 
 # Load gene list ----------------------------------------------------------
 
-mRNA_dataset <- c("TCGA","GTEX","CCLE","HPA")
-protein_dataset <- "TCGA"
-miRNA_dataset <- "TCGA"
+mRNA_TCGA <- readr::read_tsv(file.path(config$database,"mRNA","datalist","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
+mRNA_GTEX <- readr::read_tsv(file.path(config$database,"mRNA","datalist","GTEX_tissues"), col_names = FALSE) %>% .$X1
+mRNA_CCLE <- readr::read_tsv(file.path(config$database,"mRNA","datalist","CCLE_tissues"), col_names = FALSE) %>% .$X1
+mRNA_HPA_tissue <- readr::read_tsv(file.path(config$database,"mRNA","datalist","hpa_tissue_file_list"), col_names = FALSE) %>% .$X1
+mRNA_HPA_cellline <- readr::read_tsv(file.path(config$database,"mRNA","datalist","hpa_cellline_file_list"), col_names = FALSE) %>% .$X1
+protein_TCGA <- "TCGA"
+miRNA_TCGA <- "TCGA"

@@ -5,17 +5,23 @@ observeEvent(input$input_gene_set_reset, {
   shinyjs::reset("input_gene_set")
   closeAlert(session = session, alertId = "guide-alert")
   status$gene_set <- FALSE
+  status$protein_set <- FALSE
+  status$miRNA_set <- FALSE
 })
 observeEvent(input$input_protein_set_reset, {
   names(selected_analysis) %>% purrr::walk(.f = function(.x) { selected_analysis[[.x]] <- FALSE })
   shinyjs::reset("input_protein_set")
   closeAlert(session = session, alertId = "guide-alert")
+  status$gene_set <- FALSE
   status$protein_set <- FALSE
+  status$miRNA_set <- FALSE
 })
 observeEvent(input$input_miRNA_set_reset, {
   names(selected_analysis) %>% purrr::walk(.f = function(.x) { selected_analysis[[.x]] <- FALSE })
   shinyjs::reset("input_miRNA_set")
   closeAlert(session = session, alertId = "guide-alert")
+  status$gene_set <- FALSE
+  status$protein_set <- FALSE
   status$miRNA_set <- FALSE
 })
 
@@ -27,8 +33,18 @@ source(file.path(config$func, "welcome_func.R"))
 output$ui_welcome_msg <- renderUI({fn_welcome_msg()})
 output$ui_analysis <- renderUI({fn_analysis()})
 # cancer types selection --------------------------------------------------
-output$ui_multi_cancer_input <- renderUI({if (status$gene_set) {fn_mRNA_select()} else if (status$protein_set) {fn_protein_select()} else if (status$miRNA_set) {fn_miRNA_select()} else {NULL}})
-
+output$ui_multi_cancer_input <- renderUI({
+  if (status$gene_set) {fn_gene_select()} 
+  else if (status$protein_set) {
+    fn_protein_select(.protein = protein_TCGA)} 
+  else if (status$miRNA_set) {
+    fn_miRNA_select(.miRNA = miRNA_TCGA)} 
+  else {NULL}})
+output$ui_mRNA_TCGA_select <- renderUI({fn_mRNA_TCGA_select(.TCGA = mRNA_TCGA)})
+output$ui_mRNA_GTEX_select <- renderUI({fn_mRNA_GTEX_select(.GTEX= mRNA_GTEX)})
+output$ui_mRNA_CCLE_select <- renderUI({fn_mRNA_CCLE_select(.CCLE = mRNA_CCLE)})
+output$ui_mRNA_HPA_tissue_select <- renderUI({fn_mRNA_HPA_tissue_select(.HPA_tissue = mRNA_HPA_tissue)})
+output$ui_mRNA_HPA_cellline_select <- renderUI({fn_mRNA_HPA_cellline_select(.HPA_cellline= mRNA_HPA_cellline)})
 # introduction ------------------------------------------------------------
 
 output$ui_introduction <- renderUI({fn_introduction()})
