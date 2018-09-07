@@ -197,7 +197,7 @@ fn_protein_select <- function(.protein){
         solidHeader = TRUE,
         title="Select TCGA Cancer Types",
         checkboxGroupButtons(
-          inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg",
+          inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg", selected = c('ESCA','LIHC','CESC','COAD'),
           choices = .protein
         ),
         shinyjs::hide(switchInput(
@@ -227,6 +227,36 @@ fn_miRNA_select <- function(.miRNA){
     )
   )
 }
+# Gene set stat -----------------------------------------------------------
+fn_gene_set_stat <- function(input_list_check){
+  column(
+    width = 8, offset = 2, style = "margin-top:20px",
+    downloadLink(
+      outputId = "download_total_gene_set", label = NULL, class = NULL,
+      valueBox(value = input_list_check$n_total, subtitle = "Total Input Genes", icon = icon("users"), color = "yellow")
+    ),
+    
+    downloadLink(
+      outputId = "download_valid_gene_set", label = NULL, class = NULL,
+      valueBox(
+        value = input_list_check$n_match, subtitle = "Valid Genes", icon = icon("credit-card"),color = "green")
+    ),
+    downloadLink(
+      outputId = "download_input_logs", label = NULL, class = NULL,
+      valueBox(
+        value = input_list_check$n_non_match, subtitle = "Invalid Genes",icon = icon("line-chart"), color = "red")
+    )
+  )
+}
+
+# start analysis widgets --------------------------------------------------
+fn_start_analysis <- function(){
+  column(
+    width = 8, offset = 2, style = "margin-top:20px",
+    shinyBS::bsButton(inputId = "analysis", label = "Start Gene Set Analysis", icon = icon("play"), class = "btn-lg"),
+    shinyBS::bsButton(inputId = "stop", label = "Stop", icon = icon("pause"), class = "btn-lg danger")
+  )
+}
 # figure ------------------------------------------------------------------
 
 fn_feature_figure <- function(){
@@ -238,5 +268,12 @@ fn_feature_figure <- function(){
       solidHeader = TRUE,
       status = "primary"
     )
+  )
+}
+fn_result <- function(id){
+  ns <- NS(id)
+  column(
+    width = 12,offset = 0,
+    DT::dataTableOutput(outputId = ns("expr_dt_comparison")) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
   )
 }

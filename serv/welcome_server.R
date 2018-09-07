@@ -45,6 +45,18 @@ output$ui_mRNA_GTEX_select <- renderUI({fn_mRNA_GTEX_select(.GTEX= mRNA_GTEX)})
 output$ui_mRNA_CCLE_select <- renderUI({fn_mRNA_CCLE_select(.CCLE = mRNA_CCLE)})
 output$ui_mRNA_HPA_tissue_select <- renderUI({fn_mRNA_HPA_tissue_select(.HPA_tissue = mRNA_HPA_tissue)})
 output$ui_mRNA_HPA_cellline_select <- renderUI({fn_mRNA_HPA_cellline_select(.HPA_cellline= mRNA_HPA_cellline)})
+# Statistics of input gene list -------------------------------------------
+output$ui_gene_set_stat <- renderUI({
+  if (status$gene_set) {fn_gene_set_stat(input_list_check)} 
+  else if (status$protein_set) {
+    fn_gene_set_stat(input_list_check)} 
+  else if (status$miRNA_set) {
+    fn_gene_set_stat(input_list_check)} 
+  else {NULL}})
+# Start analysis ----------------------------------------------------------
+output$ui_start_analysis <- renderUI({if (status$gene_set) {fn_start_analysis()} else {NULL}})
+output$ui_result <- renderUI({if(status$result) {fn_result("expr")} else {NULL}})
+
 # introduction ------------------------------------------------------------
 
 output$ui_introduction <- renderUI({fn_introduction()})
@@ -70,7 +82,10 @@ validate_input_gene_set <- eventReactive(
       return()
     }
     # check gene
-    #.v_igs <- check_gene_set(.s = input$input_gene_set, status = status, error = error)
+    .v_igs <- check_gene_set(.s = input$input_gene_set)
+    # validate genes
+    validate_gene_set(.v = .v_igs, total_gene_symbol = total_gene_symbol, input_list_check = input_list_check)
+    
   }
 )
 validate_input_protein_set <- eventReactive(
@@ -85,7 +100,10 @@ validate_input_protein_set <- eventReactive(
       return()
     }
     # check gene
-    #.v_igs <- check_protein_set(.s = input$input_protein_set, status = status, error = error)
+    .v_igs <- check_gene_set(.s = input$input_protein_set)
+    # validate genes
+    validate_protein_set(.v = .v_igs, total_protein_symbol = total_protein_symbol, input_list_check = input_list_check)
+
   }
 )
 validate_input_miRNA_set <- eventReactive(
@@ -103,8 +121,34 @@ validate_input_miRNA_set <- eventReactive(
     #.v_igs <- check_miRNA_set(.s = input$input_miRNA_set, status = status, error = error)
   }
 )
-# observeEvent ------------------------------------------------------------
 
+observeEvent(input$select_protein_TCGA,{
+    status$result <- TRUE
+    TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
+      dplyr::mutate(
+        expr = purrr::map(
+          .x = expr,
+          .f = function(.x) {
+            .x %>%
+              dplyr::filter(symbol %in% input_list_check$match)
+          }
+        )
+      ) ->> expr_clean
+    tibble_format_change(.expr_clean = expr_clean)
+    output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable(table_result)})
+})
+# match_result_output -----------------------------------------------------
+
+observeEvent(input$invalid_gene,{
+  shinyWidgets::sendSweetAlert(
+    session = session,
+    title = "invalid_gene",
+    text = input_list_check$non_match,
+    type = "error"
+  )
+})
+
+# observeEvent ------------------------------------------------------------
 observeEvent(status$gene_trigger, {
   if (error$gene_set != "" && !is.null(error$gene_set)) {
     shinyWidgets::sendSweetAlert(

@@ -28,6 +28,7 @@ status <- reactiveValues(
   "miRNA_set" = FALSE,
   "analysis" = FALSE,
   "tcga_expr" = FALSE,
+  "result" = FALSE,
   "gene_trigger" = FALSE,
   "protein_trigger" = FALSE,
   "miRNA_trigger" = FALSE,
@@ -56,7 +57,7 @@ selected_analysis <- reactiveValues(
 selected_ctyps <- reactiveVal()
 
 # Gene sets ---------------------------------------------------------------
-gene_set <- reactiveValues(
+input_list_check <- reactiveValues(
   match = "",
   non_match = "",
   n_match = "",
@@ -64,6 +65,9 @@ gene_set <- reactiveValues(
   n_total = ""
 )
 
+# Load data ---------------------------------------------------------------
+
+TCGA_protein <- readr::read_rds(file.path(config$database, "protein","tcga_pancan33-rppa-expr-v4-l4.rds.gz"))
 # Load gene list ----------------------------------------------------------
 
 mRNA_TCGA <- readr::read_tsv(file.path(config$database,"mRNA","datalist","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
@@ -71,5 +75,8 @@ mRNA_GTEX <- readr::read_tsv(file.path(config$database,"mRNA","datalist","GTEX_t
 mRNA_CCLE <- readr::read_tsv(file.path(config$database,"mRNA","datalist","CCLE_tissues"), col_names = FALSE) %>% .$X1
 mRNA_HPA_tissue <- readr::read_tsv(file.path(config$database,"mRNA","datalist","hpa_tissue_file_list"), col_names = FALSE) %>% .$X1
 mRNA_HPA_cellline <- readr::read_tsv(file.path(config$database,"mRNA","datalist","hpa_cellline_file_list"), col_names = FALSE) %>% .$X1
-protein_TCGA <- "TCGA"
-miRNA_TCGA <- "TCGA"
+protein_TCGA <- readr::read_tsv(file.path(config$database,"protein","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
+miRNA_TCGA <- readr::read_tsv(file.path(config$database,"miRNA","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
+total_gene_symbol <- "BRAF"
+total_protein_symbol <- readr::read_tsv(file.path(config$database,"protein","protein_symbol"), col_names = FALSE) %>% .$X1
+total_miRNA_symbol <- "total_gene_symbol"
