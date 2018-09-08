@@ -27,7 +27,7 @@ status <- reactiveValues(
   "protein_set" = FALSE,
   "miRNA_set" = FALSE,
   "analysis" = FALSE,
-  "tcga_expr" = FALSE,
+  "valid" = TRUE,
   "result" = FALSE,
   "gene_trigger" = FALSE,
   "protein_trigger" = FALSE,
@@ -68,6 +68,7 @@ input_list_check <- reactiveValues(
 # Load data ---------------------------------------------------------------
 
 TCGA_protein <- readr::read_rds(file.path(config$database, "protein","tcga_pancan33-rppa-expr-v4-l4.rds.gz"))
+TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","tcga_pancan33-mirna-expr.rds.gz"))
 # Load gene list ----------------------------------------------------------
 
 mRNA_TCGA <- readr::read_tsv(file.path(config$database,"mRNA","datalist","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
@@ -79,4 +80,4 @@ protein_TCGA <- readr::read_tsv(file.path(config$database,"protein","TCGA_cancer
 miRNA_TCGA <- readr::read_tsv(file.path(config$database,"miRNA","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
 total_gene_symbol <- "BRAF"
 total_protein_symbol <- readr::read_tsv(file.path(config$database,"protein","protein_symbol"), col_names = FALSE) %>% .$X1
-total_miRNA_symbol <- "total_gene_symbol"
+total_miRNA_symbol <- readr::read_tsv(file.path(config$database,"miRNA","sort_miRNA_symbol"), col_names = FALSE) %>% .$X1

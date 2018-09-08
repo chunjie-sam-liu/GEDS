@@ -32,6 +32,12 @@ source(file.path(config$func, "welcome_func.R"))
 # welcome message
 output$ui_welcome_msg <- renderUI({fn_welcome_msg()})
 output$ui_analysis <- renderUI({fn_analysis()})
+output$ui_gene_set_stat <- renderUI({
+  if (status$protein_set) {
+    fn_gene_set_stat(input_list_check)} 
+  else if (status$miRNA_set) {
+    fn_gene_set_stat(input_list_check)} 
+  else {NULL}})
 # cancer types selection --------------------------------------------------
 output$ui_multi_cancer_input <- renderUI({
   if (status$gene_set) {fn_gene_select()} 
@@ -84,7 +90,7 @@ validate_input_gene_set <- eventReactive(
     # check gene
     .v_igs <- check_gene_set(.s = input$input_gene_set)
     # validate genes
-    validate_gene_set(.v = .v_igs, total_gene_symbol = total_gene_symbol, input_list_check = input_list_check)
+    validate_input_set(.v = .v_igs, .total_symbol = total_gene_symbol, input_list_check = input_list_check)
     
   }
 )
@@ -102,7 +108,7 @@ validate_input_protein_set <- eventReactive(
     # check gene
     .v_igs <- check_gene_set(.s = input$input_protein_set)
     # validate genes
-    validate_protein_set(.v = .v_igs, total_protein_symbol = total_protein_symbol, input_list_check = input_list_check)
+    validate_input_set(.v = .v_igs, .total_symbol = total_protein_symbol, input_list_check = input_list_check)
 
   }
 )
@@ -118,12 +124,13 @@ validate_input_miRNA_set <- eventReactive(
       return()
     }
     # check gene
-    #.v_igs <- check_miRNA_set(.s = input$input_miRNA_set, status = status, error = error)
+    .v_igs <- check_gene_set(.s = input$input_miRNA_set)
+    # validate genes
+    validate_input_set(.v = .v_igs, .total_symbol = total_miRNA_symbol, input_list_check = input_list_check)
   }
 )
 
 observeEvent(input$select_protein_TCGA,{
-    status$result <- TRUE
     TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
       dplyr::mutate(
         expr = purrr::map(
@@ -133,19 +140,25 @@ observeEvent(input$select_protein_TCGA,{
               dplyr::filter(symbol %in% input_list_check$match)
           }
         )
-      ) ->> expr_clean
-    tibble_format_change(.expr_clean = expr_clean)
+      ) -> expr_clean
+    tibble_change_to_plot(.expr_clean = expr_clean)->>plot_result
+    tibble_format_change(.expr_clean = expr_clean)->>table_result
+    output$expr_bubble_plot <- renderPlot({plot_result %>% expr_buble_plot()})
     output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable(table_result)})
 })
-# match_result_output -----------------------------------------------------
-
-observeEvent(input$invalid_gene,{
-  shinyWidgets::sendSweetAlert(
-    session = session,
-    title = "invalid_gene",
-    text = input_list_check$non_match,
-    type = "error"
-  )
+observeEvent(input$select_miRNA_TCGA,{
+  TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>%
+    dplyr::mutate(
+      mirna = purrr::map(
+        .x = mirna,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(symbol %in% input_list_check$match)
+        }
+      )
+    ) ->> expr_clean
+  tibble_format_change_mirna(.expr_clean = expr_clean)->>table_result
+  output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable_mirna(table_result)})
 })
 
 # observeEvent ------------------------------------------------------------
@@ -179,7 +192,16 @@ observeEvent(status$miRNA_trigger, {
     )
   }
 })
-
+observeEvent(status$valid, {
+  if (status$valid == FALSE) {
+    shinyWidgets::sendSweetAlert(
+      session = session,
+      title = "Error...",
+      text = "No matched symbol, please check",
+      type = "error"
+    )
+  }
+})
 # observe -----------------------------------------------------------------
 
 observe(validate_input_gene_set())

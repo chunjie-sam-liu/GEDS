@@ -7,8 +7,8 @@ tabItem(
   # welcome
   fluidRow(shiny::uiOutput(outputId = "ui_welcome_msg")),
   fluidRow(shiny::uiOutput(outputId = "ui_analysis")),
-  fluidRow(shiny::uiOutput(outputId = "ui_multi_cancer_input")),
   fluidRow(shiny::uiOutput(outputId = "ui_gene_set_stat")),
+  fluidRow(shiny::uiOutput(outputId = "ui_multi_cancer_input")),
   fluidRow(shiny::uiOutput(outputId = "ui_start_analysis")),
   fluidRow(shiny::uiOutput(outputId = "ui_result")),
   fluidRow(shiny::uiOutput(outputId = "ui_introduction")),

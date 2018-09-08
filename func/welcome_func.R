@@ -3,7 +3,7 @@
 fn_welcome_msg <- function() {
   column(
     width = 12, offset = 0,
-    shiny::tags$h1("GSEXPR offers you a web-based platform for gene set expression")
+    shiny::tags$h1("GSEXPR offers you a web-based platform for gene, protein or miRNA expression")
   )
 }
 
@@ -197,7 +197,7 @@ fn_protein_select <- function(.protein){
         solidHeader = TRUE,
         title="Select TCGA Cancer Types",
         checkboxGroupButtons(
-          inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg", selected = c('ESCA','LIHC','CESC','COAD'),
+          inputId = "select_protein_TCGA", label = "",status = "success", size = "lg", selected = c('ESCA','LIHC','CESC','COAD'),
           choices = .protein
         ),
         shinyjs::hide(switchInput(
@@ -217,7 +217,7 @@ fn_miRNA_select <- function(.miRNA){
         solidHeader = TRUE,
         title="Select TCGA Cancer Types",
         checkboxGroupButtons(
-          inputId = "select_miRNA_TCGA", label = "", status = "primary", size = "lg",
+          inputId = "select_miRNA_TCGA", label = "", status = "primary", size = "lg",selected = c('CESC','LIHC','LGG','UCS'),
           choices = .miRNA
         ),
         shinyjs::hide(switchInput(
@@ -271,9 +271,18 @@ fn_feature_figure <- function(){
   )
 }
 fn_result <- function(id){
-  ns <- NS(id)
   column(
     width = 12,offset = 0,
-    DT::dataTableOutput(outputId = ns("expr_dt_comparison")) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    shinydashboard::tabBox(
+      id = "expr_plot", title = "", width = 12,
+      tabPanel(
+        title = "Figure of expression",
+        plotOutput(outputId = "expr_bubble_plot") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+      ),
+      tabPanel(
+        title = "Table of expression",
+        DT::dataTableOutput(outputId = "expr_dt_comparison") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+      )
+    )
   )
 }
