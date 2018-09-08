@@ -13,11 +13,13 @@ config$version <- "0.0.1"
 # default getwd()
 # in development mode, change the config$wd to your working directory
 
-config$wd <- "/data/xiamx/github/GSEXPR"
-#config$wd <- 
+# config$wd <- "/data/xiamx/github/GSEXPR"
+config$wd <- "/data/liucj/github/GSEXPR"
 
 # Databases ---------------------------------------------------------------
 config$database <- "/data/shiny-data/GSEXPR"
+
+
 
 # Absolute paths ----------------------------------------------------------
 # server

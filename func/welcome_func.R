@@ -197,7 +197,7 @@ fn_protein_select <- function(.protein){
         solidHeader = TRUE,
         title="Select TCGA Cancer Types",
         checkboxGroupButtons(
-          inputId = "select_protein_TCGA", label = "",status = "success", size = "lg", selected = c('ESCA','LIHC','CESC','COAD'),
+          inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg", selected = c('ESCA','LIHC','CESC','COAD'),
           choices = .protein
         ),
         shinyjs::hide(switchInput(
