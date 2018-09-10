@@ -53,7 +53,7 @@ body <- dashboardBody(
   shiny::tags$head(
     shinyWidgets::useSweetAlert(),
     shinyjs::useShinyjs(),
-    shinyjs::extendShinyjs(script = file.path(config$wd, "www", "js", "gsexpr.js")),
+    shinyjs::extendShinyjs(script = file.path(config$wd, "www", "js", "geds.js")),
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "css/main.css"),
     shiny::tags$script(type = "text/javascript", src = "js/main.js")
   ),
