@@ -1,4 +1,4 @@
-# GSEXPR
+# GEDS
 This repo is a minor project for practicing and inner using for gene set expression analysis.
 
 Input a set of gene, the result will represent the TCGA cancer expression, CCLE cancer cell line expression and GTEx normal tissue expression.
