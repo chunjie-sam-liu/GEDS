@@ -87,7 +87,30 @@ tibble::tibble(
   ) ->
   ccle_data
 
+# save cell line data to tibble.
 
+
+protein_path <- "/data/shiny-data/GSEXPR/protein/drop/result"
+
+
+tibble::tibble(
+  tis = list.files(path = protein_path )
+) %>%
+  dplyr::mutate(
+    expression = purrr::map(
+      .x = tis,
+      .f = function(.x) {
+        .d <- readr::read_tsv(file = file.path(protein_path, .x))
+
+        .d %>%
+          tidyr::gather(key = 'protein', value = 'expr', -Sample_Name) %>%
+          # tidyr::replace_na(replace = list(expr = 0)) %>%
+          dplyr::mutate(expr = as.numeric(expr)) %>%
+          tidyr::spread(key = Sample_Name, value = expr)
+      }
+    )
+  ) ->
+  d
 
 
 
