@@ -1,0 +1,5 @@
+ENSEMBL = useMart("ENSEMBL_MART_ENSEMBL", host = "http://asia.ensembl.org",dataset = "hsapiens_gene_ensembl")
+ENSEMBL.ATTRIBUTES = listAttributes(ENSEMBL)
+ENSEMBL.FILTERS = listFilters(ENSEMBL)
+CCLE_ensembl <- read.table("CCLE_ensembl.txt")
+symbol <- getBM(c("ensembl_gene_id","hgnc_symbol"), filters = "ensembl_gene_id", values = CCLE_ensembl, mart = ENSEMBL)

@@ -1,0 +1,5 @@
+/*main css for gsexpr*/
+.btn-primary.active, .btn-primary:active, .open>.dropdown-toggle.btn-primary {
+  background-color: #dd4b39;
+  border-color: #dd4b39;
+}
