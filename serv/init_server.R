@@ -71,13 +71,14 @@ TCGA_protein <- readr::read_rds(file.path(config$database, "protein","tcga_panca
 TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","tcga_pancan33-mirna-expr.rds.gz"))
 # Load gene list ----------------------------------------------------------
 
-mRNA_TCGA <- readr::read_tsv(file.path(config$database,"mRNA","datalist","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
-mRNA_GTEX <- readr::read_tsv(file.path(config$database,"mRNA","datalist","GTEX_tissues"), col_names = FALSE) %>% .$X1
-mRNA_CCLE <- readr::read_tsv(file.path(config$database,"mRNA","datalist","CCLE_tissues"), col_names = FALSE) %>% .$X1
-mRNA_HPA_tissue <- readr::read_tsv(file.path(config$database,"mRNA","datalist","hpa_tissue_file_list"), col_names = FALSE) %>% .$X1
-mRNA_HPA_cellline <- readr::read_tsv(file.path(config$database,"mRNA","datalist","hpa_cellline_file_list"), col_names = FALSE) %>% .$X1
-protein_TCGA <- readr::read_tsv(file.path(config$database,"protein","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
-miRNA_TCGA <- readr::read_tsv(file.path(config$database,"miRNA","TCGA_cancertypes"), col_names = FALSE) %>% .$X1
+mRNA_TCGA <- readr::read_rds(file.path(config$database,"mRNA","TCGA_cancertypes.rds.gz"))
+mRNA_GTEX <- readr::read_rds(file.path(config$database,"mRNA","GTEX_tissues.rds.gz"))
+mRNA_CCLE <- readr::read_rds(file.path(config$database,"mRNA","CCLE_tissues.rds.gz"))
+#mRNA_HPA_tissue <- readr::read_rds(file.path(config$database,"mRNA","datalist","hpa_tissue_file_list"), col_names = FALSE) %>% .$X1
+#mRNA_HPA_cellline <- readr::read_rds(file.path(config$database,"mRNA","datalist","hpa_cellline_file_list"), col_names = FALSE) %>% .$X1
+protein_TCGA <- readr::read_rds(file.path(config$database,"protein","TCGA_protein_cancertype.rds.gz"))
+protein_CCLE <- readr::read_rds(file.path(config$database,"protein","MCLP_tissues.rds.gz"))
+miRNA_TCGA <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_cancertype.rds.gz"))
 total_gene_symbol <- "BRAF"
-total_protein_symbol <- readr::read_tsv(file.path(config$database,"protein","protein_symbol"), col_names = FALSE) %>% .$X1
-total_miRNA_symbol <- readr::read_tsv(file.path(config$database,"miRNA","sort_miRNA_symbol"), col_names = FALSE) %>% .$X1
+total_protein_symbol <- readr::read_rds(file.path(config$database,"protein","TCGA_protein_symbol.rds.gz"))
+total_miRNA_symbol <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_symbol.rds.gz"))

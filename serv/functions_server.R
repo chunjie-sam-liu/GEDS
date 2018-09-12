@@ -27,9 +27,6 @@ validate_input_set <- function(.v,  .total_symbol, input_list_check = input_list
     status$valid <- FALSE}
 }
 
-
-
-
 # protein table_print -------------------------------------------------------------
 protein_filter <- function(){
   TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
