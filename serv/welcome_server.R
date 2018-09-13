@@ -10,33 +10,21 @@ source(file.path(config$func, "protein_func.R"))
 # welcome message
 output$ui_welcome_msg <- renderUI({fn_welcome_msg()})
 output$ui_analysis <- renderUI({fn_analysis()})
-output$ui_gene_set_stat <- renderUI({
-  if (status$protein_set) {
-    fn_gene_set_stat(input_list_check)} 
-  else if (status$miRNA_set) {
-    fn_gene_set_stat(input_list_check)} 
-  else {NULL}})
+# search panel ------------------------------------------------------------
+output$ui_panel_mRNA <- renderUI({fn_panel_mRNA()})
+output$ui_panel_protein <- renderUI({fn_panel_protein()})
+output$ui_panel_miRNA <- renderUI({fn_panel_miRNA()})
 # cancer types selection --------------------------------------------------
-output$ui_multi_cancer_input <- renderUI({
-  if (status$gene_set) {fn_gene_select()} 
-  else if (status$protein_set) {
-    fn_protein_select(.protein = protein_TCGA$cancer_types)} 
-  else if (status$miRNA_set) {
-    fn_miRNA_select(.miRNA = miRNA_TCGA$cancer_types)} 
-  else {NULL}})
+output$ui_multi_cancer_input <- renderUI({if (status$gene_set) {fn_gene_select()}  else {NULL}})
 output$ui_mRNA_TCGA_select <- renderUI({fn_mRNA_TCGA_select(.TCGA = mRNA_TCGA)})
 output$ui_mRNA_GTEX_select <- renderUI({fn_mRNA_GTEX_select(.GTEX= mRNA_GTEX)})
 output$ui_mRNA_CCLE_select <- renderUI({fn_mRNA_CCLE_select(.CCLE = mRNA_CCLE)})
-#output$ui_mRNA_HPA_tissue_select <- renderUI({fn_mRNA_HPA_tissue_select(.HPA_tissue = mRNA_HPA_tissue)})
-#output$ui_mRNA_HPA_cellline_select <- renderUI({fn_mRNA_HPA_cellline_select(.HPA_cellline= mRNA_HPA_cellline)})
+output$ui_protein_select <- renderUI({if (status$protein_set) {fn_protein_select(.protein = protein_TCGA$cancer_types)} else {NULL}})
+output$ui_miRNA_select <- renderUI({if (status$miRNA_set) {fn_miRNA_select(.miRNA = miRNA_TCGA$cancer_types)} else {NULL}})
 # Statistics of input gene list -------------------------------------------
-output$ui_gene_set_stat <- renderUI({
-  if (status$gene_set) {fn_gene_set_stat(input_list_check)} 
-  else if (status$protein_set) {
-    fn_gene_set_stat(input_list_check)} 
-  else if (status$miRNA_set) {
-    fn_gene_set_stat(input_list_check)} 
-  else {NULL}})
+output$ui_mRNA_stat <- renderUI({if (status$gene_set) {fn_gene_set_stat(input_list_check)} else {NULL}})
+output$ui_protein_stat <- renderUI({if (status$protein_set) {fn_gene_set_stat(input_list_check)} else {NULL}})
+output$ui_miRNA_stat <- renderUI({if (status$miRNA_set) {fn_gene_set_stat(input_list_check)} else {NULL}})
 # Start analysis ----------------------------------------------------------
 output$ui_start_analysis <- renderUI({if (status$gene_set) {fn_start_analysis()} else {NULL}})
 output$ui_result <- renderUI({if(status$result) {fn_result("expr")} else {NULL}})
