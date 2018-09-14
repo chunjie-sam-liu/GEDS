@@ -1,6 +1,24 @@
 # source by server.R
 # saved as miRNA_server.R
 
+# Validate gene with TCGA gene symbol -------------------------------------
+
+validate_miRNA_set <- function(.v,  .total_symbol, input_list_check = input_list_check) {
+  
+  .v_dedup <- .v[.v != ""] %>% unique()
+  .v_dedup %in% .total_symbol$symbol -> .inter
+  input_list_check$match <- .v_dedup[.inter]
+  input_list_check$non_match <- .v_dedup[!.inter]
+  input_list_check$n_match <- length(.total_symbol$symbol[.v_dedup[.inter]])
+  input_list_check$n_non_match <- length(.v_dedup[!.inter])
+  input_list_check$n_total <- length(.total_symbol$symbol[.v_dedup[.inter]]) + length(.v_dedup[!.inter])
+  if(.inter) {
+    status$mirna_result <- TRUE
+    status$valid <- TRUE } 
+  else {
+    status$mirna_result <- FALSE
+    status$valid <- FALSE}
+}
 
 # Clear input -------------------------------------------------------------
 
@@ -8,9 +26,8 @@ observeEvent(input$input_miRNA_set_reset, {
   names(selected_analysis) %>% purrr::walk(.f = function(.x) { selected_analysis[[.x]] <- FALSE })
   shinyjs::reset("input_miRNA_set")
   closeAlert(session = session, alertId = "guide-alert")
-  status$gene_set <- FALSE
-  status$protein_set <- FALSE
   status$miRNA_set <- FALSE
+  status$mirna_result <- FALSE
 })
 
 
@@ -30,9 +47,71 @@ validate_input_miRNA_set <- eventReactive(
     # check gene
     .v_igs <- check_gene_set(.s = input$input_miRNA_set)
     # validate genes
-    validate_input_set(.v = .v_igs, .total_symbol = total_miRNA_symbol, input_list_check = input_list_check)
+    validate_miRNA_set(.v = .v_igs, .total_symbol = total_miRNA_symbol, input_list_check = input_list_check)
   }
 )
+
+# miRNA table print -------------------------------------------------------
+tibble_change_to_plot_mirna <- function(.expr_clean){
+  .expr_clean %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = mirna,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = mirna, -c(gene, name)) %>%
+            tidyr::drop_na(mirna) %>%
+            dplyr::group_by(gene, name) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-mirna) %>% 
+    tidyr::unnest()
+}
+tibble_format_change_mirna <- function(.expr_clean){
+  .expr_clean %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = mirna,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = mirna, -c(gene, name)) %>%
+            tidyr::drop_na(mirna) %>%
+            dplyr::group_by(gene,name) %>%
+            dplyr::summarise(mean = mean(mirna)) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-mirna) %>% 
+    tidyr::unnest() 
+}
+expr_buble_plot_mirna <-  function(.expr){
+  .expr %>%
+    ggplot(mapping=aes(x=cancer_types,y=mirna,color=cancer_types)) +
+    geom_boxplot() +
+    facet_grid(~name) +
+    theme(
+      axis.line = element_line(color = "black"),
+      panel.background  = element_rect(fill = "white", color = "grey"),
+      panel.grid = element_line(colour = "grey"),
+      axis.title.x = element_blank(),
+      legend.title = element_blank(),
+      text = element_text(size = 20)
+    )
+}
+expr_clean_datatable_mirna <- function(.expr_clean) {
+  DT::datatable(
+    data = .expr_clean,
+    rownames = FALSE,
+    colnames = c("Cancer Types", "Symbol","Name", "Mean Rppa expr."),
+    filter = "top",
+    extensions = "Buttons",
+    style = "bootstrap",
+    class = "table-bordered table-condensed"
+  ) 
+}
 
 
 # ObserveEvent ------------------------------------------------------------
@@ -43,12 +122,14 @@ observeEvent(input$select_miRNA_TCGA,{
         .x = mirna,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(symbol %in% input_list_check$match)
+            dplyr::filter(name %in% input_list_check$match)
         }
       )
     ) ->> expr_clean
-  tibble_format_change_mirna(.expr_clean = expr_clean)->>table_result
-  output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable_mirna(table_result)})
+  tibble_change_to_plot_mirna(.expr_clean = expr_clean)->>mirna_plot_result
+  tibble_format_change_mirna(.expr_clean = expr_clean)->>mirna_table_result
+  output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})
+  output$expr_dt_comparison_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(mirna_table_result)})
 })
 observeEvent(status$miRNA_trigger, {
   if (error$miRNA_set != "" && !is.null(error$miRNA_set)) {
@@ -60,7 +141,6 @@ observeEvent(status$miRNA_trigger, {
     )
   }
 })
-
 # observe -----------------------------------------------------------------
 observe(validate_input_miRNA_set())
 

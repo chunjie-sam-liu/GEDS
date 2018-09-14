@@ -9,8 +9,7 @@ observeEvent(input$input_gene_set_reset, {
   shinyjs::reset("input_gene_set")
   closeAlert(session = session, alertId = "guide-alert")
   status$gene_set <- FALSE
-  status$protein_set <- FALSE
-  status$miRNA_set <- FALSE
+  status$result <- FALSE
 })
 
 

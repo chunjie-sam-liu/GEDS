@@ -29,6 +29,7 @@ status <- reactiveValues(
   "analysis" = FALSE,
   "valid" = TRUE,
   "result" = FALSE,
+  "mirna_result" = FALSE,
   "gene_trigger" = FALSE,
   "protein_trigger" = FALSE,
   "miRNA_trigger" = FALSE,

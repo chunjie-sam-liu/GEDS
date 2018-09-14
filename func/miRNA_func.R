@@ -38,3 +38,22 @@ fn_miRNA_select <- function(.miRNA){
     )
   )
 }
+
+# result ------------------------------------------------------------------
+
+fn_mirna_result <- function(id){
+  column(
+    width = 12,offset = 0,
+    shinydashboard::tabBox(
+      id = "expr_plot", title = "", width = 12,
+      tabPanel(
+        title = "Figure of expression",
+        plotOutput(outputId = "expr_bubble_plot_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+      ),
+      tabPanel(
+        title = "Table of expression",
+        DT::dataTableOutput(outputId = "expr_dt_comparison_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+      )
+    )
+  )
+}

@@ -37,12 +37,14 @@ fn_analysis <-  function(){
           tabPanel("protein", 
                   shiny::uiOutput(outputId = "ui_panel_protein"),
                   shiny::uiOutput(outputId = "ui_protein_select"),
-                  shiny::uiOutput(outputId = "ui_protein_stat")
+                  shiny::uiOutput(outputId = "ui_protein_stat"),
+                  shiny::uiOutput(outputId = "ui_result")
           ),
           tabPanel("miRNA", 
                   shiny::uiOutput(outputId = "ui_panel_miRNA"),
                   shiny::uiOutput(outputId = "ui_miRNA_select"),
-                  shiny::uiOutput(outputId = "ui_miRNA_stat")
+                  shiny::uiOutput(outputId = "ui_miRNA_stat"),
+                  shiny::uiOutput(outputId = "ui_miRNA_result")
           )
         )
   ))

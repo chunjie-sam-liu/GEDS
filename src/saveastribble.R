@@ -71,7 +71,7 @@ library(magrittr)
 
 # change name -------------------------------------------------------------
 library(magrittr)
-ccle_path <- "/data/shiny-data/GSEXPR/mRNA/CCLE/result"
+ccle_path <- "/data/shiny-data/GEDS/mRNA/CCLE/result"
 
 tibble::tibble(
   tis = list.files(path = ccle_path )
@@ -87,10 +87,10 @@ tibble::tibble(
   ) ->
   ccle_data
 
-# save cell line data to tibble.
+# save protein cell line data to tibble.
 
 
-protein_path <- "/data/shiny-data/GSEXPR/protein/drop/result"
+protein_path <- "/data/shiny-data/GEDS/protein/drop/result"
 
 
 tibble::tibble(
@@ -101,8 +101,9 @@ tibble::tibble(
       .x = tis,
       .f = function(.x) {
         .d <- readr::read_tsv(file = file.path(protein_path, .x))
-
+        
         .d %>%
+          dplyr::distinct(.keep_all = TRUE) %>%
           tidyr::gather(key = 'protein', value = 'expr', -Sample_Name) %>%
           # tidyr::replace_na(replace = list(expr = 0)) %>%
           dplyr::mutate(expr = as.numeric(expr)) %>%
@@ -112,7 +113,23 @@ tibble::tibble(
   ) ->
   d
 
+# save mRNA hpa data to tibble
+hpa_path <- "/data/shiny-data/GEDS/mRNA/hpa/tissueresult"
 
+tibble::tibble(
+  tis = list.files(path = path )
+) %>%
+  dplyr::mutate(
+    expression = purrr::map(
+      .x = tis,
+      .f = function(.x) {
+        .d <- readr::read_tsv(file = file.path(hpa_path, .x))
+        
+        .d %>%
+          dplyr::distinct(.keep_all = TRUE)
 
-
-
+      }
+    )
+  ) ->
+  e 
+  e %>% readr::write_rds(path = file.path(hpa_path, "Hpa_tissue_expr.rds.gz"), compress = "gz")
