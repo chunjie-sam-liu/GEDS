@@ -1,18 +1,33 @@
 # source by server.R
 # saved as miRNA_server.R
 
+# Check input gene set ----------------------------------------------------
+check_mirna_set <- function(.s) {
+  .s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ]  -> .ss
+  .ss
+}
 # Validate gene with TCGA gene symbol -------------------------------------
 
 validate_miRNA_set <- function(.v,  .total_symbol, input_list_check = input_list_check) {
-  
-  .v_dedup <- .v[.v != ""] %>% unique()
-  .v_dedup %in% .total_symbol$symbol -> .inter
-  input_list_check$match <- .v_dedup[.inter]
-  input_list_check$non_match <- .v_dedup[!.inter]
-  input_list_check$n_match <- length(.total_symbol$symbol[.v_dedup[.inter]])
-  input_list_check$n_non_match <- length(.v_dedup[!.inter])
-  input_list_check$n_total <- length(.total_symbol$symbol[.v_dedup[.inter]]) + length(.v_dedup[!.inter])
-  if(.inter) {
+  .v[.v != ""] %>% unique()  -> .vv
+  gsub(pattern = "-",replacement = "", .vv) %>% sapply(FUN = tolower, USE.NAMES = FALSE) -> .vvv
+  tibble::tibble(l=.vvv) %>%
+    dplyr::mutate(
+      expression = purrr::map(
+        .x = l,
+        .f = function(.x) {
+          grep(pattern = .x, .total_symbol$match, value = TRUE)
+        }
+      )
+    ) -> .v_dedup
+  as.character(.v_dedup$expression) %in% .total_symbol$match -> .inter
+  .total_symbol %>% dplyr::filter(match %in% as.character(.v_dedup$expression)[.inter]) ->.vvv
+  input_list_check$match <- .vvv$symbol
+  input_list_check$non_match <- .v_dedup$l[!.inter]
+  input_list_check$n_match <- length(as.character(.v_dedup$expression)[.inter])
+  input_list_check$n_non_match <- length(.v_dedup$l[!.inter])
+  input_list_check$n_total <- length(as.character(.v_dedup$expression)[.inter]) + length(.v_dedup$l[!.inter])
+  if(input_list_check$n_match > 0) {
     status$mirna_result <- TRUE
     status$valid <- TRUE } 
   else {
@@ -45,7 +60,7 @@ validate_input_miRNA_set <- eventReactive(
       return()
     }
     # check gene
-    .v_igs <- check_gene_set(.s = input$input_miRNA_set)
+    .v_igs <- check_mirna_set(.s = input$input_miRNA_set)
     # validate genes
     validate_miRNA_set(.v = .v_igs, .total_symbol = total_miRNA_symbol, input_list_check = input_list_check)
   }
@@ -128,7 +143,8 @@ observeEvent(input$select_miRNA_TCGA,{
     ) ->> expr_clean
   tibble_change_to_plot_mirna(.expr_clean = expr_clean)->>mirna_plot_result
   tibble_format_change_mirna(.expr_clean = expr_clean)->>mirna_table_result
-  output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})
+  if(input_list_check$n_match < 5){output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})}else{NULL}
+  #output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})
   output$expr_dt_comparison_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(mirna_table_result)})
 })
 observeEvent(status$miRNA_trigger, {

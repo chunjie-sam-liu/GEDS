@@ -71,7 +71,7 @@ library(magrittr)
 
 # change name -------------------------------------------------------------
 library(magrittr)
-ccle_path <- "/data/shiny-data/GEDS/mRNA/CCLE/result"
+ccle_path <- "/data/shiny-data/GSEXPR/mRNA/CCLE/result"
 
 tibble::tibble(
   tis = list.files(path = ccle_path )
@@ -87,10 +87,10 @@ tibble::tibble(
   ) ->
   ccle_data
 
-# save protein cell line data to tibble.
+# save cell line data to tibble.
 
 
-protein_path <- "/data/shiny-data/GEDS/protein/drop/result"
+protein_path <- "/data/shiny-data/GSEXPR/protein/drop/result"
 
 
 tibble::tibble(
@@ -101,9 +101,8 @@ tibble::tibble(
       .x = tis,
       .f = function(.x) {
         .d <- readr::read_tsv(file = file.path(protein_path, .x))
-        
+
         .d %>%
-          dplyr::distinct(.keep_all = TRUE) %>%
           tidyr::gather(key = 'protein', value = 'expr', -Sample_Name) %>%
           # tidyr::replace_na(replace = list(expr = 0)) %>%
           dplyr::mutate(expr = as.numeric(expr)) %>%
@@ -113,23 +112,18 @@ tibble::tibble(
   ) ->
   d
 
-# save mRNA hpa data to tibble
-hpa_path <- "/data/shiny-data/GEDS/mRNA/hpa/tissueresult"
 
-tibble::tibble(
-  tis = list.files(path = path )
-) %>%
-  dplyr::mutate(
+a <- "LET7a-3p let7b-3p let-7c3p let-7D-3p aaaa bbbbb ccccc"
+a %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>% .[1,] %>% tibble::tibble() %>%
+dplyr::mutate(
     expression = purrr::map(
-      .x = tis,
+      .x = .,
       .f = function(.x) {
-        .d <- readr::read_tsv(file = file.path(hpa_path, .x))
-        
-        .d %>%
-          dplyr::distinct(.keep_all = TRUE)
-
+          grep(pattern = .x, mirna$symbol, value = TRUE) %>% as.character
       }
     )
-  ) ->
-  e 
-  e %>% readr::write_rds(path = file.path(hpa_path, "Hpa_tissue_expr.rds.gz"), compress = "gz")
+  ) -> h
+as.character(h$expression) %in% mirna$symbol -> .inter
+as.character(h$expression)[.inter]
+
+
