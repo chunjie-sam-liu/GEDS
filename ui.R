@@ -62,11 +62,11 @@ body <- dashboardBody(
   tabItems(
 
   # Welcome -----------------------------------------------------------------
-    source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value#,
+    source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value,
   # Help --------------------------------------------------------------------
-#    source(file = file.path(config$wd, "ui", "help_ui.R"), local = TRUE)$value,
+    source(file = file.path(config$wd, "ui", "help_ui.R"), local = TRUE)$value#,
   # Contact -----------------------------------------------------------------
-#    source(file = file.path(config$wd, "ui", "Contact_ui.R"), local = TRUE)$value
+#    source(file = file.path(config$wd, "ui", "contact_ui.R"), local = TRUE)$value
   )
 )
 

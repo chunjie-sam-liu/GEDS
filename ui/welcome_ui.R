@@ -8,8 +8,8 @@ tabItem(
   fluidRow(shiny::uiOutput(outputId = "ui_welcome_msg")),
   fluidRow(shiny::uiOutput(outputId = "ui_analysis")),
   fluidRow(shiny::uiOutput(outputId = "ui_start_analysis")),
-  fluidRow(shiny::uiOutput(outputId = "ui_introduction")),
-  fluidRow(shiny::uiOutput(outputId = "ui_feature_figure")),
+  #fluidRow(shiny::uiOutput(outputId = "ui_introduction")),
+  #fluidRow(shiny::uiOutput(outputId = "ui_feature_figure")),
   
   
 

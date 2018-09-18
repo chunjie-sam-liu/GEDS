@@ -32,10 +32,10 @@ output$ui_miRNA_result <- renderUI({if(status$mirna_result) {fn_mirna_result("ex
 
 # introduction ------------------------------------------------------------
 
-output$ui_introduction <- renderUI({fn_introduction()})
+#output$ui_introduction <- renderUI({fn_introduction()})
 
 # figure ------------------------------------------------------------------
-output$ui_feature_figure <- renderUI({fn_feature_figure()})
+#output$ui_feature_figure <- renderUI({fn_feature_figure()})
 
 # observeEvent ------------------------------------------------------------
 

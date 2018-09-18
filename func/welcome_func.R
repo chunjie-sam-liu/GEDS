@@ -3,7 +3,7 @@
 fn_welcome_msg <- function() {
   column(
     width = 12, offset = 0,
-    shiny::tags$h1("GSEXPR offers you a web-based platform for gene, protein or miRNA expression")
+    shiny::tags$h1("GEDS offers you a web-based platform for gene, protein or miRNA expression")
   )
 }
 
@@ -16,7 +16,7 @@ fn_introduction <- function() {
       width = 12,
       status = "primary",
       solidHeader = TRUE,
-      title="This is introduction of GSEXPR"
+      title="This is introduction of GEDS"
     )
   )
 }

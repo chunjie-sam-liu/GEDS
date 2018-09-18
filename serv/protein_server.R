@@ -120,7 +120,6 @@ observeEvent(input$select_protein_TCGA,{
       )
     ) -> expr_clean
   tibble_change_to_plot(.expr_clean = expr_clean)->>plot_result
-  print(plot_result)
   tibble_format_change(.expr_clean = expr_clean)->>table_result
   output$expr_bubble_plot <- renderPlot({expr_buble_plot(plot_result)})
   output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable(table_result)})
