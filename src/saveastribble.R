@@ -71,7 +71,7 @@ library(magrittr)
 
 # change name -------------------------------------------------------------
 library(magrittr)
-ccle_path <- "/data/shiny-data/GSEXPR/mRNA/CCLE/result"
+ccle_path <- "/data/shiny-data/GEDS/protein/test"
 
 tibble::tibble(
   tis = list.files(path = ccle_path )
@@ -80,8 +80,8 @@ tibble::tibble(
     expression = purrr::map(
       .x = tis,
       .f = function(.x) {
-        .d <- readr::read_tsv(file = file.path(ccle_path, .x)) %>% 
-          dplyr::rename(symbol = `Symbol name`)
+        readr::read_tsv(file = file.path(ccle_path, .x))
+        print(.x)
       }
     )
   ) ->
@@ -113,6 +113,66 @@ tibble::tibble(
   d
 
 
+a <- "LET7a-3p let7b-3p let-7c3p let-7D-3p aaaa bbbbb ccccc"
+a %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>% .[1,] %>% tibble::tibble() %>%
+dplyr::mutate(
+    expression = purrr::map(
+      .x = .,
+      .f = function(.x) {
+          grep(pattern = .x, mirna$symbol, value = TRUE) %>% as.character
+      }
+    )
+  ) -> h
+as.character(h$expression) %in% mirna$symbol -> .inter
+as.character(h$expression)[.inter]
 
 
 
+  .s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ] -> .v
+  .v_dedup <- .v[.v != ""] %>% unique()
+  .v_dedup %in% .total_symbol$symbol -> .inter
+  .total_symbol %>% dplyr::filter(symbol %in% .v_dedup[.inter]) -> .vvv
+   .vvv$protein -> match_protein
+  TCGA_protein %>% dplyr::filter(cancer_types %in% select_protein_TCGA) %>%
+    dplyr::mutate(
+      expr = purrr::map(
+        .x = expr,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(protein %in% match_protein)
+        }
+      )
+    ) -> expr_clean
+
+  expr_clean %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = expr,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = expr, -c(symbol, protein)) %>%
+            tidyr::drop_na(expr) %>%
+            dplyr::group_by(symbol, protein) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-expr) %>% 
+    tidyr::unnest()  ->>plot_result
+
+    expr_clean %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = expr,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = expr, -c(symbol, protein)) %>%
+            tidyr::drop_na(expr) %>%
+            dplyr::group_by(symbol, protein) %>%
+            dplyr::summarise(mean = mean(expr)) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-expr) %>% 
+    tidyr::unnest() ->>table_result
