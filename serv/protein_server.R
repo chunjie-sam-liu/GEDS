@@ -1,6 +1,44 @@
 # source by server.R
 # saved as protein_server.R
 
+# Check input gene set ----------------------------------------------------
+check_protein_set <- function(.s) {
+  .s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ] -> .ss
+  .ss
+}
+
+# Validate gene with TCGA gene symbol -------------------------------------
+
+validate_protein_set <- function(.v,  .total_symbol, input_list_check = input_list_check) {
+  
+  .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
+  tibble::tibble(symbol=.vvv) %>%
+    dplyr::mutate(
+      expression = purrr::map(
+        .x = symbol,
+        .f = function(.x) {
+          grep(pattern = .x, .total_symbol$symbol, value = TRUE ) ->a
+          if(length(a)>0){a}
+        }
+      )
+    ) -> .v_dedup
+  .v_dedup %>% tidyr::drop_na() -> protein_match
+  input_list_check$match <-  protein_match$symbol
+  match$protein <- tidyr::separate_rows(protein_match,sep="\t") %>% dplyr::distinct() %>% .$expression
+  .vvv %in% input_list_check$match   -> .inter
+  input_list_check$non_match <- .vvv[!.inter]
+  input_list_check$n_non_match <- length(.vvv[!.inter])
+  input_list_check$n_match <- length(protein_match$symbol)
+  input_list_check$n_total <- length(protein_match$symbol) + length(.vvv[!.inter])
+
+  if(input_list_check$n_match > 0) {
+    status$protein_result <- TRUE
+    status$valid <- TRUE } 
+  else {
+    status$protein_result <- FALSE
+    status$valid <- FALSE}
+}
+
 
 # Clear input -------------------------------------------------------------
 
@@ -9,7 +47,9 @@ observeEvent(input$input_protein_set_reset, {
   shinyjs::reset("input_protein_set")
   closeAlert(session = session, alertId = "guide-alert")
   status$protein_set <- FALSE
-  status$result <- FALSE
+  status$protein_result <- FALSE
+  status$valid <- FALSE
+  status$protein_trigger <- FALSE
 })
 
 
@@ -27,25 +67,12 @@ validate_input_protein_set <- eventReactive(
       return()
     }
     # check gene
-    .v_igs <- check_gene_set(.s = input$input_protein_set)
+    .v_igs <- check_protein_set(.s = input$input_protein_set)
     # validate genes
-    validate_input_set(.v = .v_igs, .total_symbol = total_protein_symbol, input_list_check = input_list_check)
-    
+    validate_protein_set(.v = .v_igs, .total_symbol = total_protein_symbol, input_list_check = input_list_check)
   }
 )
 # protein table_print -------------------------------------------------------------
-protein_filter <- function(){
-  TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
-    dplyr::mutate(
-      expr = purrr::map(
-        .x = expr,
-        .f = function(.x) {
-          .x %>%
-            dplyr::filter(symbol %in% input_list_check$match)
-        }
-      )
-    )
-}
 tibble_change_to_plot <- function(.expr_clean){
   .expr_clean %>%
     dplyr::mutate(
@@ -85,7 +112,7 @@ expr_buble_plot <-  function(.expr){
   .expr %>%
     ggplot(mapping=aes(x=cancer_types,y=expr,color=cancer_types)) +
     geom_boxplot() +
-    facet_grid(~symbol) +
+    facet_grid(~protein) +
     theme(
       axis.line = element_line(color = "black"),
       panel.background  = element_rect(fill = "white", color = "grey"),
@@ -115,7 +142,7 @@ observeEvent(input$select_protein_TCGA,{
         .x = expr,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(symbol %in% input_list_check$match)
+            dplyr::filter(symbol %in% match$protein)
         }
       )
     ) -> expr_clean

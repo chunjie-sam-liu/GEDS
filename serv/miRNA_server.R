@@ -6,6 +6,7 @@ check_mirna_set <- function(.s) {
   .s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ]  -> .ss
   .ss
 }
+
 # Validate gene with TCGA gene symbol -------------------------------------
 
 validate_miRNA_set <- function(.v,  .total_symbol, input_list_check = input_list_check) {
@@ -43,6 +44,8 @@ observeEvent(input$input_miRNA_set_reset, {
   closeAlert(session = session, alertId = "guide-alert")
   status$miRNA_set <- FALSE
   status$mirna_result <- FALSE
+  status$valid <- FALSE
+  status$miRNA_trigger <- FALSE
 })
 
 
@@ -144,7 +147,6 @@ observeEvent(input$select_miRNA_TCGA,{
   tibble_change_to_plot_mirna(.expr_clean = expr_clean)->>mirna_plot_result
   tibble_format_change_mirna(.expr_clean = expr_clean)->>mirna_table_result
   if(input_list_check$n_match < 5){output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})}else{NULL}
-  #output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})
   output$expr_dt_comparison_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(mirna_table_result)})
 })
 observeEvent(status$miRNA_trigger, {
