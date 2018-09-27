@@ -3,8 +3,9 @@
 # panel -------------------------------------------------------------------
 
 fn_panel_protein <- function(){
+  tagList(
   column(
-    width = 12, offset = 0,
+    width = 10, offset = 0,
     shinyWidgets::searchInput(
       inputId = "input_protein_set",
       label = "",
@@ -13,6 +14,21 @@ fn_panel_protein <- function(){
       btnReset = icon("remove"),
       width = "100%"
     )
+  ),
+  column(
+    width = 1,
+    shiny::tags$div(
+      class = "form-group shiny-input-container",
+      shiny::tags$label("for" = "margin"),
+      shiny::tags$div(
+        class = "input-group search-text",
+        shiny::tags$span(
+          class = "input-group-btn",
+          shinyBS::bsButton(inputId = "protein_example", label = "Example", icon = icon(name = "check"))
+        )
+      )
+    )
+  )
   )
 }
 
@@ -26,11 +42,11 @@ fn_protein_select <- function(.protein){
       shinydashboard::box(
         width = 10,
         status = "primary",
-        solidHeader = TRUE,
+        #solidHeader = TRUE,
         title="Select TCGA Cancer Types",
         checkboxGroupButtons(
-          inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg", selected = c('ESCA','LIHC','CESC','COAD'),
-          choices = .protein
+          inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg", selected = c('ACC','BLCA','BRCA','CESC'), 
+          individual = TRUE, choices = .protein
         ),
         shinyjs::hide(switchInput(
           inputId = "select_dataset6", label = "Dataset", value = FALSE,

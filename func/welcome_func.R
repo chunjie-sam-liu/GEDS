@@ -26,7 +26,7 @@ fn_introduction <- function() {
 fn_analysis <-  function(){
   shiny::fluidRow(
   column(
-    width =12, offset = 0,
+    width =10, offset = 1,
         shinydashboard::tabBox(
           title = "",id = "tabset1", height = "140px",width=12,
           tabPanel("mRNA", 
@@ -53,22 +53,20 @@ fn_analysis <-  function(){
 # Gene set stat -----------------------------------------------------------
 fn_gene_set_stat <- function(input_list_check){
   column(
-    width = 8, offset = 2, style = "margin-top:20px",
-    downloadLink(
-      outputId = "download_total_gene_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
-    ),
+    width = 10, offset = 1, style = "margin-top:20px",
+      downloadLink(
+        outputId = "download_total_gene_set", label = NULL, class = NULL,
+        valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
+      ),
     
-    downloadLink(
-      outputId = "download_valid_gene_set", label = NULL, class = NULL,
-      valueBox(
-        value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
-    ),
-    downloadLink(
-      outputId = "download_input_logs", label = NULL, class = NULL,
-      valueBox(
-        value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
-    )
+      downloadLink(
+        outputId = "download_valid_gene_set", label = NULL, class = NULL,
+        valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
+      ),
+      downloadLink(
+        outputId = "download_input_logs", label = NULL, class = NULL,
+        valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
+      )
   )
 }
 

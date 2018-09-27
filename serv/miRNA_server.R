@@ -29,12 +29,23 @@ validate_miRNA_set <- function(.v,  .total_symbol, input_list_check = input_list
   input_list_check$n_non_match <- length(.v_dedup$l[!.inter])
   input_list_check$n_total <- length(as.character(.v_dedup$expression)[.inter]) + length(.v_dedup$l[!.inter])
   if(input_list_check$n_match > 0) {
-    status$mirna_result <- TRUE
+    status$miRNA_result <- TRUE
     status$valid <- TRUE } 
   else {
-    status$mirna_result <- FALSE
+    status$miRNA_result <- FALSE
     status$valid <- FALSE}
 }
+
+# Example -----------------------------------------------------------------
+
+observeEvent(input$miRNA_example, {
+  status$miRNA_set <- FALSE
+  status$miRNA_result <- FALSE
+  status$miRNA_trigger <- FALSE
+  closeAlert(session = session, alertId = "guide-alert")
+  shinyjs::js$example_miRNA_set(id = "seinput_miRNA_set")
+  shinyjs::enable(id = "input_miRNA_set")
+})
 
 # Clear input -------------------------------------------------------------
 
@@ -43,7 +54,7 @@ observeEvent(input$input_miRNA_set_reset, {
   shinyjs::reset("input_miRNA_set")
   closeAlert(session = session, alertId = "guide-alert")
   status$miRNA_set <- FALSE
-  status$mirna_result <- FALSE
+  status$miRNA_result <- FALSE
   status$valid <- FALSE
   status$miRNA_trigger <- FALSE
 })
@@ -109,7 +120,7 @@ expr_buble_plot_mirna <-  function(.expr){
   .expr %>%
     ggplot(mapping=aes(x=cancer_types,y=mirna,color=cancer_types)) +
     geom_boxplot() +
-    facet_grid(~name) +
+    facet_wrap(~name,ncol = 1,scales = "free") +
     theme(
       axis.line = element_line(color = "black"),
       panel.background  = element_rect(fill = "white", color = "grey"),
@@ -146,6 +157,9 @@ observeEvent(input$select_miRNA_TCGA,{
     ) ->> expr_clean
   tibble_change_to_plot_mirna(.expr_clean = expr_clean)->>mirna_plot_result
   tibble_format_change_mirna(.expr_clean = expr_clean)->>mirna_table_result
+  
+  plot_height$miRNA <- "800px"
+  print(plot_height$miRNA)
   if(input_list_check$n_match < 5){output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})}else{NULL}
   output$expr_dt_comparison_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(mirna_table_result)})
 })

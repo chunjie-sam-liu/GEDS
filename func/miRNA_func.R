@@ -3,8 +3,9 @@
 # panel -------------------------------------------------------------------
 
 fn_panel_miRNA <- function(){
+  tagList(
   column(
-    width = 12, offset = 0,
+    width = 10, offset = 0,
     shinyWidgets::searchInput(
       inputId = "input_miRNA_set",
       label = "",
@@ -13,6 +14,21 @@ fn_panel_miRNA <- function(){
       btnReset = icon("remove"),
       width = "100%"
     )
+  ),
+  column(
+    width = 1,
+    shiny::tags$div(
+      class = "form-group shiny-input-container",
+      shiny::tags$label("for" = "margin"),
+      shiny::tags$div(
+        class = "input-group search-text",
+        shiny::tags$span(
+          class = "input-group-btn",
+          shinyBS::bsButton(inputId = "miRNA_example", label = "Example", icon = icon(name = "check"))
+        )
+      )
+    )
+  )
   )
 }
 
@@ -28,8 +44,8 @@ fn_miRNA_select <- function(.miRNA){
         solidHeader = TRUE,
         title="Select TCGA Cancer Types",
         checkboxGroupButtons(
-          inputId = "select_miRNA_TCGA", label = "", status = "primary", size = "lg",selected = c('CESC','LIHC','LGG','UCS'),
-          choices = .miRNA
+          inputId = "select_miRNA_TCGA", label = "", status = "primary", size = "lg",selected = c('ACC','BLCA','BRCA','CESC'),
+          individual = TRUE, choices = .miRNA
         ),
         shinyjs::hide(switchInput(
           inputId = "select_dataset7", label = "Dataset", value = FALSE,
@@ -41,14 +57,14 @@ fn_miRNA_select <- function(.miRNA){
 
 # result ------------------------------------------------------------------
 
-fn_mirna_result <- function(id){
+fn_mirna_result <- function(.plot_height){
   column(
     width = 12,offset = 0,
     shinydashboard::tabBox(
       id = "expr_plot", title = "", width = 12,
       tabPanel(
         title = "Figure of expression",
-        plotOutput(outputId = "expr_bubble_plot_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+        plotOutput(outputId = "expr_bubble_plot_mirna",height = .plot_height) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
       ),
       tabPanel(
         title = "Table of expression",

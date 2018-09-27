@@ -10,7 +10,19 @@ shinyjs.example_gene_set = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
   var selector = $("#" + params.id);
-  selector.val("A2M ACE ANGPT2 BPI CD1B CDR1 EGR2 EGR3 HBEGF HERPUD1 MCM2 MRE11A PCTP PODXL PPAP2B PPY PTGS2 RCAN1 SLC4A7 THBD");
+  selector.val("AKT FOXM1 PRKAA1");
+};
+shinyjs.example_protein_set = function(params){
+  var defaultParams = {id: null};
+  params = shinyjs.getParams(params, defaultParams);
+  var selector = $("#" + params.id);
+  selector.val("AKT FOXM1 PRKAA1");
+};
+shinyjs.example_miRNA_set = function(params){
+  var defaultParams = {id: null};
+  params = shinyjs.getParams(params, defaultParams);
+  var selector = $("#" + params.id);
+  selector.val("LET7a-3p let7b-3p let-7c3p let-7D-3p");
 };
 
 

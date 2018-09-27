@@ -39,6 +39,16 @@ validate_protein_set <- function(.v,  .total_symbol, input_list_check = input_li
     status$valid <- FALSE}
 }
 
+# Example -----------------------------------------------------------------
+
+observeEvent(input$protein_example, {
+  status$protein_set <- FALSE
+  status$protein_result <- FALSE
+  status$protein_trigger <- FALSE
+  closeAlert(session = session, alertId = "guide-alert")
+  shinyjs::js$example_protein_set(id = "seinput_protein_set")
+  shinyjs::enable(id = "input_protein_set")
+})
 
 # Clear input -------------------------------------------------------------
 
@@ -109,10 +119,10 @@ tibble_format_change <- function(.expr_clean){
     tidyr::unnest() 
 }
 expr_buble_plot <-  function(.expr){
-  .expr %>%
-    ggplot(mapping=aes(x=cancer_types,y=expr,color=cancer_types)) +
-    geom_boxplot() +
-    facet_grid(~protein) +
+  .expr %>% dplyr::rename(FPKM = expr) %>%
+    ggplot(mapping=aes(x=cancer_types,y=FPKM,color=cancer_types)) +
+    geom_boxplot(outlier.colour = NA) +
+    facet_wrap(~protein, ncol = 1) +
     theme(
       axis.line = element_line(color = "black"),
       panel.background  = element_rect(fill = "white", color = "grey"),
@@ -162,7 +172,7 @@ observeEvent(status$protein_trigger, {
   }
 })
 
-# ovserve -----------------------------------------------------------------
+# observe -----------------------------------------------------------------
 observe(validate_input_protein_set())
 
 

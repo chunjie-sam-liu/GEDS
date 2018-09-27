@@ -129,17 +129,26 @@ as.character(h$expression)[.inter]
 
 
   .s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ] -> .v
-  .v_dedup <- .v[.v != ""] %>% unique()
-  .v_dedup %in% .total_symbol$symbol -> .inter
-  .total_symbol %>% dplyr::filter(symbol %in% .v_dedup[.inter]) -> .vvv
-   .vvv$protein -> match_protein
+  .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
+  tibble::tibble(symbol=.vvv) %>%
+    dplyr::mutate(
+      expression = purrr::map(
+        .x = symbol,
+        .f = function(.x) {
+          grep(pattern = .x, .total_symbol$symbol, value = TRUE ) ->a
+          if(length(a)>0){a}
+        }
+      )
+    ) -> .v_dedup
+  .v_dedup %>% tidyr::drop_na() -> protein_match
+  match_protein <- tidyr::separate_rows(protein_match,sep="\t") %>% dplyr::distinct() %>% .$expression
   TCGA_protein %>% dplyr::filter(cancer_types %in% select_protein_TCGA) %>%
     dplyr::mutate(
       expr = purrr::map(
         .x = expr,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(protein %in% match_protein)
+            dplyr::filter(symbol %in% match_protein)
         }
       )
     ) -> expr_clean
@@ -160,6 +169,17 @@ as.character(h$expression)[.inter]
     dplyr::select(-expr) %>% 
     tidyr::unnest()  ->>plot_result
 
+    test %>% tibble::tibble(x=.) %>%
+      dplyr::mutate(
+      plot = purrr::map(
+        .x = x,
+        .f = function(.x){
+          plot_result %>% 
+            dplyr::filter(protein %in% .x) %>% print()
+        }
+      )
+    )  -> test2
+
     expr_clean %>%
     dplyr::mutate(
       mean = purrr::map(
@@ -176,3 +196,28 @@ as.character(h$expression)[.inter]
     ) %>%
     dplyr::select(-expr) %>% 
     tidyr::unnest() ->>table_result
+
+  plot_result$protein %>% 
+    tibble::tibble(x=.) %>% 
+    dplyr::distinct() %>%
+    dplyr::mutate(
+      plot = purrr::map(
+        .x = x,
+        .f = function(.x){
+          plot_result %>% 
+            dplyr::filter(protein %in% .x) %>% expr_buble_plot() -> gg_result
+          print(gg_result)
+          .filename <- file.path(config$wd,"plot",paste(.x,".png",sep = ""))
+          
+          print(.filename)
+          ggsave(filename = file.path(config$wd,"plot",paste(.x,".png",sep = "")), plot = gg_result)
+          
+          paste(config$wd,"/plot/",.x,".png",sep = "") %>% c(plot$protein,.) ->plot$protein 
+        }
+      )
+    )
+  print(plot$protein)
+  output$expr_bubble_plot <- renderImage({
+    filename <- plot$protein 
+    list(src = filename,alt= "plot result")
+  }, deleteFile = F)
