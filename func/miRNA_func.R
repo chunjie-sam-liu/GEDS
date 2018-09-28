@@ -5,7 +5,7 @@
 fn_panel_miRNA <- function(){
   tagList(
   column(
-    width = 10, offset = 0,
+    width = 10,
     shinyWidgets::searchInput(
       inputId = "input_miRNA_set",
       label = "",
@@ -37,9 +37,9 @@ fn_panel_miRNA <- function(){
 fn_miRNA_select <- function(.miRNA){
   shiny::fluidRow(
     column(
-      width = 12, offset = 1,
+      width = 12, offset = 0,
       shinydashboard::box(
-        width = 10,
+        width = 12,
         status = "primary",
         solidHeader = TRUE,
         title="Select TCGA Cancer Types",
@@ -64,7 +64,8 @@ fn_mirna_result <- function(.plot_height){
       id = "expr_plot", title = "", width = 12,
       tabPanel(
         title = "Figure of expression",
-        plotOutput(outputId = "expr_bubble_plot_mirna",height = .plot_height) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+        #plotOutput(outputId = "expr_bubble_plot_mirna", height = .plot_height) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+        plotOutput(outputId = "expr_bubble_plot_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
       ),
       tabPanel(
         title = "Table of expression",

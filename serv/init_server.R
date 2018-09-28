@@ -21,7 +21,11 @@ processing <- reactiveValues(
   "expr_calc_start" = FALSE,
   "expr_calc_end" = FALSE
 )
-
+reset <- reactiveValues(
+  "protein" = FALSE,
+  "mRNA" = FALSE,
+  "miRNA" = FALSE
+)
 status <- reactiveValues(
   "gene_set" = FALSE,
   "protein_set" = FALSE,

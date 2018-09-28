@@ -55,8 +55,10 @@ observeEvent(input$input_miRNA_set_reset, {
   closeAlert(session = session, alertId = "guide-alert")
   status$miRNA_set <- FALSE
   status$miRNA_result <- FALSE
-  status$valid <- FALSE
+  status$valid <- TRUE
   status$miRNA_trigger <- FALSE
+  output$expr_bubble_plot_mirna <- NULL
+  output$expr_dt_comparison_mirna <-  NULL
 })
 
 
@@ -67,6 +69,7 @@ validate_input_miRNA_set <- eventReactive(
   ignoreNULL = TRUE,
   valueExpr = {
     status$miRNA_set <- TRUE
+    if(reset$miRNA){reset$miRNA <- FALSE} else{reset$miRNA <- TRUE}
     if (is.null(input$input_miRNA_set) || input$input_miRNA_set == "") {
       error$miRNA_set <- "Error: Please input miRNA symbol."
       status$miRNA_trigger <- if (status$miRNA_trigger == TRUE) FALSE else TRUE
@@ -144,7 +147,8 @@ expr_clean_datatable_mirna <- function(.expr_clean) {
 
 
 # ObserveEvent ------------------------------------------------------------
-observeEvent(input$select_miRNA_TCGA,{
+observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
+  if(length(input$select_miRNA_TCGA)>0){
   TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>%
     dplyr::mutate(
       mirna = purrr::map(
@@ -157,12 +161,11 @@ observeEvent(input$select_miRNA_TCGA,{
     ) ->> expr_clean
   tibble_change_to_plot_mirna(.expr_clean = expr_clean)->>mirna_plot_result
   tibble_format_change_mirna(.expr_clean = expr_clean)->>mirna_table_result
-  
-  plot_height$miRNA <- "800px"
-  print(plot_height$miRNA)
-  if(input_list_check$n_match < 5){output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})}else{NULL}
+  mirna_plot_result$name %>% tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x %>% length() -> number
+  plot_height$miRNA <- number*200
+  if(number < 5){output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()})}else{NULL}
   output$expr_dt_comparison_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(mirna_table_result)})
-})
+}})
 observeEvent(status$miRNA_trigger, {
   if (error$miRNA_set != "" && !is.null(error$miRNA_set)) {
     shinyWidgets::sendSweetAlert(
