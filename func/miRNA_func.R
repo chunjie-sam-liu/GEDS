@@ -57,15 +57,14 @@ fn_miRNA_select <- function(.miRNA){
 
 # result ------------------------------------------------------------------
 
-fn_mirna_result <- function(.plot_height){
+fn_mirna_result <- function(){
   column(
     width = 12,offset = 0,
     shinydashboard::tabBox(
       id = "expr_plot", title = "", width = 12,
       tabPanel(
         title = "Figure of expression",
-        #plotOutput(outputId = "expr_bubble_plot_mirna", height = .plot_height) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-        plotOutput(outputId = "expr_bubble_plot_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+        plotOutput(outputId = "expr_bubble_plot_mirna", height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
       ),
       tabPanel(
         title = "Table of expression",

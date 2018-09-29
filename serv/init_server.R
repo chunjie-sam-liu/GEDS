@@ -85,11 +85,7 @@ plot <- reactiveValues(
   mRNA = NULL,
   miRNA = NULL
 )
-plot_height <- reactiveValues(
-  protein = NULL,
-  mRNA = NULL,
-  miRNA = NULL
-)
+
 
 # Load data ---------------------------------------------------------------
 

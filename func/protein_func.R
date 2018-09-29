@@ -66,7 +66,7 @@ fn_result <- function(id){
       id = "expr_plot", title = "", width = 12,
       tabPanel(
         title = "Figure of expression",
-        plotOutput(outputId = "expr_bubble_plot") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+        plotOutput(outputId = "expr_bubble_plot", height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
       ),
       tabPanel(
         title = "Table of expression",

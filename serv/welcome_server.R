@@ -28,7 +28,7 @@ output$ui_miRNA_stat <- renderUI({if (status$miRNA_set) {fn_gene_set_stat(input_
 # Start analysis ----------------------------------------------------------
 output$ui_start_analysis <- renderUI({if (status$gene_set) {fn_start_analysis()} else {NULL}})
 output$ui_result <- renderUI({if(status$protein_result) {fn_result("expr")} else {NULL}})
-output$ui_miRNA_result <- renderUI({if(status$miRNA_result) {fn_mirna_result(.plot_height = plot_height$miRNA)} else {NULL}})
+output$ui_miRNA_result <- renderUI({if(status$miRNA_result) {fn_mirna_result()} else {NULL}})
 
 # introduction ------------------------------------------------------------
 

@@ -58,8 +58,10 @@ observeEvent(input$input_protein_set_reset, {
   closeAlert(session = session, alertId = "guide-alert")
   status$protein_set <- FALSE
   status$protein_result <- FALSE
-  status$valid <- FALSE
+  status$valid <- TRUE
   status$protein_trigger <- FALSE
+  output$expr_bubble_plot <- NULL
+  output$expr_dt_comparison <- NULL
 })
 
 
@@ -70,6 +72,7 @@ validate_input_protein_set <- eventReactive(
   ignoreNULL = TRUE,
   valueExpr = {
     status$protein_set <- TRUE
+    if(reset$protein){reset$protein <- FALSE} else{reset$protein <- TRUE}
     if (is.null(input$input_protein_set) || input$input_protein_set == "") {
       error$protein_set <- "Error: Please input protein symbol."
       status$protein_trigger <- if (status$protein_trigger == TRUE) FALSE else TRUE
@@ -145,7 +148,8 @@ expr_clean_datatable <- function(.expr_clean) {
 }
 
 # ObserveEvent ------------------------------------------------------------
-observeEvent(input$select_protein_TCGA,{
+observeEvent(c(input$select_protein_TCGA,reset$protein),{
+  if(length(input$select_protein_TCGA)>0){
   TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
     dplyr::mutate(
       expr = purrr::map(
@@ -158,9 +162,11 @@ observeEvent(input$select_protein_TCGA,{
     ) -> expr_clean
   tibble_change_to_plot(.expr_clean = expr_clean)->>plot_result
   tibble_format_change(.expr_clean = expr_clean)->>table_result
-  output$expr_bubble_plot <- renderPlot({expr_buble_plot(plot_result)})
+  plot_result %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein %>% length() -> number
+  if(number < 5){output$expr_bubble_plot <- renderPlot({expr_buble_plot(plot_result)},height = number*200)}
+  else{NULL}
   output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable(table_result)})
-})
+}})
 observeEvent(status$protein_trigger, {
   if (error$protein_set != "" && !is.null(error$protein_set)) {
     shinyWidgets::sendSweetAlert(
