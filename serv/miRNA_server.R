@@ -166,25 +166,21 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 
     print(choice$miRNA)
     number <- length(plot_number$miRNA)
+    number2 <-  length(input$select_miRNA_TCGA)
     if(number < 5){
-      output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = number*200)
+      if(number2 <5 ){
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = number*200, width = number2*200)
+      }
+      else{
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = number*200)
+      }
       multiple$miRNA <- FALSE
     }
     else{
       multiple$miRNA <- TRUE
-      mirna_plot_result %>% dplyr::select(gene) %>% dplyr::distinct() %>%
-      dplyr::mutate(
-        mirna = purrr::map(
-          .x = gene,
-          .f = function(.x) {
-            mirna_plot_result %>%
-            dplyr::filter(gene %in% .x) -> one_plot
-            output[[.x]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()},height = 200)
-          }
-        )
-      )
     }
     output$expr_dt_comparison_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(mirna_table_result)})
+    return(mirna_plot_result)
 }})
 observeEvent(status$miRNA_trigger, {
   if (error$miRNA_set != "" && !is.null(error$miRNA_set)) {
@@ -211,5 +207,7 @@ observeEvent(status$miRNA_valid, {
 observe(validate_input_miRNA_set())
 observeEvent(input$select_miRNA_result, {
   choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
+  mirna_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> one_plot
+  output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()},height = 200)
 })
 

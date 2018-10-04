@@ -61,7 +61,6 @@ selected_analysis <- reactiveValues(
   'mirna' = FALSE
 )
 
-selected_ctyps <- reactiveVal()
 
 # Gene sets ---------------------------------------------------------------
 input_gene_check <- reactiveValues(
