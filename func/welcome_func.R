@@ -26,9 +26,9 @@ fn_introduction <- function() {
 fn_analysis <-  function(){
   shiny::fluidRow(
   column(
-    width =10, offset = 1,
-        shinydashboard::tabBox(
-          title = "",id = "tabset1", height = "140px",width=12,
+    width = 10,offset =1,
+    shinydashboard::tabBox(
+      title = "",id = "tabset1", height = "140px",width=12,
           tabPanel("mRNA", 
                   shiny::uiOutput(outputId = "ui_panel_mRNA"),
                   shiny::uiOutput(outputId = "ui_multi_cancer_input"),

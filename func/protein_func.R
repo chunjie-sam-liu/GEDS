@@ -3,6 +3,7 @@
 # panel -------------------------------------------------------------------
 
 fn_panel_protein <- function(){
+  shiny::fluidRow(
   tagList(
   column(
     width = 10, offset = 0,
@@ -29,7 +30,7 @@ fn_panel_protein <- function(){
       )
     )
   )
-  )
+  ))
 }
 
 
@@ -38,12 +39,9 @@ fn_panel_protein <- function(){
 fn_protein_select <- function(.protein){
   shiny::fluidRow(
     column(
-      width = 12, offset = 1,
+      width = 12, offset = 0,
       shinydashboard::box(
-        width = 10,
-        status = "primary",
-        #solidHeader = TRUE,
-        title="Select TCGA Cancer Types",
+        width = 12,
         checkboxGroupButtons(
           inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg", selected = c('ACC','BLCA','BRCA','CESC'), 
           individual = TRUE, choices = .protein
@@ -52,14 +50,34 @@ fn_protein_select <- function(.protein){
           inputId = "select_dataset6", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
         )))
+      )
     )
-  )
 }
 
+fn_protein_set_stat <- function(input_list_check){
+  shiny::fluidRow(
+  column(
+    width = 10, offset = 1, style = "margin-top:20px",
+    downloadLink(
+      outputId = "download_total_protein_set", label = NULL, class = NULL,
+      valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
+    ),
+    
+    downloadLink(
+      outputId = "download_valid_protein_set", label = NULL, class = NULL,
+      valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
+    ),
+    downloadLink(
+      outputId = "download_protein_input_logs", label = NULL, class = NULL,
+      valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
+    )
+  ))
+}
 
 # result ------------------------------------------------------------------
 
 fn_result <- function(id){
+  shiny::fluidRow(
   column(
     width = 12,offset = 0,
     shinydashboard::tabBox(
@@ -73,5 +91,5 @@ fn_result <- function(id){
         DT::dataTableOutput(outputId = "expr_dt_comparison") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
       )
     )
-  )
+  ))
 }

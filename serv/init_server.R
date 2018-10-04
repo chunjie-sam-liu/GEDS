@@ -31,7 +31,9 @@ status <- reactiveValues(
   "protein_set" = FALSE,
   "miRNA_set" = FALSE,
   "analysis" = FALSE,
-  "valid" = TRUE,
+  "gene_valid" = TRUE,
+  "protein_valid" = TRUE,
+  "miRNA_valid" = TRUE,
   "protein_result" = FALSE,
   "miRNA_result" = FALSE,
   "gene_trigger" = FALSE,
@@ -62,7 +64,21 @@ selected_analysis <- reactiveValues(
 selected_ctyps <- reactiveVal()
 
 # Gene sets ---------------------------------------------------------------
-input_list_check <- reactiveValues(
+input_gene_check <- reactiveValues(
+  match = "",
+  non_match = "",
+  n_match = "",
+  n_non_match = "",
+  n_total = ""
+)
+input_protein_check <- reactiveValues(
+  match = "",
+  non_match = "",
+  n_match = "",
+  n_non_match = "",
+  n_total = ""
+)
+input_miRNA_check <- reactiveValues(
   match = "",
   non_match = "",
   n_match = "",
@@ -85,7 +101,21 @@ plot <- reactiveValues(
   mRNA = NULL,
   miRNA = NULL
 )
-
+plot_number <- reactiveValues(
+  protein = FALSE,
+  mRNA = FALSE,
+  miRNA = FALSE
+)
+multiple <- reactiveValues(
+  protein = FALSE,
+  mRNA = FALSE,
+  miRNA = FALSE
+)
+choice <- reactiveValues(
+  protein = NULL,
+  mRNA = NULL,
+  miRNA = NULL
+)
 
 # Load data ---------------------------------------------------------------
 
@@ -101,4 +131,4 @@ protein_MCLP <- readr::read_rds(file.path(config$database,"protein","MCLP_tissue
 miRNA_TCGA <- readr::read_rds(file.path(config$database,"miRNA","TCGA_sort_miRNA_cancertype.rds.gz"))
 total_gene_symbol <- "BRAF"
 total_protein_symbol <- readr::read_rds(file.path(config$database,"protein","protein_symbol.rds.gz"))
-total_miRNA_symbol <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_symbol.rds.gz"))
+total_miRNA_symbol <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_symbol_new.rds.gz"))

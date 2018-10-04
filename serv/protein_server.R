@@ -9,7 +9,7 @@ check_protein_set <- function(.s) {
 
 # Validate gene with TCGA gene symbol -------------------------------------
 
-validate_protein_set <- function(.v,  .total_symbol, input_list_check = input_list_check) {
+validate_protein_set <- function(.v,  .total_symbol, input_protein_check = input_protein_check) {
   
   .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
   tibble::tibble(symbol=.vvv) %>%
@@ -23,20 +23,20 @@ validate_protein_set <- function(.v,  .total_symbol, input_list_check = input_li
       )
     ) -> .v_dedup
   .v_dedup %>% tidyr::drop_na() -> protein_match
-  input_list_check$match <-  protein_match$symbol
+  input_protein_check$match <-  protein_match$symbol
   match$protein <- tidyr::separate_rows(protein_match,sep="\t") %>% dplyr::distinct() %>% .$expression
-  .vvv %in% input_list_check$match   -> .inter
-  input_list_check$non_match <- .vvv[!.inter]
-  input_list_check$n_non_match <- length(.vvv[!.inter])
-  input_list_check$n_match <- length(protein_match$symbol)
-  input_list_check$n_total <- length(protein_match$symbol) + length(.vvv[!.inter])
+  .vvv %in% input_protein_check$match   -> .inter
+  input_protein_check$non_match <- .vvv[!.inter]
+  input_protein_check$n_non_match <- length(.vvv[!.inter])
+  input_protein_check$n_match <- length(protein_match$symbol)
+  input_protein_check$n_total <- length(protein_match$symbol) + length(.vvv[!.inter])
 
-  if(input_list_check$n_match > 0) {
+  if(input_protein_check$n_match > 0) {
     status$protein_result <- TRUE
-    status$valid <- TRUE } 
+    status$protein_valid <- TRUE } 
   else {
     status$protein_result <- FALSE
-    status$valid <- FALSE}
+    status$protein_valid <- FALSE}
 }
 
 # Example -----------------------------------------------------------------
@@ -53,12 +53,11 @@ observeEvent(input$protein_example, {
 # Clear input -------------------------------------------------------------
 
 observeEvent(input$input_protein_set_reset, {
-  names(selected_analysis) %>% purrr::walk(.f = function(.x) { selected_analysis[[.x]] <- FALSE })
   shinyjs::reset("input_protein_set")
   closeAlert(session = session, alertId = "guide-alert")
   status$protein_set <- FALSE
   status$protein_result <- FALSE
-  status$valid <- TRUE
+  status$protein_valid <- TRUE
   status$protein_trigger <- FALSE
   output$expr_bubble_plot <- NULL
   output$expr_dt_comparison <- NULL
@@ -82,7 +81,7 @@ validate_input_protein_set <- eventReactive(
     # check gene
     .v_igs <- check_protein_set(.s = input$input_protein_set)
     # validate genes
-    validate_protein_set(.v = .v_igs, .total_symbol = total_protein_symbol, input_list_check = input_list_check)
+    validate_protein_set(.v = .v_igs, .total_symbol = total_protein_symbol, input_protein_check = input_protein_check)
   }
 )
 # protein table_print -------------------------------------------------------------
@@ -124,14 +123,16 @@ tibble_format_change <- function(.expr_clean){
 expr_buble_plot <-  function(.expr){
   .expr %>% dplyr::rename(FPKM = expr) %>%
     ggplot(mapping=aes(x=cancer_types,y=FPKM,color=cancer_types)) +
-    geom_boxplot(outlier.colour = NA) +
-    facet_wrap(~protein, ncol = 1) +
+    geom_boxplot(width=0.5) +
+    facet_wrap(~protein, ncol = 1,scales = "free") +
     theme(
       axis.line = element_line(color = "black"),
       panel.background  = element_rect(fill = "white", color = "grey"),
-      panel.grid = element_line(colour = "grey"),
       axis.title.x = element_blank(),
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
       legend.title = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
       text = element_text(size = 20)
     )
 }
@@ -163,7 +164,7 @@ observeEvent(c(input$select_protein_TCGA,reset$protein),{
   tibble_change_to_plot(.expr_clean = expr_clean)->>plot_result
   tibble_format_change(.expr_clean = expr_clean)->>table_result
   plot_result %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein %>% length() -> number
-  if(number < 5){output$expr_bubble_plot <- renderPlot({expr_buble_plot(plot_result)},height = number*200)}
+  if(number < 6){output$expr_bubble_plot <- renderPlot({expr_buble_plot(plot_result)},height = number*200)}
   else{NULL}
   output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable(table_result)})
 }})
@@ -177,7 +178,16 @@ observeEvent(status$protein_trigger, {
     )
   }
 })
-
+observeEvent(status$protein_valid, {
+  if (status$protein_valid == FALSE) {
+    shinyWidgets::sendSweetAlert(
+      session = session,
+      title = "Error...",
+      text = "No matched symbol, please check",
+      type = "error"
+    )
+  }
+})
 # observe -----------------------------------------------------------------
 observe(validate_input_protein_set())
 

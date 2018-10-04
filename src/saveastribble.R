@@ -204,9 +204,19 @@ as.character(h$expression)[.inter]
       plot = purrr::map(
         .x = x,
         .f = function(.x){
-          plot_result %>% 
-            dplyr::filter(protein %in% .x) %>% expr_buble_plot() -> gg_result
-          print(gg_result)
+          plot_result  %>% 
+            ggplot(mapping=aes(x=cancer_types,y=expr,color=cancer_types)) +
+            geom_boxplot(outlier.colour = NA) +
+            facet_wrap(~protein, ncol = 1) +
+            theme(
+            axis.line = element_line(color = "black"),
+            panel.background  = element_rect(fill = "white", color = "grey"),
+            panel.grid = element_line(colour = "grey"),
+            axis.title.x = element_blank(),
+            legend.title = element_blank(),
+            text = element_text(size = 20)
+            ) -> gg_result
+          
           .filename <- file.path(config$wd,"plot",paste(.x,".png",sep = ""))
           
           print(.filename)
