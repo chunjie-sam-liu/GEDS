@@ -49,15 +49,82 @@ TCGA_protein %>% dplyr::mutate(
 paf <- readr::read_tsv('protein_annotation_full')
 TCGA_protein %>% dplyr::mutate(
     expr = purrr::map(
-      .x = expr,
+      .x = expression,
+      .f = function(.x) {
+        .x %>% dplyr::mutate(tmp = stringr::str_replace(protein, '_', '') %>% toupper()) -> d
+        paf %>% dplyr::rename(tmp = protein) ->dd
+        d %>% dplyr::left_join(dd, by = 'tmp')-> ddd
+        .x %>% names %>% .[c(-1)] -> .barcode
+        ddd %>% dplyr::select(symbol = symbol, protein, .barcode)
+      }
+  )
+) %>% .[-10,]->TCGA_protein_new
+
+MCLP_protein %>% dplyr::mutate(
+    expression = purrr::map(
+      .x = expression,
       .f = function(.x) {
         .x %>% dplyr::mutate(tmp = stringr::str_replace(protein, '_', '') %>% toupper()) -> d
         paf %>% dplyr::rename(tmp = protein) ->dd
         d %>% dplyr::left_join(dd, by = 'tmp')-> ddd
         .x %>% names %>% .[c(-1,-2)] -> .barcode
-        ddd %>% dplyr::select(symbol = symbol.y, protein, .barcode)
+        ddd %>% dplyr::select(symbol = symbol, protein, .barcode)
       }
   )
-) %>% .[-10,]->TCGA_protein_new
+) ->MCLP_protein_new
 
+.s <- "AKT1 aaa FOXM1"
+.s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ] ->.v
+.vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
+tibble::tibble(symbol=.vvv) %>%
+    dplyr::mutate(
+      expression = purrr::map(
+        .x = symbol,
+        .f = function(.x) {
+          grep(pattern = .x, .total_symbol$symbol, value = TRUE ) 
+        }
+      )
+    ) -> .v_dedup
 
+a %>% 
+  dplyr::mutate(
+    symbol = purrr::map(
+      .x = mirna,
+      .f = function(.x){
+        .x %>% dplyr::select("gene","name")
+      }
+    )
+  ) -> c
+
+TCGA %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = mirna,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = expr, -c(gene, name)) %>%
+            tidyr::drop_na(expr) %>%
+            dplyr::group_by(gene, name) %>%
+            dplyr::summarise(mean = mean(expr)) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-mirna) %>% 
+    tidyr::unnest() 
+MCLP    %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = expression,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = expr, -c(symbol, protein)) %>%
+            tidyr::drop_na(expr) %>%
+            dplyr::group_by(symbol, protein) %>%
+            dplyr::summarise(mean = mean(expr)) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-expression) %>% 
+    tidyr::unnest() 

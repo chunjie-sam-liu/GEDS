@@ -6,7 +6,7 @@ fn_panel_protein <- function(){
   shiny::fluidRow(
   tagList(
   column(
-    width = 10, offset = 0,
+    width = 10,
     shinyWidgets::searchInput(
       inputId = "input_protein_set",
       label = "",
@@ -36,20 +36,30 @@ fn_panel_protein <- function(){
 
 # dataset select ----------------------------------------------------------
 
-fn_protein_select <- function(.protein){
+fn_protein_select <- function(.tcga,.mclp){
   shiny::fluidRow(
     column(
       width = 12, offset = 0,
-      shinydashboard::box(
-        width = 12,
-        checkboxGroupButtons(
+      tabsetPanel(id = "select_protein",
+        tabPanel("Cancer Types",
+          checkboxGroupButtons(
           inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .protein
-        ),
-        shinyjs::hide(switchInput(
+          individual = TRUE, choices = .tcga
+          ),
+          shinyjs::hide(switchInput(
           inputId = "select_dataset6", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-        )))
+          ))),
+        tabPanel("Tissues",
+          checkboxGroupButtons(
+          inputId = "select_protein_MCLP", label = "",status = "primary", size = "lg", selected = c('bladder'), 
+          individual = TRUE, choices = .mclp
+          ),
+          shinyjs::hide(switchInput(
+          inputId = "select_dataset7", label = "Dataset", value = FALSE,
+          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
+          )))
+        )
       )
     )
 }
@@ -57,7 +67,7 @@ fn_protein_select <- function(.protein){
 fn_protein_set_stat <- function(input_list_check){
   shiny::fluidRow(
   column(
-    width = 10, offset = 1, style = "margin-top:20px",
+    width = 10, offset = 1,
     downloadLink(
       outputId = "download_total_protein_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
@@ -76,20 +86,51 @@ fn_protein_set_stat <- function(input_list_check){
 
 # result ------------------------------------------------------------------
 
-fn_result <- function(id){
+fn_protein_single_result <- function(){
   shiny::fluidRow(
   column(
     width = 12,offset = 0,
     shinydashboard::tabBox(
       id = "expr_plot", title = "", width = 12,
-      tabPanel(
-        title = "Figure of expression",
-        plotOutput(outputId = "expr_bubble_plot", height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+      tabPanel("Figure of expression",
+        plotOutput(outputId = "expr_bubble_plot_protein", height = "100%", width = "100%") %>% 
+        withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
       ),
       tabPanel(
         title = "Table of expression",
-        DT::dataTableOutput(outputId = "expr_dt_comparison") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+        DT::dataTableOutput(outputId = "expr_dt_comparison_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
       )
     )
   ))
+}
+
+fn_protein_multi_result <- function(list){
+  shiny::fluidRow(
+    column(
+      width = 12, offset = 0,
+      shinydashboard::tabBox(
+        id = "mutiple_protein_plot_result", title = "", width = 12,
+        tabPanel(
+          title = "Figure of expression",
+          tagList(
+            column(
+              width = 12, offset = 0,
+              radioGroupButtons(
+                inputId = "select_protein_result", label = "", status = "primary", size = "lg",
+                individual = TRUE, choices = list
+              )),
+            column(
+              width = 12, offset = 0,
+              shiny::uiOutput(outputId = "plot_multiple_protein")
+            ))
+        ),
+        tabPanel(
+          title = "Table of expression",
+          DT::dataTableOutput(outputId = "expr_dt_comparison_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+        ))
+    ))
+}
+
+fn_plot_multiple_protein <- function(choice){
+  plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
 }

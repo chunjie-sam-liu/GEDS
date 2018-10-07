@@ -162,14 +162,15 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
     ) ->> expr_clean
     tibble_change_to_plot_mirna(.expr_clean = expr_clean)->>mirna_plot_result
     tibble_format_change_mirna(.expr_clean = expr_clean)->>mirna_table_result
+    print(mirna_plot_result)
     mirna_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name -> plot_number$miRNA
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 
-    print(choice$miRNA)
     number <- length(plot_number$miRNA)
-    number2 <-  length(input$select_miRNA_TCGA)
+    dataset_number$miRNA <-  length(input$select_miRNA_TCGA)
     if(number < 5){
-      if(number2 <5 ){
-        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = number*200, width = number2*200)
+      if(dataset_number$miRNA <5 ){
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% 
+            expr_buble_plot_mirna()},height = number*200, width = dataset_number$miRNA*200)
       }
       else{
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = number*200)

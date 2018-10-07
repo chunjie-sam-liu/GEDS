@@ -90,7 +90,7 @@ tibble::tibble(
 # save cell line data to tibble.
 
 
-protein_path <- "/data/shiny-data/GSEXPR/protein/drop/result"
+protein_path <- "/data/xiamx/GEDS/protein/drop/result"
 
 
 tibble::tibble(
@@ -152,7 +152,16 @@ as.character(h$expression)[.inter]
         }
       )
     ) -> expr_clean
-
+  MCLP_protein %>% dplyr::filter(tis %in% select_protein_MCLP) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = expression,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% match_protein)
+            }
+          )
+        ) %>% dplyr::select(-expression) -> expr_clean
   expr_clean %>%
     dplyr::mutate(
       mean = purrr::map(

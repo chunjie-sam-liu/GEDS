@@ -81,7 +81,8 @@ fn_mirna_single_result <- function(){
     shinydashboard::tabBox(
       id = "expr_plot", title = "", width = 12,
       tabPanel("Figure of expression",
-          plotOutput(outputId = "expr_bubble_plot_mirna", height = "100%", width = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+        plotOutput(outputId = "expr_bubble_plot_mirna", height = "100%", width = "100%") %>% 
+        withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
           ),
       tabPanel(
         title = "Table of expression",
@@ -102,7 +103,7 @@ fn_mirna_multi_result <- function(list){
             column(
               width = 12, offset = 0,
               radioGroupButtons(
-                inputId = "select_miRNA_result", label = "", status = "primary", size = "lg",#selected = c('ACC','BLCA','BRCA','CESC'),
+                inputId = "select_miRNA_result", label = "", status = "primary", size = "lg",
                 individual = TRUE, choices = list
               )),
             column(

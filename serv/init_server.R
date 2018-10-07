@@ -105,6 +105,11 @@ plot_number <- reactiveValues(
   mRNA = FALSE,
   miRNA = FALSE
 )
+dataset_number <- reactiveValues(
+  protein = NULL,
+  mRNA = NULL,
+  miRNA = NULL
+)
 multiple <- reactiveValues(
   protein = FALSE,
   mRNA = FALSE,
@@ -119,6 +124,9 @@ choice <- reactiveValues(
 # Load data ---------------------------------------------------------------
 
 TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_new.rds.gz"))
+TCGA_protein_mean <- readr::read_rds(file.path(config$database, "protein","TCGA_expr_mean.rds.gz"))
+MCLP_protein <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_new.rds.gz"))
+MCLP_protein_mean <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_mean.rds.gz"))
 TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","tcga_pancan33-mirna-expr.rds.gz"))
 # Load gene list ----------------------------------------------------------
 

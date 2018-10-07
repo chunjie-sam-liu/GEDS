@@ -30,7 +30,6 @@ validate_protein_set <- function(.v,  .total_symbol, input_protein_check = input
   input_protein_check$n_non_match <- length(.vvv[!.inter])
   input_protein_check$n_match <- length(protein_match$symbol)
   input_protein_check$n_total <- length(protein_match$symbol) + length(.vvv[!.inter])
-
   if(input_protein_check$n_match > 0) {
     status$protein_result <- TRUE
     status$protein_valid <- TRUE } 
@@ -84,8 +83,9 @@ validate_input_protein_set <- eventReactive(
     validate_protein_set(.v = .v_igs, .total_symbol = total_protein_symbol, input_protein_check = input_protein_check)
   }
 )
+
 # protein table_print -------------------------------------------------------------
-tibble_change_to_plot <- function(.expr_clean){
+tibble_change_to_plot_protein <- function(.expr_clean){
   .expr_clean %>%
     dplyr::mutate(
       mean = purrr::map(
@@ -102,7 +102,7 @@ tibble_change_to_plot <- function(.expr_clean){
     dplyr::select(-expr) %>% 
     tidyr::unnest()
 }
-tibble_format_change <- function(.expr_clean){
+tibble_format_change_protein <- function(.expr_clean){
   .expr_clean %>%
     dplyr::mutate(
       mean = purrr::map(
@@ -120,7 +120,7 @@ tibble_format_change <- function(.expr_clean){
     dplyr::select(-expr) %>% 
     tidyr::unnest() 
 }
-expr_buble_plot <-  function(.expr){
+expr_buble_plot_protein <-  function(.expr){
   .expr %>% dplyr::rename(FPKM = expr) %>%
     ggplot(mapping=aes(x=cancer_types,y=FPKM,color=cancer_types)) +
     geom_boxplot(width=0.5) +
@@ -136,11 +136,11 @@ expr_buble_plot <-  function(.expr){
       text = element_text(size = 20)
     )
 }
-expr_clean_datatable <- function(.expr_clean) {
+expr_clean_datatable_protein <- function(.expr_clean) {
   DT::datatable(
     data = .expr_clean,
     rownames = FALSE,
-    colnames = c("Cancer Types", "Symbol", "Protein", "Mean expr."),
+    colnames = c("Cancer Types/Tissues", "Symbol", "Protein", "Mean expr."),
     filter = "top",
     extensions = "Buttons",
     style = "bootstrap",
@@ -149,24 +149,49 @@ expr_clean_datatable <- function(.expr_clean) {
 }
 
 # ObserveEvent ------------------------------------------------------------
-observeEvent(c(input$select_protein_TCGA,reset$protein),{
-  if(length(input$select_protein_TCGA)>0){
-  TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
-    dplyr::mutate(
-      expr = purrr::map(
-        .x = expr,
-        .f = function(.x) {
-          .x %>%
-            dplyr::filter(symbol %in% match$protein)
-        }
-      )
-    ) -> expr_clean
-  tibble_change_to_plot(.expr_clean = expr_clean)->>plot_result
-  tibble_format_change(.expr_clean = expr_clean)->>table_result
-  plot_result %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein %>% length() -> number
-  if(number < 6){output$expr_bubble_plot <- renderPlot({expr_buble_plot(plot_result)},height = number*200)}
-  else{NULL}
-  output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable(table_result)})
+observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_protein_MCLP,reset$protein),{
+  if(length(input$select_protein)>0){
+    if(input$select_protein == "Cancer Types"){
+    dataset_number$protein <-  length(input$select_protein_TCGA)
+    TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
+      dplyr::mutate(
+        expr = purrr::map(
+          .x = expr,
+          .f = function(.x) {
+            .x %>%
+              dplyr::filter(symbol %in% match$protein)
+          }
+        )
+      ) -> expr_clean }
+    else if(input$select_protein == "Tissues"){
+      dataset_number$protein <-  length(input$select_protein_MCLP)
+      MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = expression,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% match$protein)
+            }
+          )
+        ) %>% dplyr::select(-expression) %>%　dplyr::rename(cancer_types = tis)-> expr_clean }
+  tibble_change_to_plot_protein(.expr_clean = expr_clean)->> protein_plot_result
+  tibble_format_change_protein(.expr_clean = expr_clean)->>protein_table_result
+  protein_plot_result %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein -> plot_number$protein
+  choice$protein <- protein_plot_result %>% dplyr::filter(protein %in% plot_number$protein[1]) %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein
+  number <- length(plot_number$protein)
+  if(number < 5){
+    if(dataset_number$protein <5 ){
+      output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*200, width = dataset_number$protein*200)
+    }
+    else{
+      output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*200)
+    }
+    multiple$protein <- FALSE
+  }
+  else{multiple$protein <- TRUE}
+  output$expr_dt_comparison_protein <- DT::renderDataTable({expr_clean_datatable_protein(protein_table_result)})
+  return(protein_plot_result)
 }})
 observeEvent(status$protein_trigger, {
   if (error$protein_set != "" && !is.null(error$protein_set)) {
@@ -190,5 +215,16 @@ observeEvent(status$protein_valid, {
 })
 # observe -----------------------------------------------------------------
 observe(validate_input_protein_set())
-
+observeEvent(c(input$select_protein,input$select_protein_result), {
+  if(length(input$select_protein_result)>0){
+    choice$protein <- paste(input$select_protein,input$select_protein_result) %>% stringr::str_replace_all(' ','')
+    protein_plot_result %>% dplyr::filter(protein %in% input$select_protein_result) -> one_plot
+    if(dataset_number$protein<5){
+      output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200, width = dataset_number$protein*200)
+    }
+    else{
+      output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200)
+    }
+  }
+})
 
