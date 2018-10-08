@@ -4,6 +4,10 @@
   border-color: #dd4b39;
 }
 
-.btn-primary {
-    width: 70px;
+#select_protein_TCGA .btn-primary {
+    width: 100px;
+}
+
+#select_miRNA_TCGA .btn-primary {
+    width: 82px;
 }

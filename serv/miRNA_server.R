@@ -143,13 +143,16 @@ expr_clean_datatable_mirna <- function(.expr_clean) {
     extensions = "Buttons",
     style = "bootstrap",
     class = "table-bordered table-condensed"
-  ) 
+  ) %>% 
+    DT::formatSignif(columns = c("mean"), digits = 2) %>%
+    DT::formatRound(columns = c("mean"), 2)
 }
 
 
 # ObserveEvent ------------------------------------------------------------
 observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
   if(length(input$select_miRNA_TCGA)>0){
+    if(status$miRNA_trigger){status$miRNA_trigger <- FALSE} else{status$miRNA_trigger <- TRUE}
     TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>%
     dplyr::mutate(
       mirna = purrr::map(
@@ -161,8 +164,7 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
       )
     ) ->> expr_clean
     tibble_change_to_plot_mirna(.expr_clean = expr_clean)->>mirna_plot_result
-    tibble_format_change_mirna(.expr_clean = expr_clean)->>mirna_table_result
-    print(mirna_plot_result)
+    tibble_format_change_mirna(.expr_clean = expr_clean) ->>mirna_table_result
     mirna_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name -> plot_number$miRNA
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 
     number <- length(plot_number$miRNA)
@@ -206,9 +208,16 @@ observeEvent(status$miRNA_valid, {
 })
 # observe -----------------------------------------------------------------
 observe(validate_input_miRNA_set())
-observeEvent(input$select_miRNA_result, {
-  choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
-  mirna_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> one_plot
-  output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()},height = 200)
+observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
+  if(length(input$select_miRNA_result)>0){
+    choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
+    mirna_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> one_plot
+    if(dataset_number$miRNA<5){
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()},height = 200, width = dataset_number$miRNA*200)
+    }
+    else{
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()},height = 200)
+    }
+  }
 })
 

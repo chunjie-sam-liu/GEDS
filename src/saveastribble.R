@@ -101,7 +101,7 @@ tibble::tibble(
       .x = tis,
       .f = function(.x) {
         .d <- readr::read_tsv(file = file.path(protein_path, .x))
-
+        print(.x)
         .d %>%
           tidyr::gather(key = 'protein', value = 'expr', -Sample_Name) %>%
           # tidyr::replace_na(replace = list(expr = 0)) %>%

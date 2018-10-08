@@ -43,8 +43,8 @@ fn_protein_select <- function(.tcga,.mclp){
       tabsetPanel(id = "select_protein",
         tabPanel("Cancer Types",
           checkboxGroupButtons(
-          inputId = "select_protein_TCGA", label = "",status = "primary", size = "lg", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga
+          inputId = "select_protein_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
+          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset6", label = "Dataset", value = FALSE,
@@ -52,8 +52,8 @@ fn_protein_select <- function(.tcga,.mclp){
           ))),
         tabPanel("Tissues",
           checkboxGroupButtons(
-          inputId = "select_protein_MCLP", label = "",status = "primary", size = "lg", selected = c('bladder'), 
-          individual = TRUE, choices = .mclp
+          inputId = "select_protein_MCLP", label = "",status = "primary", selected = c('bladder'), 
+          individual = TRUE, choices = .mclp, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset7", label = "Dataset", value = FALSE,

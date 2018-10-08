@@ -145,12 +145,15 @@ expr_clean_datatable_protein <- function(.expr_clean) {
     extensions = "Buttons",
     style = "bootstrap",
     class = "table-bordered table-condensed"
-  ) 
+  ) %>% 
+    DT::formatSignif(columns = c("mean"), digits = 2) %>%
+    DT::formatRound(columns = c("mean"), 2)
 }
 
 # ObserveEvent ------------------------------------------------------------
 observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_protein_MCLP,reset$protein),{
   if(length(input$select_protein)>0){
+    if(status$protein_trigger){status$protein_trigger <- FALSE} else{status$protein_trigger <- TRUE}
     if(input$select_protein == "Cancer Types"){
     dataset_number$protein <-  length(input$select_protein_TCGA)
     TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
@@ -215,9 +218,9 @@ observeEvent(status$protein_valid, {
 })
 # observe -----------------------------------------------------------------
 observe(validate_input_protein_set())
-observeEvent(c(input$select_protein,input$select_protein_result), {
+observeEvent(c(input$select_protein,input$select_protein_result,status$protein_trigger), {
   if(length(input$select_protein_result)>0){
-    choice$protein <- paste(input$select_protein,input$select_protein_result) %>% stringr::str_replace_all(' ','')
+    choice$protein <- paste(input$select_protein,input$select_protein_result,status$protein_trigger) %>% stringr::str_replace_all(' ','')
     protein_plot_result %>% dplyr::filter(protein %in% input$select_protein_result) -> one_plot
     if(dataset_number$protein<5){
       output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200, width = dataset_number$protein*200)
