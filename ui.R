@@ -34,7 +34,10 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
 
 # Welcome -----------------------------------------------------------------
-    menuItem("Welcome", tabName = "welcome", icon = icon("home")),
+    #menuItem("Welcome", tabName = "welcome", icon = icon("home")),
+
+# Detail search -----------------------------------------------------------
+    menuItem("Detail_search", tabName = "detail_search", icon = icon("home")),
 
 # Help --------------------------------------------------------------------
     menuItem("Help", tabName = "help", icon = icon("question")),
@@ -62,7 +65,11 @@ body <- dashboardBody(
   tabItems(
 
   # Welcome -----------------------------------------------------------------
-    source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value,
+    #source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value,
+
+  # Detail search -----------------------------------------------------------
+    source(file = file.path(config$wd, "ui", "detail_search_ui.R"), local = TRUE)$value,
+  
   # Help --------------------------------------------------------------------
     source(file = file.path(config$wd, "ui", "help_ui.R"), local = TRUE)$value#,
   # Contact -----------------------------------------------------------------

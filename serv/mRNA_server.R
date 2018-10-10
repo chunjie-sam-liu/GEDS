@@ -1,53 +1,249 @@
 # source by server.R
 # saved as mRNA_server.R
 
+# Check input gene set ----------------------------------------------------
+check_mRNA_set <- function(.s) {
+  .s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ] -> .ss
+  .ss
+}
+
+# Validate gene with TCGA gene symbol -------------------------------------
+
+validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_check) {
+  
+  .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
+  .vvv %in% total_mRNA_symbol$symbol-> .inter
+  input_mRNA_check$match <-  .vvv[.inter]
+  input_mRNA_check$non_match <- .vvv[!.inter]
+  input_mRNA_check$n_non_match <- length(.vvv[!.inter])
+  input_mRNA_check$n_match <- length(.vvv[.inter])
+  input_mRNA_check$n_total <- length(.vvv[.inter]) + length(.vvv[!.inter])
+  if(input_mRNA_check$n_match > 0) {
+    status$mRNA_valid <- TRUE } 
+  else {
+    status$mRNA_valid <- FALSE}
+}
+
+# Example -----------------------------------------------------------------
+
+observeEvent(input$mRNA_example, {
+  status$mRNA_set <- FALSE
+  status$mRNA_result <- FALSE
+  closeAlert(session = session, alertId = "guide-alert")
+  shinyjs::js$example_mRNA_set(id = "seinput_mRNA_set")
+  shinyjs::enable(id = "input_mRNA_set")
+})
 
 # Clear input -------------------------------------------------------------
 
-observeEvent(input$input_gene_set_reset, {
-  names(selected_analysis) %>% purrr::walk(.f = function(.x) { selected_analysis[[.x]] <- FALSE })
-  shinyjs::reset("input_gene_set")
+observeEvent(input$input_mRNA_set_reset, {
+  shinyjs::reset("input_mRNA_set")
   closeAlert(session = session, alertId = "guide-alert")
-  status$gene_set <- FALSE
-  status$result <- FALSE
+  status$mRNA_set <- FALSE
+  status$mRNA_result <- FALSE
+  status$mRNA_valid <- TRUE
+  status$mRNA_trigger <- FALSE
+  status$analysis <- FALSE
+  output$expr_bubble_plot_mRNA <- NULL
+  output$expr_dt_comparison_mRNA <- NULL
 })
-
 
 # Monitor search ----------------------------------------------------------
 
-validate_input_gene_set <- eventReactive(
-  eventExpr = input$input_gene_set_search,
+validate_input_mRNA_set <- eventReactive(
+  eventExpr = input$input_mRNA_set_search,
   ignoreNULL = TRUE,
   valueExpr = {
-    status$gene_set <- TRUE
-    if (is.null(input$input_gene_set) || input$input_gene_set == "") {
-      error$gene_set <- "Error: Please input gene symbol."
-      status$gene_trigger <- if (status$gene_trigger == TRUE) FALSE else TRUE
-      status$gene_set <- FALSE
+    status$mRNA_set <- TRUE
+    if (is.null(input$input_mRNA_set) || input$input_mRNA_set == "") {
+      error$mRNA_set <- "Error: Please input gene symbol."
+      status$mRNA_trigger <- if (status$mRNA_trigger == TRUE) FALSE else TRUE
+      status$mRNA_set <- FALSE
       return()
     }
     # check gene
-    .v_igs <- check_gene_set(.s = input$input_gene_set)
+    .v_igs <- check_mRNA_set(.s = input$input_mRNA_set)
     # validate genes
-    validate_input_set(.v = .v_igs, .total_symbol = total_gene_symbol, input_list_check = input_list_check)
+    validate_mRNA_set(.v = .v_igs, .total_symbol = total_mRNA_symbol, input_mRNA_check = input_mRNA_check)
     
   }
 )
 
+validate_analysis <- eventReactive(
+  eventExpr = input$analysis,
+  ignoreNULL = TRUE,
+  valueExpr = {
+    if(status$analysis){status$analysis <- FALSE} else{status$analysis <-  TRUE}
+    status$mRNA_result <- TRUE
+    }
+  )
+
+# mRNA table_print -------------------------------------------------------------
+tibble_change_to_plot_mRNA <- function(.expr_clean){
+  .expr_clean %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = expr,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = expr, -c(symbol)) %>%
+            tidyr::drop_na(expr) %>%
+            dplyr::group_by(symbol) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-expr) %>% 
+    tidyr::unnest()
+}
+tibble_format_change_mRNA <- function(.expr_clean){
+  .expr_clean %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = expr,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = expr, -c(symbol)) %>%
+            tidyr::drop_na(expr) %>%
+            dplyr::group_by(symbol) %>%
+            dplyr::summarise(mean = mean(expr)) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-expr) %>% 
+    tidyr::unnest() 
+}
+expr_buble_plot_mRNA <-  function(.expr){
+  .expr %>% dplyr::rename(FPKM = expr) %>%
+    ggplot(mapping=aes(x=cancer_types,y=FPKM,color=cancer_types)) +
+    geom_boxplot(width=0.5) +
+    facet_wrap(~symbol, ncol = 1,scales = "free") +
+    theme(
+      axis.line = element_line(color = "black"),
+      panel.background  = element_rect(fill = "white", color = "grey"),
+      axis.title.x = element_blank(),
+      axis.text.x = element_blank(),
+      legend.title = element_blank(),
+      legend.position = "bottom",
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      text = element_text(size = 20)
+    )
+}
+expr_clean_datatable_mRNA <- function(.expr_clean) {
+  DT::datatable(
+    data = .expr_clean,
+    rownames = FALSE,
+    colnames = c("Cancer Types/Tissues", "Symbol", "Mean expr."),
+    filter = "top",
+    extensions = "Buttons",
+    style = "bootstrap",
+    class = "table-bordered table-condensed"
+  ) %>% 
+    DT::formatSignif(columns = c("mean"), digits = 2) %>%
+    DT::formatRound(columns = c("mean"), 2)
+}
+
 
 # ObserveEvent ------------------------------------------------------------
-observeEvent(status$gene_trigger, {
-  if (error$gene_set != "" && !is.null(error$gene_set)) {
+observeEvent(c(status$analysis,reset$mRNA),{
+  if(length(input$select_mRNA)>0){
+    if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
+    if(input$select_mRNA == "Cancer Types"){
+      dataset_number$mRNA <-  length(input$select_mRNA_TCGA)
+      TCGA_mRNA %>% dplyr::filter(cancer_types %in% input$select_mRNA_TCGA) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = expr,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% input_mRNA_check$match) %>% dplyr::select(-entrez_id)
+            }
+          )
+        ) -> expr_clean }
+    else if(input$select_mRNA == "Tissues"){
+      dataset_number$mRNA <-  length(input$select_mRNA_GTEX)
+      GTEX_mRNA %>% dplyr::filter(SMTS %in% input$select_mRNA_GTEX) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = expr,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% input_mRNA_check$match) %>% dplyr::select(-ensembl_gene_id)
+            }
+          )
+        ) %>% dplyr::select(-phenotype) %>% dplyr::rename(cancer_types = SMTS)-> expr_clean }
+    else if(input$select_mRNA == "Celllines"){
+      dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
+      CCLE_mRNA %>% dplyr::filter(tissue %in% input$select_mRNA_CCLE) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = expression,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% input_mRNA_check$match)
+            }
+          )
+        ) %>% dplyr::select(-expression) %>%　dplyr::rename(cancer_types = tissue)-> expr_clean }
+    tibble_change_to_plot_mRNA(.expr_clean = expr_clean)->> mRNA_plot_result
+    tibble_format_change_mRNA(.expr_clean = expr_clean)->>mRNA_table_result
+    mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol -> plot_number$mRNA
+    choice$mRNA <- mRNA_plot_result %>% dplyr::filter(symbol %in% plot_number$symbol[1]) %>% 
+      dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
+    number <- length(plot_number$mRNA)
+    if(number < 5){
+      if(dataset_number$mRNA == 1 ){
+        output$expr_bubble_plot_mRNA <- renderPlot({expr_buble_plot_mRNA(mRNA_plot_result)},height = number*200, width = 300)}
+      else if(dataset_number$mRNA <5 ){
+        output$expr_bubble_plot_mRNA <- renderPlot({expr_buble_plot_mRNA(mRNA_plot_result)},height = number*200, width = dataset_number$mRNA*200)
+      }
+      else{
+        output$expr_bubble_plot_mRNA <- renderPlot({expr_buble_plot_mRNA(mRNA_plot_result)},height = number*200)
+      }
+      multiple$mRNA <- FALSE
+    }
+    else{multiple$mRNA <- TRUE}
+    output$expr_dt_comparison_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(mRNA_table_result)})
+    return(mRNA_plot_result)
+  }})
+
+observeEvent(status$mRNA_trigger, {
+  if (error$mRNA_set != "" && !is.null(error$mRNA_set)) {
     shinyWidgets::sendSweetAlert(
       session = session,
       title = "Error...",
-      text = error$gene_set,
+      text = error$mRNA_set,
       type = "error"
     )
   }
 })
 
+observeEvent(status$mRNA_valid, {
+  if (status$mRNA_valid == FALSE) {
+    shinyWidgets::sendSweetAlert(
+      session = session,
+      title = "Error...",
+      text = "No matched symbol, please check",
+      type = "error"
+    )
+  }
+})
 
 # observe -----------------------------------------------------------------
-observe(validate_input_gene_set())
-
+observe(validate_input_mRNA_set())
+observe(validate_analysis())
+observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
+  if(length(input$select_mRNA_result)>0){
+    choice$mRNA <- paste(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
+    mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> one_plot
+    if(dataset_number$mRNA == 1 ){
+      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mRNA()}, height = 200, width = 300)}
+    else if(dataset_number$mRNA<5 && dataset_number$mRNA>1){
+      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mRNA()},height = 200, width = dataset_number$mRNA*200)
+    }
+    else{
+      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mRNA()},height = 200)
+    }
+  }
+})

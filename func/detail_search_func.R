@@ -1,4 +1,4 @@
-# sourced by "welcome_server.R"
+# sourced by "detail_search_server.R"
 
 fn_welcome_msg <- function() {
   column(

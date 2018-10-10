@@ -3,10 +3,9 @@
 # panel -------------------------------------------------------------------
 
 fn_panel_protein <- function(){
-  shiny::fluidRow(
   tagList(
   column(
-    width = 10,
+    width = 9, offset = 0,
     shinyWidgets::searchInput(
       inputId = "input_protein_set",
       label = "",
@@ -29,7 +28,6 @@ fn_panel_protein <- function(){
         )
       )
     )
-  )
   ))
 }
 
@@ -91,7 +89,7 @@ fn_protein_single_result <- function(){
   column(
     width = 12,offset = 0,
     shinydashboard::tabBox(
-      id = "expr_plot", title = "", width = 12,
+      id = "protein_expr_plot", title = "", width = 12,
       tabPanel("Figure of expression",
         plotOutput(outputId = "expr_bubble_plot_protein", height = "100%", width = "100%") %>% 
         withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")

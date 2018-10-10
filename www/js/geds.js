@@ -6,11 +6,11 @@ shinyjs.init = function(){
   $('input[type="checkbox"]').prop("checked", true);
 };
 
-shinyjs.example_gene_set = function(params){
+shinyjs.example_mRNA_set = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
   var selector = $("#" + params.id);
-  selector.val("AKT FOXM1 PRKAA1");
+  selector.val("AKT1 FOXM1");
 };
 shinyjs.example_protein_set = function(params){
   var defaultParams = {id: null};

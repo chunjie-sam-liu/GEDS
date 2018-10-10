@@ -3,10 +3,9 @@
 # panel -------------------------------------------------------------------
 
 fn_panel_miRNA <- function(){
-  shiny::fluidRow(
   tagList(
   column(
-    width = 10,
+    width = 9, offset = 0,
     shinyWidgets::searchInput(
       inputId = "input_miRNA_set",
       label = "",
@@ -30,7 +29,7 @@ fn_panel_miRNA <- function(){
       )
     )
   )
-  ))
+  )
 }
 
 # dataset seletct ---------------------------------------------------------

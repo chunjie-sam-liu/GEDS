@@ -240,3 +240,14 @@ as.character(h$expression)[.inter]
     filename <- plot$protein 
     list(src = filename,alt= "plot result")
   }, deleteFile = F)
+
+  TCGA %>%
+      dplyr::mutate(
+      plot = purrr::map(
+        .x = x,
+        .f = function(.x){
+          plot_result %>% 
+            dplyr::filter(protein %in% .x) %>% print()
+        }
+      )
+    )  -> test2

@@ -170,7 +170,9 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
     number <- length(plot_number$miRNA)
     dataset_number$miRNA <-  length(input$select_miRNA_TCGA)
     if(number < 5){
-      if(dataset_number$miRNA <5 ){
+      if(dataset_number$miRNA == 1 ){
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()}, height = number*200, width = 300)}
+      else if(dataset_number$miRNA <5 ){
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% 
             expr_buble_plot_mirna()},height = number*200, width = dataset_number$miRNA*200)
       }
@@ -212,11 +214,13 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
   if(length(input$select_miRNA_result)>0){
     choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
     mirna_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> one_plot
-    if(dataset_number$miRNA<5){
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()},height = 200, width = dataset_number$miRNA*200)
+    if(dataset_number$miRNA == 1 ){
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200, width = 300)}
+    else if(dataset_number$miRNA<5){
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200, width = dataset_number$miRNA*200)
     }
     else{
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()},height = 200)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200)
     }
   }
 })

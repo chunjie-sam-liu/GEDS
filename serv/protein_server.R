@@ -43,7 +43,6 @@ validate_protein_set <- function(.v,  .total_symbol, input_protein_check = input
 observeEvent(input$protein_example, {
   status$protein_set <- FALSE
   status$protein_result <- FALSE
-  status$protein_trigger <- FALSE
   closeAlert(session = session, alertId = "guide-alert")
   shinyjs::js$example_protein_set(id = "seinput_protein_set")
   shinyjs::enable(id = "input_protein_set")
@@ -54,14 +53,13 @@ observeEvent(input$protein_example, {
 observeEvent(input$input_protein_set_reset, {
   shinyjs::reset("input_protein_set")
   closeAlert(session = session, alertId = "guide-alert")
-  status$protein_set <- FALSE
-  status$protein_result <- FALSE
-  status$protein_valid <- TRUE
-  status$protein_trigger <- FALSE
-  output$expr_bubble_plot <- NULL
-  output$expr_dt_comparison <- NULL
+  status$mRNA_set <- FALSE
+  status$mRNA_result <- FALSE
+  status$mRNA_valid <- TRUE
+  status$mRNA_trigger <- FALSE
+  output$expr_bubble_plot_protein <- NULL
+  output$expr_dt_comparison_protein <- NULL
 })
-
 
 # Monitor search ----------------------------------------------------------
 
@@ -184,7 +182,10 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
   choice$protein <- protein_plot_result %>% dplyr::filter(protein %in% plot_number$protein[1]) %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein
   number <- length(plot_number$protein)
   if(number < 5){
-    if(dataset_number$protein <5 ){
+    if(dataset_number$protein == 1){
+      output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*200, width = 300)
+    }
+    else if(dataset_number$protein <5 ){
       output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*200, width = dataset_number$protein*200)
     }
     else{
@@ -196,6 +197,7 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
   output$expr_dt_comparison_protein <- DT::renderDataTable({expr_clean_datatable_protein(protein_table_result)})
   return(protein_plot_result)
 }})
+
 observeEvent(status$protein_trigger, {
   if (error$protein_set != "" && !is.null(error$protein_set)) {
     shinyWidgets::sendSweetAlert(
@@ -206,6 +208,7 @@ observeEvent(status$protein_trigger, {
     )
   }
 })
+
 observeEvent(status$protein_valid, {
   if (status$protein_valid == FALSE) {
     shinyWidgets::sendSweetAlert(
@@ -216,13 +219,17 @@ observeEvent(status$protein_valid, {
     )
   }
 })
+
 # observe -----------------------------------------------------------------
 observe(validate_input_protein_set())
 observeEvent(c(input$select_protein,input$select_protein_result,status$protein_trigger), {
   if(length(input$select_protein_result)>0){
     choice$protein <- paste(input$select_protein,input$select_protein_result,status$protein_trigger) %>% stringr::str_replace_all(' ','')
     protein_plot_result %>% dplyr::filter(protein %in% input$select_protein_result) -> one_plot
-    if(dataset_number$protein<5){
+    if(dataset_number$protein == 1){
+      output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200, width = 300)
+    }
+    else if(dataset_number$protein<5){
       output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200, width = dataset_number$protein*200)
     }
     else{

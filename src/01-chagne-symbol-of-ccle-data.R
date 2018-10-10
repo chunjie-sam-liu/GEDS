@@ -21,7 +21,7 @@ ccle %>%
     expression = purrr::map(
       .x = expression,
       .f = function(.x) {
-        .x %>% dplyr::rename(symbol = `Symbol name`)
+        .x[-c(16196,18848,19790,7667,24823,24841,24868,24860,24833,16510),]
       }
     )
   ) ->
@@ -118,9 +118,9 @@ MCLP    %>%
         .x = expression,
         .f = function(.x){
           .x %>% 
-            tidyr::gather(key = barcode, value = expr, -c(symbol, protein)) %>%
+            tidyr::gather(key = barcode, value = expr, -c(symbol)) %>%
             tidyr::drop_na(expr) %>%
-            dplyr::group_by(symbol, protein) %>%
+            dplyr::group_by(symbol) %>%
             dplyr::summarise(mean = mean(expr)) %>%
             dplyr::ungroup() 
         }
@@ -128,3 +128,15 @@ MCLP    %>%
     ) %>%
     dplyr::select(-expression) %>% 
     tidyr::unnest() 
+
+dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
+CCLE %>% dplyr::filter(tissue %in% tissue) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = expression,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% .vvv)
+            }
+          )
+        ) %>% dplyr::select(-expression) %>%　dplyr::rename(cancer_types = tis)-> expr_clean          

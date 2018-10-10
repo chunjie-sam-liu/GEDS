@@ -27,23 +27,24 @@ reset <- reactiveValues(
   "miRNA" = FALSE
 )
 status <- reactiveValues(
-  "gene_set" = FALSE,
+  "mRNA_set" = FALSE,
   "protein_set" = FALSE,
   "miRNA_set" = FALSE,
   "analysis" = FALSE,
-  "gene_valid" = TRUE,
+  "mRNA_valid" = TRUE,
   "protein_valid" = TRUE,
   "miRNA_valid" = TRUE,
   "protein_result" = FALSE,
   "miRNA_result" = FALSE,
-  "gene_trigger" = FALSE,
+  "mRNA_result" = FALSE,
+  "mRNA_trigger" = FALSE,
   "protein_trigger" = FALSE,
   "miRNA_trigger" = FALSE,
   "progressbar" = FALSE
 )
 
 error <- reactiveValues(
-  "gene_set" = "",
+  "mRNA_set" = "",
   "protein_set" = "",
   "miRNA_set" = "",
   "tcga_expr" = "",
@@ -63,7 +64,7 @@ selected_analysis <- reactiveValues(
 
 
 # Gene sets ---------------------------------------------------------------
-input_gene_check <- reactiveValues(
+input_mRNA_check <- reactiveValues(
   match = "",
   non_match = "",
   n_match = "",
@@ -122,13 +123,24 @@ choice <- reactiveValues(
 )
 
 # Load data ---------------------------------------------------------------
+TCGA_mRNA <- readr::read_rds(file.path(config$database, "mRNA","TCGA_test.rds.gz"))
+#TCGA_mRNA <- readr::read_rds(file.path(config$database, "mRNA","tcga_pancan33-expr.rds.gz"))
+#TCGA_mRNA_mean <- readr::read_rds(file.path(config$database, "mRNA","tcga_pancan33-expr.rds.gz"))
 
-TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_new.rds.gz"))
-TCGA_protein_mean <- readr::read_rds(file.path(config$database, "protein","TCGA_expr_mean.rds.gz"))
-MCLP_protein <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_filter_new.rds.gz"))
-MCLP_protein_mean <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_mean.rds.gz"))
-TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","tcga_pancan33-mirna-expr.rds.gz"))
-TCGA_miRNA_mean <- readr::read_rds(file.path(config$database, "miRNA","TCGA_miRNA_mean.rds.gz"))
+GTEX_mRNA <- readr::read_rds(file.path(config$database, "mRNA","GTEX_test.rds.gz"))
+#GTEX_mRNA <- readr::read_rds(file.path(config$database, "mRNA","GTEX_new_expr.rds.gz"))
+#GTEX_mRNA_mean <- readr::read_rds(file.path(config$database, "mRNA","GTEX_new_expr.rds.gz"))
+
+CCLE_mRNA <- readr::read_rds(file.path(config$database, "mRNA","CCLE_test.rds.gz"))
+#CCLE_mRNA <- readr::read_rds(file.path(config$database, "mRNA","CCLE_new_expr.rds.gz"))
+#CCLE_mRNA_mean <- readr::read_rds(file.path(config$database, "mRNA","CCLE_mean.rds.gz"))
+
+#TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_new.rds.gz"))
+#TCGA_protein_mean <- readr::read_rds(file.path(config$database, "protein","TCGA_expr_mean.rds.gz"))
+#MCLP_protein <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_filter_new.rds.gz"))
+#MCLP_protein_mean <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_mean.rds.gz"))
+#TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","tcga_pancan33-mirna-expr.rds.gz"))
+#TCGA_miRNA_mean <- readr::read_rds(file.path(config$database, "miRNA","TCGA_miRNA_mean.rds.gz"))
 # Load gene list ----------------------------------------------------------
 
 mRNA_TCGA <- readr::read_rds(file.path(config$database,"mRNA","TCGA_sort_cancertype.rds.gz"))
@@ -137,6 +149,6 @@ mRNA_CCLE <- readr::read_rds(file.path(config$database,"mRNA","CCLE_tissues.rds.
 protein_TCGA <- readr::read_rds(file.path(config$database,"protein","TCGA_protein_sort_cancertype.rds.gz"))
 protein_MCLP <- readr::read_rds(file.path(config$database,"protein","MCLP_tissues_filter_new.rds.gz"))
 miRNA_TCGA <- readr::read_rds(file.path(config$database,"miRNA","TCGA_sort_miRNA_cancertype.rds.gz"))
-total_gene_symbol <- "BRAF"
+total_mRNA_symbol <- readr::read_rds(file.path(config$database,"mRNA","mRNA_symbol.rds.gz"))
 total_protein_symbol <- readr::read_rds(file.path(config$database,"protein","protein_symbol.rds.gz"))
 total_miRNA_symbol <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_symbol_new.rds.gz"))

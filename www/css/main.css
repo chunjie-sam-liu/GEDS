@@ -11,3 +11,7 @@
 #select_miRNA_TCGA .btn-primary {
     width: 82px;
 }
+
+#select_mRNA_TCGA .btn-primary {
+    width: 80px;
+}

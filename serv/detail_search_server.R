@@ -2,7 +2,7 @@
 
 # Source the function -----------------------------------------------------
 
-source(file.path(config$func, "welcome_func.R"))
+source(file.path(config$func, "detail_search_func.R"))
 source(file.path(config$func, "mRNA_func.R"))
 source(file.path(config$func, "miRNA_func.R"))
 source(file.path(config$func, "protein_func.R"))
