@@ -18,17 +18,16 @@ validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_
         .x = symbol,
         .f = function(.x) {
           grep(pattern = (paste(",",.x,",") %>% 
-            stringr::str_replace_all(' ','')), total_mRNA_symbol$alias_match, value = TRUE ) ->a
-          total_mRNA_symbol %>% dplyr::filter(alias_match %in% a) %>% .$symbol->b
+            stringr::str_replace_all(' ','')), .total_symbol$alias_match, value = TRUE ) ->a
+          .total_symbol %>% dplyr::filter(alias_match %in% a) %>% .$symbol->b
           grep(pattern = (paste(",",.x,",") %>% 
-            stringr::str_replace_all(' ','')), total_mRNA_symbol$symbol_match, value = TRUE ) ->c
-          total_mRNA_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
+            stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
+          .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
           e <- c(b,d)
           if(length(e)>0){e}
         }
       )
     ) -> .v_dedup
-  print(.v_dedup)
   .v_dedup %>% tidyr::drop_na() -> mRNA_match
   input_mRNA_check$match <-  mRNA_match$symbol
   match$mRNA <- tidyr::separate_rows(mRNA_match,sep="\t") %>% dplyr::distinct() %>% .$expression

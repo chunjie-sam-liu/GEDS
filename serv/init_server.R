@@ -140,5 +140,5 @@ protein_TCGA <- readr::read_rds(file.path(config$database,"protein","TCGA_protei
 protein_MCLP <- readr::read_rds(file.path(config$database,"protein","MCLP_tissues_filter_new.rds.gz"))
 miRNA_TCGA <- readr::read_rds(file.path(config$database,"miRNA","TCGA_sort_miRNA_cancertype.rds.gz"))
 total_mRNA_symbol <- readr::read_rds(file.path(config$database,"mRNA","mRNA_symbol_alias.rds.gz"))
-total_protein_symbol <- readr::read_rds(file.path(config$database,"protein","protein_symbol.rds.gz"))
+total_protein_symbol <- readr::read_rds(file.path(config$database,"protein","protein_symbol_alias.rds.gz"))
 total_miRNA_symbol <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_symbol_new.rds.gz"))

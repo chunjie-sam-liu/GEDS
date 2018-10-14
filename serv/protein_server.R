@@ -17,8 +17,14 @@ validate_protein_set <- function(.v,  .total_symbol, input_protein_check = input
       expression = purrr::map(
         .x = symbol,
         .f = function(.x) {
-          grep(pattern = .x, .total_symbol$symbol, value = TRUE ) ->a
-          if(length(a)>0){a}
+          grep(pattern = (paste(",",.x,",") %>% 
+            stringr::str_replace_all(' ','')), .total_symbol$alias_match, value = TRUE ) ->a
+          .total_symbol %>% dplyr::filter(alias_match %in% a) %>% .$symbol->b
+          grep(pattern = (paste(",",.x,",") %>% 
+            stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
+          .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
+          e <- c(b,d)
+          if(length(e)>0){e}
         }
       )
     ) -> .v_dedup
