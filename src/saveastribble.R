@@ -243,11 +243,10 @@ as.character(h$expression)[.inter]
 
   TCGA %>%
       dplyr::mutate(
-      plot = purrr::map(
-        .x = x,
+      name = purrr::map(
+        .x = expr,
         .f = function(.x){
-          plot_result %>% 
-            dplyr::filter(protein %in% .x) %>% print()
+          .x$symbol
         }
       )
     )  -> test2

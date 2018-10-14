@@ -53,10 +53,10 @@ observeEvent(input$protein_example, {
 observeEvent(input$input_protein_set_reset, {
   shinyjs::reset("input_protein_set")
   closeAlert(session = session, alertId = "guide-alert")
-  status$mRNA_set <- FALSE
-  status$mRNA_result <- FALSE
-  status$mRNA_valid <- TRUE
-  status$mRNA_trigger <- FALSE
+  status$protein_set <- FALSE
+  status$protein_result <- FALSE
+  status$protein_valid <- TRUE
+  status$protein_trigger <- FALSE
   output$expr_bubble_plot_protein <- NULL
   output$expr_dt_comparison_protein <- NULL
 })
@@ -189,7 +189,7 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
       output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*200, width = dataset_number$protein*200)
     }
     else{
-      output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*200)
+      output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = 6*dataset_number$protein+number*200)
     }
     multiple$protein <- FALSE
   }
@@ -233,7 +233,7 @@ observeEvent(c(input$select_protein,input$select_protein_result,status$protein_t
       output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200, width = dataset_number$protein*200)
     }
     else{
-      output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200)
+      output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200+6*dataset_number$protein)
     }
   }
 })

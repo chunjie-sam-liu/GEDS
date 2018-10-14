@@ -83,43 +83,8 @@ validate_input_miRNA_set <- eventReactive(
 )
 
 # miRNA table print -------------------------------------------------------
-tibble_change_to_plot_mirna <- function(.expr_clean){
-  .expr_clean %>%
-    dplyr::mutate(
-      mean = purrr::map(
-        .x = mirna,
-        .f = function(.x){
-          .x %>% 
-            tidyr::gather(key = barcode, value = mirna, -c(gene, name)) %>%
-            tidyr::drop_na(mirna) %>%
-            dplyr::group_by(gene, name) %>%
-            dplyr::ungroup() 
-        }
-      )
-    ) %>%
-    dplyr::select(-mirna) %>% 
-    tidyr::unnest()
-}
-tibble_format_change_mirna <- function(.expr_clean){
-  .expr_clean %>%
-    dplyr::mutate(
-      mean = purrr::map(
-        .x = mirna,
-        .f = function(.x){
-          .x %>% 
-            tidyr::gather(key = barcode, value = mirna, -c(gene, name)) %>%
-            tidyr::drop_na(mirna) %>%
-            dplyr::group_by(gene,name) %>%
-            dplyr::summarise(mean = mean(mirna)) %>%
-            dplyr::ungroup() 
-        }
-      )
-    ) %>%
-    dplyr::select(-mirna) %>% 
-    tidyr::unnest() 
-}
 expr_buble_plot_mirna <-  function(.expr){
-  .expr %>% dplyr::rename(TPM = mirna) %>%
+  .expr %>% dplyr::rename(TPM = expr) %>%
     ggplot(mapping=aes(x=cancer_types,y=TPM,color=cancer_types)) +
     geom_boxplot(width=0.5) +
     facet_wrap(~name,ncol = 1,scales = "free") +
@@ -144,8 +109,8 @@ expr_clean_datatable_mirna <- function(.expr_clean) {
     style = "bootstrap",
     class = "table-bordered table-condensed"
   ) %>% 
-    DT::formatSignif(columns = c("mean"), digits = 2) %>%
-    DT::formatRound(columns = c("mean"), 2)
+    DT::formatSignif(columns = c("expr"), digits = 2) %>%
+    DT::formatRound(columns = c("expr"), 2)
 }
 
 
@@ -156,15 +121,17 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
     TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>%
     dplyr::mutate(
       mirna = purrr::map(
-        .x = mirna,
+        .x = summary,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(name %in% input_miRNA_check$match)
+            dplyr::filter(name %in% input_miRNA_check$match) %>% 
+            tidyr::unnest()
         }
       )
-    ) ->> expr_clean
-    tibble_change_to_plot_mirna(.expr_clean = expr_clean)->>mirna_plot_result
-    tibble_format_change_mirna(.expr_clean = expr_clean) ->>mirna_table_result
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) ->> expr_clean
+    print(expr_clean)
+    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> mirna_plot_result
+    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->>mirna_table_result
     mirna_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name -> plot_number$miRNA
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 
     number <- length(plot_number$miRNA)
@@ -177,7 +144,7 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
             expr_buble_plot_mirna()},height = number*200, width = dataset_number$miRNA*200)
       }
       else{
-        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = number*200)
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = 6*dataset_number$mRNA+number*200)
       }
       multiple$miRNA <- FALSE
     }
@@ -220,7 +187,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
       output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200, width = dataset_number$miRNA*200)
     }
     else{
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200+6*dataset_number$mRNA)
     }
   }
 })

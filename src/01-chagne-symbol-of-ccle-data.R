@@ -81,7 +81,14 @@ tibble::tibble(symbol=.vvv) %>%
       expression = purrr::map(
         .x = symbol,
         .f = function(.x) {
-          grep(pattern = .x, .total_symbol$symbol, value = TRUE ) 
+          grep(pattern = (paste(",",.x,",") %>% 
+          stringr::str_replace_all(' ','')), mRNA_symbol_alias_new$alias, value = TRUE ) ->a
+          mRNA_symbol_alias_new %>% dplyr::filter(alias %in% a) %>% .$symbol->b
+          grep(pattern = (paste(",",.x,",") %>% 
+          stringr::str_replace_all(' ','')), mRNA_symbol_alias_new$match, value = TRUE ) ->c
+          mRNA_symbol_alias_new %>% dplyr::filter(match %in% c) %>% .$symbol->d
+          e <- c(b,d)
+          if(length(e)>0){e}
         }
       )
     ) -> .v_dedup
@@ -133,10 +140,81 @@ dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
 CCLE %>% dplyr::filter(tissue %in% tissue) %>%
         dplyr::mutate(
           expr = purrr::map(
-            .x = expression,
+            .x = expr,
             .f = function(.x) {
               .x %>%
                 dplyr::filter(symbol %in% .vvv)
             }
           )
-        ) %>% dplyr::select(-expression) %>%　dplyr::rename(cancer_types = tis)-> expr_clean          
+        ) %>% dplyr::select(-expression) %>%　dplyr::rename(cancer_types = tissue)-> expr_clean     
+expr_clean %>%
+    dplyr::mutate(
+      mean = purrr::map(
+        .x = expr,
+        .f = function(.x){
+          .x %>% 
+            tidyr::gather(key = barcode, value = expr, -c(symbol)) %>%
+            tidyr::drop_na(expr) %>%
+            dplyr::group_by(symbol) %>%
+            dplyr::ungroup() 
+        }
+      )
+    ) %>%
+    dplyr::select(-expr) %>% 
+    tidyr::unnest()    
+
+#new data trans
+TCGA %>% dplyr::filter(cancer_types %in% c("TGCT","GBM")) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = mean,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% c("A1BG","A1CF")) %>% dplyr::select(-entrez_id) %>%
+                tidyr::gather(key = barcode, value = expr, -c(symbol)) %>% tidyr::unnest()
+            }
+          )
+        ) %>% dplyr::select(-mean) %>% tidyr::unnest() %>% 
+        dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
+        dplyr::select(cancer_types=tmp,symbol,expr)
+         -> expr_clean
+
+GTEX %>% dplyr::filter(SMTS %in% c("testis","bladder")) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = mean,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% c("A1BG","A1CF")) %>% dplyr::select(-ensembl_gene_id) %>%
+                tidyr::unnest()
+            }
+          )
+        ) %>% dplyr::select(-mean) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary)
+         -> expr_clean
+
+CCLE %>% dplyr::filter(tissue %in% c("liver","pancreas")) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = mean,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% c("A1BG","A1CF")) %>% 
+                tidyr::unnest()
+            }
+          )
+        ) %>% dplyr::select(-mean) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary)
+         -> expr_clean
+
+#miRNA
+TCGA %>% dplyr::filter(cancer_types %in% c("OV","KICH")) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = mean,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(name %in% c("hsa-miR-1298-3p","hsa-miR-3921")) %>% 
+                tidyr::unnest()
+            }
+          )
+        ) %>% dplyr::select(-mean) %>% tidyr::unnest() %>% dplyr::rename(expr=summary)
+         -> expr_clean
