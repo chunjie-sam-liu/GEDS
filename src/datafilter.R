@@ -149,3 +149,15 @@ TCGA %>% multidplyr::partition(cluster = cluster) %>%
     dplyr::ungroup() %>%
     dplyr::select(-PARTITION_ID) ->TCGA_summary
     parallel::stopCluster(cluster)
+
+TCGA %>% dplyr::filter(cancer_types %in% c("SKCM","SARC") %>%
+    dplyr::mutate(
+      mirna = purrr::map(
+        .x = summary,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(name %in% input_miRNA_check$match) %>% 
+            tidyr::unnest()
+        }
+      )
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%

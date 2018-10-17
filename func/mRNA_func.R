@@ -40,7 +40,7 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
     column(
       width = 12, offset=0,
       tabsetPanel(id = "select_mRNA",
-        tabPanel("Cancer Types",
+        tabPanel("Cancer types",
           checkboxGroupButtons(
           inputId = "select_mRNA_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
           individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
@@ -51,16 +51,16 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
         ))),
         tabPanel("Tissues",
           checkboxGroupButtons(
-          inputId = "select_mRNA_GTEX", label = "",status = "primary", selected = c('adipose_tissue'), 
+          inputId = "select_mRNA_GTEX", label = "",status = "primary", selected = c('adipose'), 
           individual = TRUE, choices = .gtex, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset2", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
         ))),
-        tabPanel("Celllines",
+        tabPanel("Cell lines",
           checkboxGroupButtons(
-          inputId = "select_mRNA_CCLE", label = "",status = "primary", selected = c('adrenal_cortex'), 
+          inputId = "select_mRNA_CCLE", label = "",status = "primary", selected = c('adrenal cortex'), 
           individual = TRUE, choices = .ccle, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(

@@ -10,13 +10,13 @@ shinyjs.example_mRNA_set = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
   var selector = $("#" + params.id);
-  selector.val("AKT1 FOXM1");
+  selector.val("TP53");
 };
 shinyjs.example_protein_set = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
   var selector = $("#" + params.id);
-  selector.val("AKT FOXM1 PRKAA1");
+  selector.val("AKT1");
 };
 shinyjs.example_miRNA_set = function(params){
   var defaultParams = {id: null};

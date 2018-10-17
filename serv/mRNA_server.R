@@ -221,8 +221,8 @@ observeEvent(status$mRNA_valid, {
 # observe -----------------------------------------------------------------
 observe(validate_input_mRNA_set())
 observe(validate_analysis())
-observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
-  if(length(input$select_mRNA_result)>0){
+observeEvent(c(input$select_mRNA_result), {
+  if(length(input$select_mRNA_result)>0 && status$mRNA_valid){
     choice$mRNA <- paste(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
     mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> one_plot
     if(dataset_number$mRNA == 1 ){
