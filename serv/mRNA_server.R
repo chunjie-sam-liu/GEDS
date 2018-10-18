@@ -24,18 +24,19 @@ validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_
             stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
           .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
           e <- c(b,d)
-          if(length(e)>0){e}
+          if(length(e)>0){e} else{"drop"}
         }
       )
     ) -> .v_dedup
-  .v_dedup %>% tidyr::drop_na() -> mRNA_match
-  input_mRNA_check$match <-  mRNA_match$symbol
-  match$mRNA <- tidyr::separate_rows(mRNA_match,sep="\t") %>% dplyr::distinct() %>% .$expression
-  .vvv %in% input_mRNA_check$match   -> .inter
-  input_mRNA_check$non_match <- .vvv[!.inter]
-  input_mRNA_check$n_non_match <- length(.vvv[!.inter])
-  input_mRNA_check$n_match <- length(mRNA_match$symbol)
-  input_mRNA_check$n_total <- length(mRNA_match$symbol) + length(.vvv[!.inter])
+  input_mRNA_check$non_match <- .v_dedup %>% dplyr::filter(expression %in% "drop") %>% .$symbol
+  .vvv %in% input_mRNA_check$non_match ->.inter
+  input_mRNA_check$match <-  .vvv[!.inter]
+  match$mRNA <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
+    tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x
+  print(match$mRNA)
+  input_mRNA_check$n_non_match <- length(input_mRNA_check$non_match)
+  input_mRNA_check$n_match <- length(.vvv[!.inter])
+  input_mRNA_check$n_total <- length(input_mRNA_check$non_match) + length(.vvv[!.inter])
   if(input_mRNA_check$n_match > 0) {
     status$mRNA_valid <- TRUE } 
   else {
@@ -133,7 +134,7 @@ expr_clean_datatable_mRNA <- function(.expr_clean) {
 observeEvent(c(status$analysis,reset$mRNA),{
   if(length(input$select_mRNA)>0){
     if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
-    if(input$select_mRNA == "Cancer Types"){
+    if(input$select_mRNA == "Cancer types"){
       dataset_number$mRNA <-  length(input$select_mRNA_TCGA)
       TCGA_mRNA %>% dplyr::filter(cancer_types %in% input$select_mRNA_TCGA) %>%
         dplyr::mutate(
@@ -161,7 +162,7 @@ observeEvent(c(status$analysis,reset$mRNA),{
             }
           )
         ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean }
-    else if(input$select_mRNA == "Celllines"){
+    else if(input$select_mRNA == "Cell lines"){
       dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
       CCLE_mRNA %>% dplyr::filter(tissue %in% input$select_mRNA_CCLE) %>%
         dplyr::mutate(

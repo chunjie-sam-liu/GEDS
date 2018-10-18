@@ -28,18 +28,18 @@ validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miR
               .total_symbol %>% dplyr::filter(match2 %in% a) %>% .$symbol->b
             }
           }
-          b
+          if(length(b)>0){b} else{"drop"}
         }
       )
     ) -> .v_dedup
-  .v_dedup %>% tidyr::drop_na() -> miRNA_match
-  input_miRNA_check$match <-  miRNA_match$symbol
-  match$miRNA <- tidyr::separate_rows(miRNA_match,sep="\t") %>% dplyr::distinct() %>% .$expression
-  .vvv %in% input_miRNA_check$match   -> .inter
-  input_miRNA_check$non_match <- .vvv[!.inter]
-  input_miRNA_check$n_match <- length(miRNA_match$symbol)
-  input_miRNA_check$n_non_match <- length(.vvv[!.inter])
-  input_miRNA_check$n_total <- length(miRNA_match$symbol) + length(.vvv[!.inter])
+  input_miRNA_check$non_match <- .v_dedup %>% dplyr::filter(expression %in% "drop") %>% .$symbol
+  .vvv %in% input_miRNA_check$non_match ->.inter
+  input_miRNA_check$match <-  .vvv[!.inter]
+  match$miRNA <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
+    tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x
+  input_miRNA_check$n_non_match <- length(input_miRNA_check$non_match)
+  input_miRNA_check$n_match <- length(.vvv[!.inter])
+  input_miRNA_check$n_total <- length(input_miRNA_check$non_match) + length(.vvv[!.inter])
   if(input_miRNA_check$n_match > 0) {
     status$miRNA_result <- TRUE
     status$miRNA_valid <- TRUE } 
@@ -143,7 +143,6 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) ->> expr_clean
     expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> mirna_plot_result
-    print(mirna_plot_result)
     expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->>mirna_table_result
     mirna_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name -> plot_number$miRNA
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 

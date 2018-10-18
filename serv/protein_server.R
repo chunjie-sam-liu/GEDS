@@ -24,18 +24,18 @@ validate_protein_set <- function(.v,  .total_symbol, input_protein_check = input
             stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
           .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
           e <- c(b,d)
-          if(length(e)>0){e}
+          if(length(e)>0){e} else{"drop"}
         }
       )
     ) -> .v_dedup
-  .v_dedup %>% tidyr::drop_na() -> protein_match
-  input_protein_check$match <-  protein_match$symbol
-  match$protein <- tidyr::separate_rows(protein_match,sep="\t") %>% dplyr::distinct() %>% .$expression
-  .vvv %in% input_protein_check$match   -> .inter
-  input_protein_check$non_match <- .vvv[!.inter]
-  input_protein_check$n_non_match <- length(.vvv[!.inter])
-  input_protein_check$n_match <- length(protein_match$symbol)
-  input_protein_check$n_total <- length(protein_match$symbol) + length(.vvv[!.inter])
+  input_protein_check$non_match <- .v_dedup %>% dplyr::filter(expression %in% "drop") %>% .$symbol
+  .vvv %in% input_protein_check$non_match ->.inter
+  input_protein_check$match <-  .vvv[!.inter]
+  match$protein <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
+    tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x
+  input_protein_check$n_non_match <- length(input_protein_check$non_match)
+  input_protein_check$n_match <- length(.vvv[!.inter])
+  input_protein_check$n_total <- length(input_protein_check$non_match) + length(.vvv[!.inter])
   if(input_protein_check$n_match > 0) {
     status$protein_result <- TRUE
     status$protein_valid <- TRUE } 
