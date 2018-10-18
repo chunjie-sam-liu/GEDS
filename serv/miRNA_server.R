@@ -11,26 +11,35 @@ check_mirna_set <- function(.s) {
 
 validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miRNA_check) {
   .v[.v != ""] %>% unique()  -> .vv
-  gsub(pattern = "-",replacement = "", .vv) %>% sapply(FUN = tolower, USE.NAMES = FALSE) -> .vvv
-  tibble::tibble(l=.vvv) %>%
+  gsub(pattern = "-",replacement = "", .vv) %>% sapply(FUN = tolower, USE.NAMES = FALSE) %>% 
+    grep(pattern="mir|let",.,value=TRUE)-> .vvv
+  tibble::tibble(symbol=.vvv) %>%
     dplyr::mutate(
       expression = purrr::map(
-        .x = l,
+        .x = symbol,
         .f = function(.x) {
-          grep(pattern="mir|let",.x,value=TRUE) ->a
-          if(length(a)>0){
-            grep(pattern = .x, .total_symbol$match, value = TRUE)
+          paste(.x,"-") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE)->a
+          .total_symbol %>% dplyr::filter(match %in% a) %>% .$symbol->b
+          if(length(a)<1){
+            paste(.x,",") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE)->a
+            .total_symbol %>% dplyr::filter(match %in% a) %>% .$symbol->b
+            if(length(a)<1){
+              grep(pattern = .x, .total_symbol$match2, value = TRUE) ->a
+              .total_symbol %>% dplyr::filter(match2 %in% a) %>% .$symbol->b
+            }
           }
+          b
         }
       )
     ) -> .v_dedup
-  as.character(.v_dedup$expression) %in% .total_symbol$match -> .inter
-  .total_symbol %>% dplyr::filter(match %in% as.character(.v_dedup$expression)[.inter]) ->.vvv
-  input_miRNA_check$match <- .vvv$symbol
-  input_miRNA_check$non_match <- .v_dedup$l[!.inter]
-  input_miRNA_check$n_match <- length(as.character(.v_dedup$expression)[.inter])
-  input_miRNA_check$n_non_match <- length(.v_dedup$l[!.inter])
-  input_miRNA_check$n_total <- length(as.character(.v_dedup$expression)[.inter]) + length(.v_dedup$l[!.inter])
+  .v_dedup %>% tidyr::drop_na() -> miRNA_match
+  input_miRNA_check$match <-  miRNA_match$symbol
+  match$miRNA <- tidyr::separate_rows(miRNA_match,sep="\t") %>% dplyr::distinct() %>% .$expression
+  .vvv %in% input_miRNA_check$match   -> .inter
+  input_miRNA_check$non_match <- .vvv[!.inter]
+  input_miRNA_check$n_match <- length(miRNA_match$symbol)
+  input_miRNA_check$n_non_match <- length(.vvv[!.inter])
+  input_miRNA_check$n_total <- length(miRNA_match$symbol) + length(.vvv[!.inter])
   if(input_miRNA_check$n_match > 0) {
     status$miRNA_result <- TRUE
     status$miRNA_valid <- TRUE } 
@@ -95,7 +104,7 @@ expr_buble_plot_mirna <-  function(.expr){
       axis.line = element_line(color = "black"),
       panel.background  = element_rect(fill = "white", color = "grey"),
       axis.title.x = element_blank(),
-      egend.position = "bottom",
+      legend.position = "bottom",
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
       axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
@@ -128,19 +137,18 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
         .x = summary,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(name %in% input_miRNA_check$match) %>% 
+            dplyr::filter(name %in% match$miRNA) %>% 
             tidyr::unnest()
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) ->> expr_clean
     expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> mirna_plot_result
+    print(mirna_plot_result)
     expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->>mirna_table_result
     mirna_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name -> plot_number$miRNA
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 
     number <- length(plot_number$miRNA)
     dataset_number$miRNA <-  length(input$select_miRNA_TCGA)
-    print(dataset_number$miRNA)
-    print(number)
     if(number < 5){
       if(dataset_number$miRNA == 1 ){
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()}, height = number*200, width = 300)}

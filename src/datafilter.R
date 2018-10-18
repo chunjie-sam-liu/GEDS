@@ -150,14 +150,30 @@ TCGA %>% multidplyr::partition(cluster = cluster) %>%
     dplyr::select(-PARTITION_ID) ->TCGA_summary
     parallel::stopCluster(cluster)
 
-TCGA %>% dplyr::filter(cancer_types %in% c("SKCM","SARC") %>%
+TCGA %>% dplyr::filter(cancer_types %in% c("SKCM","SARC")) %>%
     dplyr::mutate(
       mirna = purrr::map(
         .x = summary,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(name %in% input_miRNA_check$match) %>% 
+            dplyr::filter(name %in% "hsa-miR-6884-3p") %>% 
             tidyr::unnest()
         }
       )
-    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary)
+
+tibble::tibble(l=.vvv) %>%
+    dplyr::mutate(
+      expression = purrr::map(
+        .x = l,
+        .f = function(.x) {
+          paste(.x,"-") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE)->a
+          if(length(a)<1){
+            paste(.x,",") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE)->a
+            if(length(a)<1){
+              grep(pattern = .x, .total_symbol$match2, value = TRUE) ->a
+            }
+          }
+        }
+      )
+    ) -> .v_dedup
