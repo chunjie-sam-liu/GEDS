@@ -2,7 +2,7 @@
 # ui elements for welcome
 
 tabItem(
-  tabName = "welcome", align = "center",
+  tabName = "detail_search", align = "center",
   
   # welcome
   fluidRow(shiny::uiOutput(outputId = "ui_welcome_msg")),

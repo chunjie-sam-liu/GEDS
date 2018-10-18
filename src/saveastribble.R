@@ -90,7 +90,7 @@ tibble::tibble(
 # save cell line data to tibble.
 
 
-protein_path <- "/data/shiny-data/GSEXPR/protein/drop/result"
+protein_path <- "/data/xiamx/GEDS/protein/drop/result"
 
 
 tibble::tibble(
@@ -101,7 +101,7 @@ tibble::tibble(
       .x = tis,
       .f = function(.x) {
         .d <- readr::read_tsv(file = file.path(protein_path, .x))
-
+        print(.x)
         .d %>%
           tidyr::gather(key = 'protein', value = 'expr', -Sample_Name) %>%
           # tidyr::replace_na(replace = list(expr = 0)) %>%
@@ -129,21 +129,39 @@ as.character(h$expression)[.inter]
 
 
   .s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ] -> .v
-  .v_dedup <- .v[.v != ""] %>% unique()
-  .v_dedup %in% .total_symbol$symbol -> .inter
-  .total_symbol %>% dplyr::filter(symbol %in% .v_dedup[.inter]) -> .vvv
-   .vvv$protein -> match_protein
+  .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
+  tibble::tibble(symbol=.vvv) %>%
+    dplyr::mutate(
+      expression = purrr::map(
+        .x = symbol,
+        .f = function(.x) {
+          grep(pattern = .x, .total_symbol$symbol, value = TRUE ) ->a
+          if(length(a)>0){a}
+        }
+      )
+    ) -> .v_dedup
+  .v_dedup %>% tidyr::drop_na() -> protein_match
+  match_protein <- tidyr::separate_rows(protein_match,sep="\t") %>% dplyr::distinct() %>% .$expression
   TCGA_protein %>% dplyr::filter(cancer_types %in% select_protein_TCGA) %>%
     dplyr::mutate(
       expr = purrr::map(
         .x = expr,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(protein %in% match_protein)
+            dplyr::filter(symbol %in% match_protein)
         }
       )
     ) -> expr_clean
-
+  MCLP_protein %>% dplyr::filter(tis %in% select_protein_MCLP) %>%
+        dplyr::mutate(
+          expr = purrr::map(
+            .x = expression,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% match_protein)
+            }
+          )
+        ) %>% dplyr::select(-expression) -> expr_clean
   expr_clean %>%
     dplyr::mutate(
       mean = purrr::map(
@@ -159,6 +177,17 @@ as.character(h$expression)[.inter]
     ) %>%
     dplyr::select(-expr) %>% 
     tidyr::unnest()  ->>plot_result
+
+    test %>% tibble::tibble(x=.) %>%
+      dplyr::mutate(
+      plot = purrr::map(
+        .x = x,
+        .f = function(.x){
+          plot_result %>% 
+            dplyr::filter(protein %in% .x) %>% print()
+        }
+      )
+    )  -> test2
 
     expr_clean %>%
     dplyr::mutate(
@@ -176,3 +205,48 @@ as.character(h$expression)[.inter]
     ) %>%
     dplyr::select(-expr) %>% 
     tidyr::unnest() ->>table_result
+
+  plot_result$protein %>% 
+    tibble::tibble(x=.) %>% 
+    dplyr::distinct() %>%
+    dplyr::mutate(
+      plot = purrr::map(
+        .x = x,
+        .f = function(.x){
+          plot_result  %>% 
+            ggplot(mapping=aes(x=cancer_types,y=expr,color=cancer_types)) +
+            geom_boxplot(outlier.colour = NA) +
+            facet_wrap(~protein, ncol = 1) +
+            theme(
+            axis.line = element_line(color = "black"),
+            panel.background  = element_rect(fill = "white", color = "grey"),
+            panel.grid = element_line(colour = "grey"),
+            axis.title.x = element_blank(),
+            legend.title = element_blank(),
+            text = element_text(size = 20)
+            ) -> gg_result
+          
+          .filename <- file.path(config$wd,"plot",paste(.x,".png",sep = ""))
+          
+          print(.filename)
+          ggsave(filename = file.path(config$wd,"plot",paste(.x,".png",sep = "")), plot = gg_result)
+          
+          paste(config$wd,"/plot/",.x,".png",sep = "") %>% c(plot$protein,.) ->plot$protein 
+        }
+      )
+    )
+  print(plot$protein)
+  output$expr_bubble_plot <- renderImage({
+    filename <- plot$protein 
+    list(src = filename,alt= "plot result")
+  }, deleteFile = F)
+
+  TCGA %>%
+      dplyr::mutate(
+      name = purrr::map(
+        .x = expr,
+        .f = function(.x){
+          .x$symbol
+        }
+      )
+    )  -> test2

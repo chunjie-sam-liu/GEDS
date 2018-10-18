@@ -63,6 +63,7 @@ body <- dashboardBody(
 
   # Welcome -----------------------------------------------------------------
     source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value,
+  
   # Help --------------------------------------------------------------------
     source(file = file.path(config$wd, "ui", "help_ui.R"), local = TRUE)$value#,
   # Contact -----------------------------------------------------------------
@@ -74,7 +75,7 @@ body <- dashboardBody(
 # Dashboardpage -----------------------------------------------------------
 
 page <- dashboardPage(
-  title = "GSEXPR - Gene Set Expression",
+  title = "GSEXPR - Gene Expression",
   header = header,
   sidebar = sidebar,
   body = body
