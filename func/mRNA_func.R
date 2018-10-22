@@ -80,7 +80,6 @@ fn_mRNA_set_stat <- function(input_list_check){
       outputId = "download_total_mRNA_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
     ),
-    
     downloadLink(
       outputId = "download_valid_mRNA_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
@@ -102,14 +101,20 @@ fn_start_analysis <- function(){
 }
 
 fn_mRNA_single_result <- function(){
+
   shiny::fluidRow(
     column(
       width = 12,offset = 0,
       shinydashboard::tabBox(
         id = "mRNA_expr_plot", title = "", width = 12,
         tabPanel("Figure of expression",
-                 plotOutput(outputId = "expr_bubble_plot_mRNA", height = "100%", width = "100%") %>% 
-                   withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+                 column(width=2,
+                        download_bt(NS("mRNA",id=NULL))
+                 ),
+                 column(width=12,
+                  plotOutput(outputId = "expr_bubble_plot_mRNA", height = "100%", width = "100%") %>% 
+                  withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+                 )
         ),
         tabPanel(
           title = "Table of expression",
@@ -147,5 +152,12 @@ fn_mRNA_multi_result <- function(list){
 }
 
 fn_plot_multiple_mRNA <- function(choice){
-  plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+  tagList(
+    column(width=2,
+           download_bt(NS("mRNA",id=NULL))
+    ),
+    column(width=12,
+           plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    )
+  )
 }

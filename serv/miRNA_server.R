@@ -41,9 +41,11 @@ validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miR
   input_miRNA_check$n_match <- length(.vvv[!.inter])
   input_miRNA_check$n_total <- length(input_miRNA_check$non_match) + length(.vvv[!.inter])
   if(input_miRNA_check$n_match > 0) {
+    status$miRNA_set <- TRUE
     status$miRNA_result <- TRUE
     status$miRNA_valid <- TRUE } 
   else {
+    status$miRNA_set <- FALSE
     status$miRNA_result <- FALSE
     status$miRNA_valid <- FALSE}
 }
@@ -79,12 +81,10 @@ validate_input_miRNA_set <- eventReactive(
   eventExpr = input$input_miRNA_set_search,
   ignoreNULL = TRUE,
   valueExpr = {
-    status$miRNA_set <- TRUE
     if(reset$miRNA){reset$miRNA <- FALSE} else{reset$miRNA <- TRUE}
     if (is.null(input$input_miRNA_set) || input$input_miRNA_set == "") {
       error$miRNA_set <- "Error: Please input miRNA symbol."
       status$miRNA_trigger <- if (status$miRNA_trigger == TRUE) FALSE else TRUE
-      status$miRNA_set <- FALSE
       return()
     }
     # check gene
@@ -150,13 +150,35 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
     dataset_number$miRNA <-  length(input$select_miRNA_TCGA)
     if(number < 5){
       if(dataset_number$miRNA == 1 ){
-        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()}, height = number*200, width = 300)}
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()}, height = number*200, width = 300)
+        output$`miRNA-picdownload` <- downloadHandler(
+          filename = function() {
+            paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
+          },
+          content = function(file){
+            ggsave(file,expr_buble_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+        )
+        }
       else if(dataset_number$miRNA <5 ){
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% 
             expr_buble_plot_mirna()},height = number*200, width = dataset_number$miRNA*200)
+        output$`miRNA-picdownload` <- downloadHandler(
+          filename = function() {
+            paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
+          },
+          content = function(file){
+            ggsave(file,expr_buble_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+        )
       }
       else{
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = 6*dataset_number$miRNA+number*200)
+        output$`miRNA-picdownload` <- downloadHandler(
+          filename = function() {
+            paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
+          },
+          content = function(file){
+            ggsave(file,expr_buble_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+        )
       }
       multiple$miRNA <- FALSE
     }
@@ -194,12 +216,34 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
     choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
     mirna_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> one_plot
     if(dataset_number$miRNA == 1 ){
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200, width = 300)}
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200, width = 300)
+      output$`miRNA-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+      )
+      }
     else if(dataset_number$miRNA<5){
       output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200, width = dataset_number$miRNA*200)
+      output$`miRNA-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+      )
     }
     else{
       output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200+6*dataset_number$miRNA)
+      output$`miRNA-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+      )
     }
   }
 })

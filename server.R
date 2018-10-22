@@ -17,6 +17,7 @@ server <- function(input, output, session) {
   source(file = file.path(config$serv, "miRNA_server.R"), local = TRUE)
   source(file = file.path(config$serv, "init_server.R"), local = TRUE)
   source(file = file.path(config$serv, "functions_server.R"), local = TRUE)
+  loading_screen()
 }
 
 
