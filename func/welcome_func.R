@@ -38,3 +38,17 @@ fn_analysis <-  function(){
         )
   ))
 }
+
+# download gene set button ------------------------------------------------
+
+fn_gs_download <- function(data,txt){
+  downloadHandler(
+    filename = function() {
+      glue::glue("{txt}")
+    },
+    content = function(con) {
+      .f <- as.data.frame(data)
+      readr::write_tsv(x=.f, con,col_names = FALSE)
+    }
+  )
+}

@@ -57,16 +57,16 @@ download_bt <- function(id){
       numericInput(
         inputId = ns("d_width"),
         label = "Width",
-        value = 4,
+        value = 8,
         min = 1,
-        max = 10
+        max = 20
       ),
       
       numericInput(
         inputId = ns("d_height"),
         label = "Height",
         value = 6,
-        min = 3,
+        min = 1,
         max = 20
       ),
       downloadButton(

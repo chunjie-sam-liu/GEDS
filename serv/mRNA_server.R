@@ -33,9 +33,13 @@ validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_
   input_mRNA_check$match <-  .vvv[!.inter]
   match$mRNA <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
     tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x
+  input_mRNA_check$total <- c(input_mRNA_check$match,input_mRNA_check$non_match)
   input_mRNA_check$n_non_match <- length(input_mRNA_check$non_match)
   input_mRNA_check$n_match <- length(.vvv[!.inter])
   input_mRNA_check$n_total <- length(input_mRNA_check$non_match) + length(.vvv[!.inter])
+  output$download_total_mRNA_set <- fn_gs_download(data = input_mRNA_check$total,txt = "total_gene_set.txt")
+  output$download_valid_mRNA_set <- fn_gs_download(data = input_mRNA_check$match,txt = "valid_gene_set.txt")
+  output$download_unmatched_mRNA_set <- fn_gs_download(data = input_mRNA_check$n_non_match,txt = "error_gene_set.txt")
   if(input_mRNA_check$n_match > 0) {
     status$mRNA_set <- TRUE
     status$mRNA_valid <- TRUE } 
@@ -278,3 +282,4 @@ observeEvent(c(input$select_mRNA_result), {
     }
   }
 })
+

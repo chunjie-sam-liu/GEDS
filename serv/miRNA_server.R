@@ -37,9 +37,13 @@ validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miR
   input_miRNA_check$match <-  .vvv[!.inter]
   match$miRNA <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
     tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x
+  input_miRNA_check$total <- c(input_miRNA_check$match,input_miRNA_check$non_match)
   input_miRNA_check$n_non_match <- length(input_miRNA_check$non_match)
   input_miRNA_check$n_match <- length(.vvv[!.inter])
   input_miRNA_check$n_total <- length(input_miRNA_check$non_match) + length(.vvv[!.inter])
+  output$download_total_miRNA_set <- fn_gs_download(data = input_miRNA_check$total,txt = "total_miRNA_set.txt")
+  output$download_valid_miRNA_set <- fn_gs_download(data = input_miRNA_check$match,txt = "valid_miRNA_set.txt")
+  output$download_miRNA_input_logs <- fn_gs_download(data = input_miRNA_check$n_non_match,txt = "error_miRNA_set.txt")
   if(input_miRNA_check$n_match > 0) {
     status$miRNA_set <- TRUE
     status$miRNA_result <- TRUE

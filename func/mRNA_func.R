@@ -45,6 +45,8 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
           inputId = "select_mRNA_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
           individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
+          bsTooltip(id="select_mRNA_TCGA", title="<p>This is an input</p><p>The second one</p>",
+                    "right", options = list(container = "body")),
           shinyjs::hide(switchInput(
           inputId = "select_dataset1", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
@@ -85,7 +87,7 @@ fn_mRNA_set_stat <- function(input_list_check){
       valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
     ),
     downloadLink(
-      outputId = "download_input_logs", label = NULL, class = NULL,
+      outputId = "download_unmatched_mRNA_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
     )
   ))

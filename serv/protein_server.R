@@ -33,9 +33,13 @@ validate_protein_set <- function(.v,  .total_symbol, input_protein_check = input
   input_protein_check$match <-  .vvv[!.inter]
   match$protein <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
     tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x
+  input_protein_check$total <- c(input_protein_check$match,input_protein_check$non_match)
   input_protein_check$n_non_match <- length(input_protein_check$non_match)
   input_protein_check$n_match <- length(.vvv[!.inter])
   input_protein_check$n_total <- length(input_protein_check$non_match) + length(.vvv[!.inter])
+  output$download_total_protein_set <- fn_gs_download(data = input_protein_check$total,txt = "total_protein_set.txt")
+  output$download_valid_protein_set <- fn_gs_download(data = input_protein_check$match,txt = "valid_protein_set.txt")
+  output$download_protein_input_logs <- fn_gs_download(data = input_protein_check$n_non_match,txt = "error_protein_set.txt")
   if(input_protein_check$n_match > 0) {
     status$protein_set <- TRUE
     status$protein_result <- TRUE

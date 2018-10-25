@@ -67,6 +67,7 @@ selected_analysis <- reactiveValues(
 input_mRNA_check <- reactiveValues(
   match = "",
   non_match = "",
+  total = "",
   n_match = "",
   n_non_match = "",
   n_total = ""
@@ -74,6 +75,7 @@ input_mRNA_check <- reactiveValues(
 input_protein_check <- reactiveValues(
   match = "",
   non_match = "",
+  total = "",
   n_match = "",
   n_non_match = "",
   n_total = ""
@@ -81,6 +83,7 @@ input_protein_check <- reactiveValues(
 input_miRNA_check <- reactiveValues(
   match = "",
   non_match = "",
+  total = "",
   n_match = "",
   n_non_match = "",
   n_total = ""
