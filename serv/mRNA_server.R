@@ -121,6 +121,12 @@ expr_buble_plot_mRNA <-  function(.expr){
 expr_clean_datatable_mRNA <- function(.expr_clean) {
   DT::datatable(
     data = .expr_clean,
+    options = list(
+      pageLength = 10,
+      autoWidth = TRUE,
+      dom = "Bfrtip",
+      buttons = c("copy", "csv", "print")
+    ),
     rownames = FALSE,
     colnames = c("Cancer types/tissues", "Symbol", "Alias", "Mean expr."),
     filter = "top",

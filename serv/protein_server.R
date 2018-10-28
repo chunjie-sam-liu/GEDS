@@ -148,6 +148,12 @@ expr_buble_plot_protein <-  function(.expr){
 expr_clean_datatable_protein <- function(.expr_clean) {
   DT::datatable(
     data = .expr_clean,
+    options = list(
+      pageLength = 10,
+      autoWidth = TRUE,
+      dom = "Bfrtip",
+      buttons = c("copy", "csv", "print")
+    ),
     rownames = FALSE,
     colnames = c("Cancer Types/Tissues", "Symbol", "Protein", "Mean expr."),
     filter = "top",
