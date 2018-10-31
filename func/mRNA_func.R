@@ -43,8 +43,10 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
         tabPanel("Cancer types",
           checkboxGroupButtons(
           inputId = "select_mRNA_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.tcga,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
+          bsTooltip(id="select_mRNA_TCGA", title="<p>This is an input</p><p>The second one</p>",
+                    "right", options = list(container = "body")),
           shinyjs::hide(switchInput(
           inputId = "select_dataset1", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
@@ -52,7 +54,7 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
         tabPanel("Tissues",
           checkboxGroupButtons(
           inputId = "select_mRNA_GTEX", label = "",status = "primary", selected = c('adipose'), 
-          individual = TRUE, choices = .gtex, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.gtex,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset2", label = "Dataset", value = FALSE,
@@ -61,7 +63,7 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
         tabPanel("Cell lines",
           checkboxGroupButtons(
           inputId = "select_mRNA_CCLE", label = "",status = "primary", selected = c('adrenal cortex'), 
-          individual = TRUE, choices = .ccle, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.ccle,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset3", label = "Dataset", value = FALSE,
@@ -80,13 +82,12 @@ fn_mRNA_set_stat <- function(input_list_check){
       outputId = "download_total_mRNA_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
     ),
-    
     downloadLink(
       outputId = "download_valid_mRNA_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
     ),
     downloadLink(
-      outputId = "download_input_logs", label = NULL, class = NULL,
+      outputId = "download_unmatched_mRNA_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
     )
   ))
@@ -102,14 +103,20 @@ fn_start_analysis <- function(){
 }
 
 fn_mRNA_single_result <- function(){
+
   shiny::fluidRow(
     column(
       width = 12,offset = 0,
       shinydashboard::tabBox(
         id = "mRNA_expr_plot", title = "", width = 12,
         tabPanel("Figure of expression",
-                 plotOutput(outputId = "expr_bubble_plot_mRNA", height = "100%", width = "100%") %>% 
-                   withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+                 column(width=2,
+                        download_bt(NS("mRNA",id=NULL))
+                 ),
+                 column(width=12,
+                  plotOutput(outputId = "expr_bubble_plot_mRNA", height = "100%", width = "100%") %>% 
+                  withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+                 )
         ),
         tabPanel(
           title = "Table of expression",
@@ -147,5 +154,12 @@ fn_mRNA_multi_result <- function(list){
 }
 
 fn_plot_multiple_mRNA <- function(choice){
-  plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+  tagList(
+    column(width=2,
+           download_bt(NS("mRNA",id=NULL))
+    ),
+    column(width=12,
+           plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    )
+  )
 }

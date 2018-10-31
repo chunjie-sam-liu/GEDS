@@ -15,3 +15,18 @@
 #select_mRNA_TCGA .btn-primary {
     width: 80px;
 }
+
+body {
+font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
+font-size: 18px !important;
+font-weight: 200 !important;
+line-height: 1.5 !important;
+}
+h1,h2,h3 {
+  font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
+}
+
+.jumbotron h2 {
+  font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
+  text-align:center;
+}

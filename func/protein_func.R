@@ -42,7 +42,7 @@ fn_protein_select <- function(.tcga,.mclp){
         tabPanel("Cancer Types",
           checkboxGroupButtons(
           inputId = "select_protein_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.tcga,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset6", label = "Dataset", value = FALSE,
@@ -51,7 +51,7 @@ fn_protein_select <- function(.tcga,.mclp){
         tabPanel("Tissues",
           checkboxGroupButtons(
           inputId = "select_protein_MCLP", label = "",status = "primary", selected = c('bladder'), 
-          individual = TRUE, choices = .mclp, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.mclp,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset7", label = "Dataset", value = FALSE,
@@ -70,7 +70,6 @@ fn_protein_set_stat <- function(input_list_check){
       outputId = "download_total_protein_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
     ),
-    
     downloadLink(
       outputId = "download_valid_protein_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
@@ -91,8 +90,13 @@ fn_protein_single_result <- function(){
     shinydashboard::tabBox(
       id = "protein_expr_plot", title = "", width = 12,
       tabPanel("Figure of expression",
-        plotOutput(outputId = "expr_bubble_plot_protein", height = "100%", width = "100%") %>% 
-        withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+               column(width=2,
+                      download_bt(NS("protein",id=NULL))
+               ),
+               column(width=12,
+                plotOutput(outputId = "expr_bubble_plot_protein", height = "100%", width = "100%") %>% 
+                withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+               )
       ),
       tabPanel(
         title = "Table of expression",
@@ -130,5 +134,12 @@ fn_protein_multi_result <- function(list){
 }
 
 fn_plot_multiple_protein <- function(choice){
-  plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+  tagList(
+    column(width=2,
+           download_bt(NS("protein",id=NULL))
+    ),
+    column(width=12,
+      plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    )
+  )
 }

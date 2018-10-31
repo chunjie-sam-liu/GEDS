@@ -3,7 +3,7 @@
 fn_welcome_msg <- function() {
   column(
     width = 12, offset = 0,
-    shiny::tags$h1("GEDS offers you a web-based platform for gene, protein and miRNA expression")
+    shiny::tags$h1("GEDS: Gene Expression Display Server")
   )
 }
 
@@ -37,4 +37,18 @@ fn_analysis <-  function(){
           )
         )
   ))
+}
+
+# download gene set button ------------------------------------------------
+
+fn_gs_download <- function(data,txt){
+  downloadHandler(
+    filename = function() {
+      glue::glue("{txt}")
+    },
+    content = function(con) {
+      .f <- as.data.frame(data)
+      readr::write_tsv(x=.f, con,col_names = FALSE)
+    }
+  )
 }

@@ -40,5 +40,45 @@ config$logs <- "logs"
 # Path to zip -------------------------------------------------------------
 Sys.setenv("R_ZIPCMD" = "/usr/bin/zip")
 
+download_bt <- function(id){
+  ns <- NS(id)
+  tagList(
+    shinyWidgets::dropdownButton(
+      tags$h3("Download Options"),
+      prettyRadioButtons(
+        inputId = ns("pictype"),
+        label = "Selcet format for your pictur",
+        choices = list("PDF" = "pdf", "PNG" = "png","EPS"="eps"),
+        inline = TRUE,
+        icon = icon("check"),
+        bigger = TRUE, status = "info",
+        animation = "jelly"
+      ),
+      numericInput(
+        inputId = ns("d_width"),
+        label = "Width",
+        value = 8,
+        min = 1,
+        max = 20
+      ),
+      
+      numericInput(
+        inputId = ns("d_height"),
+        label = "Height",
+        value = 6,
+        min = 1,
+        max = 20
+      ),
+      downloadButton(
+        outputId = ns("picdownload"),
+        label = "Download"
+      ),
+      circle = TRUE, status = "default",
+      right = TRUE,
+      icon = icon("download"), width = "300px",
+      tooltip = shinyWidgets::tooltipOptions(title = "Click to download")
+    )
+  )
+}
 
 

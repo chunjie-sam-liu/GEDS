@@ -42,7 +42,7 @@ fn_miRNA_select <- function(.miRNA){
         tabPanel("Cancer Types",
         checkboxGroupButtons(
           inputId = "select_miRNA_TCGA", label = "", status = "primary",selected = c('ACC','BLCA','BRCA','CESC'),
-          individual = TRUE, choices = .miRNA,checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.miRNA,"ALL"),checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
         ),
         shinyjs::hide(switchInput(
           inputId = "select_dataset7", label = "Dataset", value = FALSE,
@@ -80,8 +80,13 @@ fn_mirna_single_result <- function(){
     shinydashboard::tabBox(
       id = "expr_plot", title = "", width = 12,
       tabPanel("Figure of expression",
-        plotOutput(outputId = "expr_bubble_plot_mirna", height = "100%", width = "100%") %>% 
-        withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+               column(width=2,
+                      download_bt(NS("miRNA",id=NULL))
+               ),
+               column(width=12,
+                plotOutput(outputId = "expr_bubble_plot_mirna", height = "100%", width = "100%") %>% 
+                withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+               )
           ),
       tabPanel(
         title = "Table of expression",
@@ -118,5 +123,11 @@ fn_mirna_multi_result <- function(list){
 }
 
 fn_plot_multiple_miRNA <- function(choice){
-  plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+  tagList(
+    column(width=2,
+           download_bt(NS("miRNA",id=NULL))
+    ),
+    column(width=12,
+      plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    ))
 }

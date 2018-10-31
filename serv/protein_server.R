@@ -24,22 +24,28 @@ validate_protein_set <- function(.v,  .total_symbol, input_protein_check = input
             stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
           .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
           e <- c(b,d)
-          if(length(e)>0){e}
+          if(length(e)>0){e} else{"drop"}
         }
       )
     ) -> .v_dedup
-  .v_dedup %>% tidyr::drop_na() -> protein_match
-  input_protein_check$match <-  protein_match$symbol
-  match$protein <- tidyr::separate_rows(protein_match,sep="\t") %>% dplyr::distinct() %>% .$expression
-  .vvv %in% input_protein_check$match   -> .inter
-  input_protein_check$non_match <- .vvv[!.inter]
-  input_protein_check$n_non_match <- length(.vvv[!.inter])
-  input_protein_check$n_match <- length(protein_match$symbol)
-  input_protein_check$n_total <- length(protein_match$symbol) + length(.vvv[!.inter])
+  input_protein_check$non_match <- .v_dedup %>% dplyr::filter(expression %in% "drop") %>% .$symbol
+  .vvv %in% input_protein_check$non_match ->.inter
+  input_protein_check$match <-  .vvv[!.inter]
+  match$protein <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
+    tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x
+  input_protein_check$total <- c(input_protein_check$match,input_protein_check$non_match)
+  input_protein_check$n_non_match <- length(input_protein_check$non_match)
+  input_protein_check$n_match <- length(.vvv[!.inter])
+  input_protein_check$n_total <- length(input_protein_check$non_match) + length(.vvv[!.inter])
+  output$download_total_protein_set <- fn_gs_download(data = input_protein_check$total,txt = "total_protein_set.txt")
+  output$download_valid_protein_set <- fn_gs_download(data = input_protein_check$match,txt = "valid_protein_set.txt")
+  output$download_protein_input_logs <- fn_gs_download(data = input_protein_check$n_non_match,txt = "error_protein_set.txt")
   if(input_protein_check$n_match > 0) {
+    status$protein_set <- TRUE
     status$protein_result <- TRUE
     status$protein_valid <- TRUE } 
   else {
+    status$protein_set <- FALSE
     status$protein_result <- FALSE
     status$protein_valid <- FALSE}
 }
@@ -73,12 +79,10 @@ validate_input_protein_set <- eventReactive(
   eventExpr = input$input_protein_set_search,
   ignoreNULL = TRUE,
   valueExpr = {
-    status$protein_set <- TRUE
     if(reset$protein){reset$protein <- FALSE} else{reset$protein <- TRUE}
     if (is.null(input$input_protein_set) || input$input_protein_set == "") {
       error$protein_set <- "Error: Please input protein symbol."
       status$protein_trigger <- if (status$protein_trigger == TRUE) FALSE else TRUE
-      status$protein_set <- FALSE
       return()
     }
     # check gene
@@ -135,6 +139,7 @@ expr_buble_plot_protein <-  function(.expr){
       axis.title.x = element_blank(),
       axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
       legend.title = element_blank(),
+      legend.position = "bottom",
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
       text = element_text(size = 20)
@@ -143,6 +148,12 @@ expr_buble_plot_protein <-  function(.expr){
 expr_clean_datatable_protein <- function(.expr_clean) {
   DT::datatable(
     data = .expr_clean,
+    options = list(
+      pageLength = 10,
+      autoWidth = TRUE,
+      dom = "Bfrtip",
+      buttons = c("copy", "csv", "print")
+    ),
     rownames = FALSE,
     colnames = c("Cancer Types/Tissues", "Symbol", "Protein", "Mean expr."),
     filter = "top",
@@ -156,11 +167,16 @@ expr_clean_datatable_protein <- function(.expr_clean) {
 
 # ObserveEvent ------------------------------------------------------------
 observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_protein_MCLP,reset$protein),{
-  if(length(input$select_protein)>0){
+  if(length(input$select_protein)>0 && status$protein_set){
     if(status$protein_trigger){status$protein_trigger <- FALSE} else{status$protein_trigger <- TRUE}
     if(input$select_protein == "Cancer Types"){
-    dataset_number$protein <-  length(input$select_protein_TCGA)
-    TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
+    grep(pattern = "ALL", input$select_protein_TCGA, value = TRUE ) ->a
+    if(length(a) == 0){
+      TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) ->data_file
+      dataset_number$protein <-  length(input$select_protein_TCGA)}
+    else{TCGA_protein ->data_file
+      dataset_number$protein <-  length(protein_TCGA$cancer_types)}
+    data_file %>%
       dplyr::mutate(
         expr = purrr::map(
           .x = expr,
@@ -171,9 +187,16 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
         )
       ) -> expr_clean }
     else if(input$select_protein == "Tissues"){
-      dataset_number$protein <-  length(input$select_protein_MCLP)
-      MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) %>%
-        dplyr::mutate(
+      grep(pattern = "ALL", input$select_protein_MCLP, value = TRUE ) ->a
+      if(length(a) == 0){
+        MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) ->data_file
+        dataset_number$protein <-  length(input$select_protein_MCLP)
+      }
+      else{
+        MCLP_protein ->data_file
+        dataset_number$protein <-  length(protein_MCLP$tissue)
+      }
+      data_file %>% dplyr::mutate(
           expr = purrr::map(
             .x = expression,
             .f = function(.x) {
@@ -190,12 +213,33 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
   if(number < 5){
     if(dataset_number$protein == 1){
       output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*200, width = 300)
+      output$`protein-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_protein(protein_plot_result),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
+      )
     }
     else if(dataset_number$protein <5 ){
       output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*200, width = dataset_number$protein*200)
+      output$`protein-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_protein(protein_plot_result),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
+      )
     }
     else{
       output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = 6*dataset_number$protein+number*200)
+      output$`protein-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_protein(protein_plot_result),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
+      )
     }
     multiple$protein <- FALSE
   }
@@ -229,17 +273,38 @@ observeEvent(status$protein_valid, {
 # observe -----------------------------------------------------------------
 observe(validate_input_protein_set())
 observeEvent(c(input$select_protein,input$select_protein_result,status$protein_trigger), {
-  if(length(input$select_protein_result)>0){
+  if(length(input$select_protein_result)>0 && status$protein_set){
     choice$protein <- paste(input$select_protein,input$select_protein_result,status$protein_trigger) %>% stringr::str_replace_all(' ','')
     protein_plot_result %>% dplyr::filter(protein %in% input$select_protein_result) -> one_plot
     if(dataset_number$protein == 1){
       output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200, width = 300)
+      output$`protein-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_protein(one_plot),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
+      )
     }
     else if(dataset_number$protein<5){
       output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200, width = dataset_number$protein*200)
+      output$`protein-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_protein(one_plot),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
+      )
     }
     else{
       output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 200+6*dataset_number$protein)
+      output$`protein-picdownload` <- downloadHandler(
+        filename = function() {
+          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
+        },
+        content = function(file){
+          ggsave(file,expr_buble_plot_protein(one_plot),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
+      )
     }
   }
 })
