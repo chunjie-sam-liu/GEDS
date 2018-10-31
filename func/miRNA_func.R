@@ -42,7 +42,7 @@ fn_miRNA_select <- function(.miRNA){
         tabPanel("Cancer Types",
         checkboxGroupButtons(
           inputId = "select_miRNA_TCGA", label = "", status = "primary",selected = c('ACC','BLCA','BRCA','CESC'),
-          individual = TRUE, choices = .miRNA,checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.miRNA,"ALL"),checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
         ),
         shinyjs::hide(switchInput(
           inputId = "select_dataset7", label = "Dataset", value = FALSE,

@@ -144,9 +144,13 @@ observeEvent(c(status$analysis,reset$mRNA),{
   if(length(input$select_mRNA)>0 && status$mRNA_set){
     if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
     if(input$select_mRNA == "Cancer types"){
-      dataset_number$mRNA <-  length(input$select_mRNA_TCGA)
-      TCGA_mRNA %>% dplyr::filter(cancer_types %in% input$select_mRNA_TCGA) %>%
-        dplyr::mutate(
+      grep(pattern = "ALL", input$select_mRNA_TCGA, value = TRUE ) ->a
+      if(length(a) == 0){
+        TCGA_mRNA %>% dplyr::filter(cancer_types %in% input$select_mRNA_TCGA) ->data_file
+        dataset_number$mRNA <-  length(input$select_mRNA_TCGA)*2}
+      else{TCGA_mRNA ->data_file
+        dataset_number$mRNA <-  length(mRNA_TCGA$cancer_types)*2}
+      data_file %>% dplyr::mutate(
           expr = purrr::map(
             .x = summary,
             .f = function(.x) {
@@ -159,9 +163,13 @@ observeEvent(c(status$analysis,reset$mRNA),{
         dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
         dplyr::select(cancer_types=tmp,symbol,expr) -> expr_clean }
     else if(input$select_mRNA == "Tissues"){
-      dataset_number$mRNA <-  length(input$select_mRNA_GTEX)
-      GTEX_mRNA %>% dplyr::filter(SMTS %in% input$select_mRNA_GTEX) %>%
-        dplyr::mutate(
+      grep(pattern = "ALL", input$select_mRNA_GTEX, value = TRUE ) ->a
+      if(length(a) == 0){
+        GTEX_mRNA %>% dplyr::filter(SMTS %in% input$select_mRNA_GTEX) ->data_file
+        dataset_number$mRNA <-  length(input$select_mRNA_GTEX)}
+      else{GTEX_mRNA ->data_file
+        dataset_number$mRNA <-  length(mRNA_GTEX$tissue)}
+      data_file %>% dplyr::mutate(
           expr = purrr::map(
             .x = summary,
             .f = function(.x) {
@@ -172,9 +180,13 @@ observeEvent(c(status$analysis,reset$mRNA),{
           )
         ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean }
     else if(input$select_mRNA == "Cell lines"){
-      dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
-      CCLE_mRNA %>% dplyr::filter(tissue %in% input$select_mRNA_CCLE) %>%
-        dplyr::mutate(
+      grep(pattern = "ALL", input$select_mRNA_CCLE, value = TRUE ) ->a
+      if(length(a) == 0){
+        CCLE_mRNA %>% dplyr::filter(tissue %in% input$select_mRNA_CCLE) ->data_file
+        dataset_number$mRNA <-  length(input$select_mRNA_CCLE)}
+      else{CCLE_mRNA ->data_file
+        dataset_number$mRNA <-  length(mRNA_CCLE$tissue)}
+      data_file %>% dplyr::mutate(
           expr = purrr::map(
             .x = summary,
             .f = function(.x) {
@@ -182,7 +194,7 @@ observeEvent(c(status$analysis,reset$mRNA),{
                 dplyr::filter(symbol %in% match$mRNA) %>% tidyr::unnest()
             }
           )
-        ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary)-> expr_clean }
+      ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary)-> expr_clean }
     expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> mRNA_plot_result
     expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
       dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr)->>mRNA_table_result

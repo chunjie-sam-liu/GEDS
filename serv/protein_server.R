@@ -170,8 +170,13 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
   if(length(input$select_protein)>0 && status$protein_set){
     if(status$protein_trigger){status$protein_trigger <- FALSE} else{status$protein_trigger <- TRUE}
     if(input$select_protein == "Cancer Types"){
-    dataset_number$protein <-  length(input$select_protein_TCGA)
-    TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
+    grep(pattern = "ALL", input$select_protein_TCGA, value = TRUE ) ->a
+    if(length(a) == 0){
+      TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) ->data_file
+      dataset_number$protein <-  length(input$select_protein_TCGA)}
+    else{TCGA_protein ->data_file
+      dataset_number$protein <-  length(protein_TCGA$cancer_types)}
+    data_file %>%
       dplyr::mutate(
         expr = purrr::map(
           .x = expr,
@@ -182,9 +187,16 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
         )
       ) -> expr_clean }
     else if(input$select_protein == "Tissues"){
-      dataset_number$protein <-  length(input$select_protein_MCLP)
-      MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) %>%
-        dplyr::mutate(
+      grep(pattern = "ALL", input$select_protein_MCLP, value = TRUE ) ->a
+      if(length(a) == 0){
+        MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) ->data_file
+        dataset_number$protein <-  length(input$select_protein_MCLP)
+      }
+      else{
+        MCLP_protein ->data_file
+        dataset_number$protein <-  length(protein_MCLP$tissue)
+      }
+      data_file %>% dplyr::mutate(
           expr = purrr::map(
             .x = expression,
             .f = function(.x) {

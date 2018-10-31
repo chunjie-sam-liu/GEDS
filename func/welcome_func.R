@@ -3,7 +3,7 @@
 fn_welcome_msg <- function() {
   column(
     width = 12, offset = 0,
-    shiny::tags$h1("GEDS:Gene expression display server")
+    shiny::tags$h1("GEDS: Gene Expression Display Server")
   )
 }
 

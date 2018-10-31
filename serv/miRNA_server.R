@@ -141,8 +141,16 @@ expr_clean_datatable_mirna <- function(.expr_clean) {
 observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
   if(length(input$select_miRNA_TCGA)>0 && status$miRNA_valid){
     if(status$miRNA_trigger){status$miRNA_trigger <- FALSE} else{status$miRNA_trigger <- TRUE}
-    TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>%
-    dplyr::mutate(
+    grep(pattern = "ALL", input$select_miRNA_TCGA, value = TRUE ) ->a
+    if(length(a) == 0){
+      TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) ->data_file
+      dataset_number$miRNA <-  length(input$select_miRNA_TCGA)
+    }
+    else{
+      TCGA_miRNA ->data_file
+      dataset_number$miRNA <-  length(miRNA_TCGA$cancer_types)
+    }
+    data_file %>% dplyr::mutate(
       mirna = purrr::map(
         .x = summary,
         .f = function(.x) {
@@ -157,7 +165,6 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
     mirna_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name -> plot_number$miRNA
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 
     number <- length(plot_number$miRNA)
-    dataset_number$miRNA <-  length(input$select_miRNA_TCGA)
     if(number < 5){
       if(dataset_number$miRNA == 1 ){
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()}, height = number*200, width = 300)

@@ -43,7 +43,7 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
         tabPanel("Cancer types",
           checkboxGroupButtons(
           inputId = "select_mRNA_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.tcga,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           bsTooltip(id="select_mRNA_TCGA", title="<p>This is an input</p><p>The second one</p>",
                     "right", options = list(container = "body")),
@@ -54,7 +54,7 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
         tabPanel("Tissues",
           checkboxGroupButtons(
           inputId = "select_mRNA_GTEX", label = "",status = "primary", selected = c('adipose'), 
-          individual = TRUE, choices = .gtex, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.gtex,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset2", label = "Dataset", value = FALSE,
@@ -63,7 +63,7 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
         tabPanel("Cell lines",
           checkboxGroupButtons(
           inputId = "select_mRNA_CCLE", label = "",status = "primary", selected = c('adrenal cortex'), 
-          individual = TRUE, choices = .ccle, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+          individual = TRUE, choices = c(.ccle,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
           ),
           shinyjs::hide(switchInput(
           inputId = "select_dataset3", label = "Dataset", value = FALSE,
