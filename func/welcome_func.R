@@ -12,9 +12,9 @@ fn_welcome_msg <- function() {
 fn_analysis <-  function(){
   shiny::fluidRow(
   column(
-    width = 10,offset =1,
+    width = 11,offset =1,
     shinydashboard::tabBox(
-      title = "",id = "tabset1", height = "140px",width=12,
+      title = "",id = "tabset1", height = "140px",width=10,
           tabPanel("mRNA", 
                   shiny::uiOutput(outputId = "ui_panel_mRNA"),
                   shiny::uiOutput(outputId = "ui_mRNA_select"),

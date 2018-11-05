@@ -22,7 +22,7 @@ shinyjs.example_miRNA_set = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
   var selector = $("#" + params.id);
-  selector.val("mir21 mir613 mir68843p");
+  selector.val("hsa-let-7b-5p");
 };
 
 

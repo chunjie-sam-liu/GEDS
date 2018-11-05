@@ -102,13 +102,15 @@ validate_input_miRNA_set <- eventReactive(
 expr_buble_plot_mirna <-  function(.expr){
   .expr %>% dplyr::rename(TPM = expr) %>%
     ggplot(mapping=aes(x=cancer_types,y=TPM,color=cancer_types)) +
-    geom_boxplot(width=0.5) +
+    geom_boxplot(width=0.5,outlier.colour = NA) +
     facet_wrap(~name,ncol = 1,scales = "free") +
+    ylab("TPM(log2)") +
     theme(
       axis.line = element_line(color = "black"),
-      panel.background  = element_rect(fill = "white", color = "grey"),
+      panel.background  = element_rect(fill = "white", color = "white"),
       axis.title.x = element_blank(),
       legend.position = "bottom",
+      strip.background = element_rect(fill = "white", color = "white"),
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
       axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
@@ -160,8 +162,10 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) ->> expr_clean
-    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> mirna_plot_result
-    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->>mirna_table_result
+    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+      dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,gene,name,expr = tmp) ->> mirna_plot_result
+    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+      dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,gene,name,expr = tmp) ->>mirna_table_result
     mirna_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name -> plot_number$miRNA
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 
     number <- length(plot_number$miRNA)

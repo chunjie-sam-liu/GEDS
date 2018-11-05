@@ -5,7 +5,7 @@
 fn_panel_miRNA <- function(){
   tagList(
   column(
-    width = 9, offset = 0,
+    width = 10, offset = 0,
     shinyWidgets::searchInput(
       inputId = "input_miRNA_set",
       label = "",
@@ -40,10 +40,14 @@ fn_miRNA_select <- function(.miRNA){
       width = 12, offset = 0,
       tabsetPanel(
         tabPanel("Cancer Types",
-        checkboxGroupButtons(
+          tagList(
+          column(width = 10,
+          checkboxGroupButtons(
           inputId = "select_miRNA_TCGA", label = "", status = "primary",selected = c('ACC','BLCA','BRCA','CESC'),
-          individual = TRUE, choices = c(.miRNA,"ALL"),checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
-        ),
+          individual = TRUE, choices = c(.miRNA,"ALL"),checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
+          column(width = 1,
+          checkboxGroupButtons(
+          inputId = "select_all_miRNA_TCGA", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
         shinyjs::hide(switchInput(
           inputId = "select_dataset7", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"

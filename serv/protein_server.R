@@ -131,12 +131,14 @@ tibble_format_change_protein <- function(.expr_clean){
 expr_buble_plot_protein <-  function(.expr){
   .expr %>% dplyr::rename(FPKM = expr) %>%
     ggplot(mapping=aes(x=cancer_types,y=FPKM,color=cancer_types)) +
-    geom_boxplot(width=0.5) +
+    geom_boxplot(width=0.5,outlier.colour = NA) +
     facet_wrap(~protein, ncol = 1,scales = "free") +
+    ylab("RPPA expression") +
     theme(
       axis.line = element_line(color = "black"),
-      panel.background  = element_rect(fill = "white", color = "grey"),
+      panel.background  = element_rect(fill = "white", color = "white"),
       axis.title.x = element_blank(),
+      strip.background = element_rect(fill = "white", color = "white"),
       axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
       legend.title = element_blank(),
       legend.position = "bottom",

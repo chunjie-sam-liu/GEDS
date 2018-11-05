@@ -5,7 +5,7 @@
 fn_panel_mRNA <- function(){
   tagList(
   column(
-    width = 9, offset = 0,
+    width = 10, offset = 0,
     shinyWidgets::searchInput(
       inputId = "input_mRNA_set",
       label = "",
@@ -41,30 +41,40 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
       width = 12, offset=0,
       tabsetPanel(id = "select_mRNA",
         tabPanel("Cancer types",
+          tagList(
+          column(width = 10,
           checkboxGroupButtons(
           inputId = "select_mRNA_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = c(.tcga,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
-          ),
-          bsTooltip(id="select_mRNA_TCGA", title="<p>This is an input</p><p>The second one</p>",
-                    "right", options = list(container = "body")),
+          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
+          column(width = 1,
+          checkboxGroupButtons(
+          inputId = "select_all_mRNA_TCGA", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
           shinyjs::hide(switchInput(
           inputId = "select_dataset1", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
         ))),
         tabPanel("Tissues",
+          tagList(
+          column(width = 10,
           checkboxGroupButtons(
           inputId = "select_mRNA_GTEX", label = "",status = "primary", selected = c('adipose'), 
-          individual = TRUE, choices = c(.gtex,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
-          ),
+          individual = TRUE, choices = .gtex, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
+          column(width = 1,
+          checkboxGroupButtons(
+          inputId = "select_all_mRNA_GTEX", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
           shinyjs::hide(switchInput(
           inputId = "select_dataset2", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-        ))),
-        tabPanel("Cell lines",
+          ))),
+          tabPanel("Cell lines",
+          tagList(
+          column(width = 10,
           checkboxGroupButtons(
           inputId = "select_mRNA_CCLE", label = "",status = "primary", selected = c('adrenal cortex'), 
-          individual = TRUE, choices = c(.ccle,"ALL"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
-          ),
+          individual = TRUE, choices = .ccle, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
+          column(width = 1,
+          checkboxGroupButtons(
+          inputId = "select_all_mRNA_CCLE", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
           shinyjs::hide(switchInput(
           inputId = "select_dataset3", label = "Dataset", value = FALSE,
           onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"

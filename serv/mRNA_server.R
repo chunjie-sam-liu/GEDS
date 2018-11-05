@@ -104,13 +104,15 @@ validate_analysis <- eventReactive(
 expr_buble_plot_mRNA <-  function(.expr){
   .expr %>% dplyr::rename(FPKM = expr) %>%
     ggplot(mapping=aes(x=cancer_types,y=FPKM,color=cancer_types)) +
-    geom_boxplot(width=0.5) +
+    geom_boxplot(width=0.5,outlier.colour = NA) +
     facet_wrap(~symbol, ncol = 1,scales = "free") +
+    ylab("FPKM(log2)") +
     theme(
       axis.line = element_line(color = "black"),
-      panel.background  = element_rect(fill = "white", color = "grey"),
+      panel.background  = element_rect(fill = "white", color = "white"),
       axis.title.x = element_blank(),
       axis.text.x = element_blank(),
+      strip.background = element_rect(fill = "white", color = "white"),
       legend.title = element_blank(),
       legend.position = "bottom",
       panel.grid.major.y = element_blank(),
@@ -128,7 +130,7 @@ expr_clean_datatable_mRNA <- function(.expr_clean) {
       buttons = c("copy", "csv", "print")
     ),
     rownames = FALSE,
-    colnames = c("Cancer types/tissues", "Symbol", "Alias", "Mean expr."),
+    colnames = c("Cancer types/tissues", "Symbol", "Alias", "Mean expr(log2)"),
     filter = "top",
     extensions = "Buttons",
     style = "bootstrap",
@@ -195,8 +197,10 @@ observeEvent(c(status$analysis,reset$mRNA),{
             }
           )
       ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary)-> expr_clean }
-    expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> mRNA_plot_result
-    expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
+    expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+      dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) ->> mRNA_plot_result
+    expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+      dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
       dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr)->>mRNA_table_result
     mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol -> plot_number$mRNA
     choice$mRNA <- mRNA_plot_result %>% dplyr::filter(symbol %in% plot_number$symbol[1]) %>% 

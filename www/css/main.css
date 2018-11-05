@@ -5,17 +5,43 @@
 }
 
 #select_protein_TCGA .btn-primary {
-    width: 100px;
+    width: 80px;
+}
+#select_protein_MCLP .btn-primary {
+    width: 89px;
 }
 
 #select_miRNA_TCGA .btn-primary {
-    width: 82px;
+    width: 80px;
 }
 
 #select_mRNA_TCGA .btn-primary {
     width: 80px;
 }
-
+#select_mRNA_GTEX .btn-primary {
+    width: 115px;
+}
+#select_mRNA_CCLE .btn-primary {
+    width: 194px;
+}
+#select_all_mRNA_TCGA .btn-primary {
+    width: 105px;
+}
+#select_all_mRNA_GTEX .btn-primary {
+    width: 105px;
+}
+#select_all_mRNA_CCLE .btn-primary {
+    width: 105px;
+}
+#select_all_protein_TCGA .btn-primary {
+    width: 80px;
+}
+#select_all_protein_MCLP .btn-primary {
+    width: 95px;
+}
+#select_all_miRNA_TCGA .btn-primary {
+    width: 105px;
+}
 body {
 font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
 font-size: 18px !important;
