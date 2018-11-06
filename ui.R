@@ -85,7 +85,7 @@ page <- dashboardPage(
 # shiny UI ----------------------------------------------------------------
 
 ui <- tagList(
-  div(style = "padding:450px", id = "loading-content",h2("Loading...")),
+  tags$img(style = "padding:450px", id = "loading-content",src = "./imgs/01.GSCA_logo_01.png"),
   shinyjs::hidden(div(id = "app-content", page))
 )
 

@@ -132,7 +132,7 @@ choice <- reactiveValues(
 
 #TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_new.rds.gz"))
 #MCLP_protein <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_filter_new.rds.gz"))
-#TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","TCGA_miRNA_summary.rds.gz"))
+TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","TCGA_miRNA_summary.rds.gz"))
 
 # Load gene list ----------------------------------------------------------
 
