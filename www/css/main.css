@@ -68,11 +68,21 @@ h1,h2,h3 {
 #loading-content{
   position: absolute;
         width: 64px; /*the image width*/
-        height: 64px; /*the image height*/
+        height: 30px; /*the image height*/
         left: 50%;
         top: 50%;
         margin-left: -32px; /*half the image width*/
-        margin-top: -32px; /*half the image height*/
+        margin-top: -15px; /*half the image height*/
+}
+#loading-text{
+  position: absolute;
+        font-size: 40px;
+        width: 100px; /*the image width*/
+        height: 100px; /*the image height*/
+        left: 50%;
+        top: 50%;
+        margin-left: -50px; /*half the image width*/
+        margin-top: -50px; /*half the image height*/
 }
 .lds-facebook {
   display: inline-block;

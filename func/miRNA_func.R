@@ -44,7 +44,7 @@ fn_miRNA_select <- function(.miRNA){
           column(width = 10,
           checkboxGroupButtons(
           inputId = "select_miRNA_TCGA", label = "", status = "primary",selected = c('ACC','BLCA','BRCA','CESC'),
-          individual = TRUE, choices = c(.miRNA,"ALL"),checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
+          individual = TRUE, choices = .miRNA,checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
           checkboxGroupButtons(
           inputId = "select_all_miRNA_TCGA", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),

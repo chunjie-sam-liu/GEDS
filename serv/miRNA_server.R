@@ -100,22 +100,47 @@ validate_input_miRNA_set <- eventReactive(
 
 # miRNA table print -------------------------------------------------------
 expr_box_plot_mirna <-  function(.expr){
-  .expr %>% dplyr::rename(TPM = expr) %>%
-    ggplot(mapping=aes(x=cancer_types,y=TPM,color=cancer_types)) +
-    geom_boxplot(width=0.5,outlier.colour = NA) +
-    facet_wrap(~name,ncol = 1,scales = "free") +
-    ylab("TPM(log2)") +
+  quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
+  .expr %>% dplyr::rename(TPM = expr,symbol = name) %>%
+    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
+    tidyr::spread(key = name, value = TPM) %>% 
+    ggplot(mapping = aes(x = cancer_types, middle = median,
+                         ymin = lower.whisker, ymax = upper.whisker,
+                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
+    geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
+    geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25)) +
+    facet_wrap(~symbol, ncol = 1,scales = "free_y", strip.position = 'right') +
     theme(
-      axis.line = element_line(color = "black"),
-      panel.background  = element_rect(fill = "white", color = "white"),
+      text = element_text(colour = 'black'),
+      
+      axis.line = element_line(color = "black", size = 0.1),
       axis.title.x = element_blank(),
-      legend.position = "bottom",
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+      
       strip.background = element_rect(fill = "white", color = "white"),
+      
+      panel.background = element_rect(fill = "white", color = "black", size = 0.5),
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
-      legend.title = element_blank(),
-      text = element_text(size = 20)
+      
+      legend.position = 'top',
+      legend.key = element_rect(fill = 'white')
+    ) +
+    labs(
+      x = 'Cancer Types',
+      y = 'TPM(log2)'
+    ) +
+    guides(
+      color = guide_legend(
+        # legend title
+        title = "Cancer Types",
+        title.position = "left",
+        
+        # legend label
+        label.position = "right",
+        # label.theme = element_text(size = 14),
+        reverse = TRUE
+      )
     )
 }
 expr_clean_datatable_mirna <- function(.expr_clean) {
@@ -143,16 +168,9 @@ expr_clean_datatable_mirna <- function(.expr_clean) {
 observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
   if(length(input$select_miRNA_TCGA)>0 && status$miRNA_valid){
     if(status$miRNA_trigger){status$miRNA_trigger <- FALSE} else{status$miRNA_trigger <- TRUE}
-    grep(pattern = "ALL", input$select_miRNA_TCGA, value = TRUE ) ->a
-    if(length(a) == 0){
-      TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) ->data_file
-      dataset_number$miRNA <-  length(input$select_miRNA_TCGA)
-    }
-    else{
-      TCGA_miRNA ->data_file
-      dataset_number$miRNA <-  length(miRNA_TCGA$cancer_types)
-    }
-    data_file %>% dplyr::mutate(
+      dataset_number$miRNA <-  length(input$select_miRNA_TCGA)  
+      TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>%
+      dplyr::mutate(
       mirna = purrr::map(
         .x = summary,
         .f = function(.x) {

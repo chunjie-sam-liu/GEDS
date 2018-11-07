@@ -100,15 +100,18 @@ tibble_change_to_plot_protein <- function(.expr_clean){
         .x = expr,
         .f = function(.x){
           .x %>% 
-            tidyr::gather(key = barcode, value = expr, -c(symbol, protein)) %>%
-            tidyr::drop_na(expr) %>%
-            dplyr::group_by(symbol, protein) %>%
-            dplyr::ungroup() 
+            purrrlyr::by_row(
+              ..f = function(.y) {
+                .y %>% dplyr::select(-symbol,-protein) %>% unlist() -> .xv
+                quantile(.xv) %>% unname()
+              }
+            ) %>% dplyr::rename(summary = .out) %>% 
+            dplyr::select(symbol,protein,summary) %>% tidyr::unnest()
         }
       )
     ) %>%
     dplyr::select(-expr) %>% 
-    tidyr::unnest()
+    tidyr::unnest() 
 }
 tibble_format_change_protein <- function(.expr_clean){
   .expr_clean %>%
@@ -129,22 +132,47 @@ tibble_format_change_protein <- function(.expr_clean){
     tidyr::unnest() 
 }
 expr_buble_plot_protein <-  function(.expr){
-  .expr %>% dplyr::rename(FPKM = expr) %>%
-    ggplot(mapping=aes(x=cancer_types,y=FPKM,color=cancer_types)) +
-    geom_boxplot(width=0.5,outlier.colour = NA) +
-    facet_wrap(~protein, ncol = 1,scales = "free") +
-    ylab("RPPA expression") +
+  quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
+  .expr %>% dplyr::rename(FPKM = summary) %>%
+    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
+    tidyr::spread(key = name, value = FPKM) %>% 
+    ggplot(mapping = aes(x = cancer_types, middle = median,
+                         ymin = lower.whisker, ymax = upper.whisker,
+                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
+    geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
+    geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25)) +
+    facet_wrap(~protein, ncol = 1,scales = "free_y", strip.position = 'right') +
     theme(
-      axis.line = element_line(color = "black"),
-      panel.background  = element_rect(fill = "white", color = "white"),
+      text = element_text(colour = 'black'),
+      
+      axis.line = element_line(color = "black", size = 0.1),
       axis.title.x = element_blank(),
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+      
       strip.background = element_rect(fill = "white", color = "white"),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
-      legend.title = element_blank(),
-      legend.position = "bottom",
+      
+      panel.background = element_rect(fill = "white", color = "black", size = 0.5),
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
-      text = element_text(size = 20)
+      
+      legend.position = 'top',
+      legend.key = element_rect(fill = 'white')
+    ) +
+    labs(
+      x = 'Cancer Types',
+      y = 'RPPA expression'
+    ) +
+    guides(
+      color = guide_legend(
+        # legend title
+        title = "Cancer Types",
+        title.position = "left",
+        
+        # legend label
+        label.position = "right",
+        # label.theme = element_text(size = 14),
+        reverse = TRUE
+      )
     )
 }
 expr_clean_datatable_protein <- function(.expr_clean) {
@@ -172,13 +200,8 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
   if(length(input$select_protein)>0 && status$protein_set){
     if(status$protein_trigger){status$protein_trigger <- FALSE} else{status$protein_trigger <- TRUE}
     if(input$select_protein == "Cancer Types"){
-    grep(pattern = "ALL", input$select_protein_TCGA, value = TRUE ) ->a
-    if(length(a) == 0){
-      TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) ->data_file
-      dataset_number$protein <-  length(input$select_protein_TCGA)}
-    else{TCGA_protein ->data_file
-      dataset_number$protein <-  length(protein_TCGA$cancer_types)}
-    data_file %>%
+      dataset_number$protein <-  length(input$select_protein_TCGA)
+      TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
       dplyr::mutate(
         expr = purrr::map(
           .x = expr,
@@ -189,16 +212,9 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
         )
       ) -> expr_clean }
     else if(input$select_protein == "Tissues"){
-      grep(pattern = "ALL", input$select_protein_MCLP, value = TRUE ) ->a
-      if(length(a) == 0){
-        MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) ->data_file
         dataset_number$protein <-  length(input$select_protein_MCLP)
-      }
-      else{
-        MCLP_protein ->data_file
-        dataset_number$protein <-  length(protein_MCLP$tissue)
-      }
-      data_file %>% dplyr::mutate(
+        MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) %>%
+          dplyr::mutate(
           expr = purrr::map(
             .x = expression,
             .f = function(.x) {

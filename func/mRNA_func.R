@@ -104,13 +104,6 @@ fn_mRNA_set_stat <- function(input_list_check){
 }
 
 # start analysis widgets --------------------------------------------------
-fn_start_analysis <- function(){
-  shiny::fluidRow(
-  column(
-    width = 8, offset = 2, 
-    shinyBS::bsButton(inputId = "analysis", label = "Start Gene Set Analysis", icon = icon("play"), class = "btn-lg")
-  ))
-}
 
 fn_mRNA_single_result <- function(){
 

@@ -85,7 +85,7 @@ page <- dashboardPage(
 # shiny UI ----------------------------------------------------------------
 
 ui <- tagList(
-  div(id = "loading-content",class="lds-facebook", div(), div(), div()),
+  div(id = "loading-content",class="lds-facebook", span(id = "loading-text","GEDS"),div(), div(), div()),
   shinyjs::hidden(div(id = "app-content", page))
 )
 
