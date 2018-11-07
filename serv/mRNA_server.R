@@ -79,6 +79,7 @@ validate_input_mRNA_set <- eventReactive(
   eventExpr = input$input_mRNA_set_search,
   ignoreNULL = TRUE,
   valueExpr = {
+    if(reset$mRNA){reset$mRNA <- FALSE} else{reset$mRNA <- TRUE}
     if (is.null(input$input_mRNA_set) || input$input_mRNA_set == "") {
       error$mRNA_set <- "Error: Please input gene symbol."
       status$mRNA_trigger <- if (status$mRNA_trigger == TRUE) FALSE else TRUE

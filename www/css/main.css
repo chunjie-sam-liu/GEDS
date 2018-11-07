@@ -3,6 +3,9 @@
   background-color: #dd4b39;
   border-color: #dd4b39;
 }
+.navbar-default .navbar-nav>li>a {
+    color: lightslategray;
+}
 
 #select_protein_TCGA .btn-primary {
     width: 80px;
@@ -34,10 +37,10 @@
     width: 105px;
 }
 #select_all_protein_TCGA .btn-primary {
-    width: 80px;
+    width: 105px;
 }
 #select_all_protein_MCLP .btn-primary {
-    width: 95px;
+    width: 105px;
 }
 #select_all_miRNA_TCGA .btn-primary {
     width: 105px;
