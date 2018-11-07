@@ -56,3 +56,57 @@ h1,h2,h3 {
   font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
   text-align:center;
 }
+.loading-image{
+        position: absolute;
+        width: 660px; /*the image width*/
+        height: 500px; /*the image height*/
+        left: 50%;
+        top: 50%;
+        margin-left: -330px; /*half the image width*/
+        margin-top: -250px; /*half the image height*/
+    }
+#loading-content{
+  position: absolute;
+        width: 64px; /*the image width*/
+        height: 64px; /*the image height*/
+        left: 50%;
+        top: 50%;
+        margin-left: -32px; /*half the image width*/
+        margin-top: -32px; /*half the image height*/
+}
+.lds-facebook {
+  display: inline-block;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+.lds-facebook div {
+  display: inline-block;
+  position: absolute;
+  left: 6px;
+  width: 13px;
+  background: #462DFC;
+  animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+.lds-facebook div:nth-child(1) {
+  left: 6px;
+  animation-delay: -0.24s;
+}
+.lds-facebook div:nth-child(2) {
+  left: 26px;
+  animation-delay: -0.12s;
+}
+.lds-facebook div:nth-child(3) {
+  left: 45px;
+  animation-delay: 0;
+}
+@keyframes lds-facebook {
+  0% {
+    top: 6px;
+    height: 51px;
+  }
+  50%, 100% {
+    top: 19px;
+    height: 26px;
+  }
+}
