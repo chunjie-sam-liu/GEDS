@@ -18,10 +18,10 @@ validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_
         .x = symbol,
         .f = function(.x) {
           grep(pattern = (paste(",",.x,",") %>% 
-                            stringr::str_replace_all(' ','')), .total_symbol$alias_match, value = TRUE ) ->a
+              stringr::str_replace_all(' ','')), .total_symbol$alias_match, value = TRUE ) ->a
           .total_symbol %>% dplyr::filter(alias_match %in% a) %>% .$symbol->b
           grep(pattern = (paste(",",.x,",") %>% 
-                            stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
+              stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
           .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
           e <- c(b,d)
           if(length(e)>0){e} else{"drop"}
@@ -42,7 +42,6 @@ validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_
   output$download_unmatched_mRNA_set <- fn_gs_download(data = input_mRNA_check$n_non_match,txt = "error_gene_set.txt")
   if(input_mRNA_check$n_match > 0) {
     status$mRNA_set <- TRUE
-    status$mRNA_result <- TRUE
     status$mRNA_valid <- TRUE } 
   else {
     status$mRNA_set <- FALSE
@@ -176,9 +175,10 @@ expr_clean_datatable_mRNA <- function(.expr_clean) {
 
 # ObserveEvent ------------------------------------------------------------
 observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,input$select_mRNA_CCLE,reset$mRNA),{
+  re <- "0"
   if(length(input$select_mRNA)>0 && status$mRNA_set){
-    if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
-    if(input$select_mRNA == "Cancer types"){
+    if(input$select_mRNA == "Cancer types" && length(input$select_mRNA_TCGA)>0){
+      re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_TCGA)
         TCGA_mRNA %>% dplyr::filter(cancer_types %in% input$select_mRNA_TCGA) %>%
         dplyr::mutate(
@@ -193,7 +193,8 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
       ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
         dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
         dplyr::select(cancer_types=tmp,symbol,expr) -> expr_clean }
-    else if(input$select_mRNA == "Tissues"){
+    else if(input$select_mRNA == "Tissues" && length(input$select_mRNA_GTEX)>0){
+      re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_GTEX)
         GTEX_mRNA %>% dplyr::filter(SMTS %in% input$select_mRNA_GTEX) %>%
         dplyr::mutate(
@@ -206,7 +207,8 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
           }
         )
       ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean }
-    else if(input$select_mRNA == "Cell lines"){
+    else if(input$select_mRNA == "Cell lines" && length(input$select_mRNA_CCLE)>0){
+      re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
         CCLE_mRNA %>% dplyr::filter(tissue %in% input$select_mRNA_CCLE) %>%
         dplyr::mutate(
@@ -217,7 +219,10 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
               dplyr::filter(symbol %in% match$mRNA) %>% tidyr::unnest()
           }
         )
-      ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary)-> expr_clean }
+        ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary)-> expr_clean }
+    if(re == "1"){
+      if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
+      status$mRNA_result <- TRUE
     expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
       dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) ->> mRNA_plot_result
     expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
@@ -229,7 +234,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
     number <- length(plot_number$mRNA)
     if(number < 5){
       if(dataset_number$mRNA == 1 ){
-        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = number*200, width = 300)
+        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = number*300, width = 300)
         output$`mRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -238,7 +243,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
             ggsave(file,expr_box_plot_mRNA(mRNA_plot_result),device = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
         )}
       else if(dataset_number$mRNA <5 ){
-        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = number*200, width = dataset_number$mRNA*200)
+        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = number*300, width = dataset_number$mRNA*300)
         output$`mRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -248,7 +253,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
         )
       }
       else{
-        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = 6*dataset_number$mRNA+number*200)
+        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = 6*dataset_number$mRNA+number*300)
         output$`mRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -261,7 +266,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
     }
     else{multiple$mRNA <- TRUE}
     output$expr_dt_comparison_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(mRNA_table_result)})
-    return(mRNA_plot_result)
+    return(mRNA_plot_result)}
   }})
 
 observeEvent(status$mRNA_trigger, {
@@ -293,7 +298,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
     choice$mRNA <- paste(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
     mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> one_plot
     if(dataset_number$mRNA == 1 ){
-      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()}, height = 200, width = 300)
+      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()}, height = 300, width = 300)
       output$`mRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -303,7 +308,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
       )
     }
     else if(dataset_number$mRNA<5 && dataset_number$mRNA>1){
-      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 200, width = dataset_number$mRNA*200)
+      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 300, width = dataset_number$mRNA*300)
       output$`mRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -313,7 +318,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
       )
     }
     else{
-      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 200+6*dataset_number$mRNA)
+      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 300+6*dataset_number$mRNA)
       output$`mRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -323,5 +328,31 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
       )
     }
   }
+})
+
+# observeEvent of selectall -----------------------------------------------
+
+observeEvent(input$select_all_mRNA_TCGA, {
+  shinyjs::js$TCGAmRNAselectall()
+})
+
+observeEvent(input$unselect_all_mRNA_TCGA, {
+  shinyjs::js$TCGAmRNAunselectall()
+  status$mRNA_result <- FALSE
+})
+observeEvent(input$select_all_mRNA_GTEX, {
+  shinyjs::js$GTEXmRNAselectall()
+})
+
+observeEvent(input$unselect_all_mRNA_GTEX, {
+  shinyjs::js$GTEXmRNAunselectall()
+  status$mRNA_result <- FALSE
+})
+observeEvent(input$select_all_mRNA_CCLE, {
+  shinyjs::js$CCLEmRNAselectall()
+})
+observeEvent(input$unselect_all_mRNA_CCLE, {
+  shinyjs::js$CCLEmRNAunselectall()
+  status$mRNA_result <- FALSE
 })
 

@@ -46,7 +46,6 @@ validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miR
   output$download_miRNA_input_logs <- fn_gs_download(data = input_miRNA_check$n_non_match,txt = "error_miRNA_set.txt")
   if(input_miRNA_check$n_match > 0) {
     status$miRNA_set <- TRUE
-    status$miRNA_result <- TRUE
     status$miRNA_valid <- TRUE } 
   else {
     status$miRNA_set <- FALSE
@@ -167,7 +166,6 @@ expr_clean_datatable_mirna <- function(.expr_clean) {
 # ObserveEvent ------------------------------------------------------------
 observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
   if(length(input$select_miRNA_TCGA)>0 && status$miRNA_valid){
-    if(status$miRNA_trigger){status$miRNA_trigger <- FALSE} else{status$miRNA_trigger <- TRUE}
       dataset_number$miRNA <-  length(input$select_miRNA_TCGA)  
       TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>%
       dplyr::mutate(
@@ -180,6 +178,8 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) ->> expr_clean
+    status$miRNA_result <- TRUE
+    if(status$miRNA_trigger){status$miRNA_trigger <- FALSE} else{status$miRNA_trigger <- TRUE}
     expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
       dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,gene,name,expr = tmp) ->> mirna_plot_result
     expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
@@ -189,7 +189,7 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
     number <- length(plot_number$miRNA)
     if(number < 5){
       if(dataset_number$miRNA == 1 ){
-        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_box_plot_mirna()}, height = number*200, width = 300)
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_box_plot_mirna()}, height = number*300, width = 300)
         output$`miRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -200,7 +200,7 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
         }
       else if(dataset_number$miRNA <5 ){
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% 
-            expr_box_plot_mirna()},height = number*200, width = dataset_number$miRNA*200)
+            expr_box_plot_mirna()},height = number*300, width = dataset_number$miRNA*300)
         output$`miRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -210,7 +210,7 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
         )
       }
       else{
-        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_box_plot_mirna()},height = 6*dataset_number$miRNA+number*200)
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_box_plot_mirna()},height = 6*dataset_number$miRNA+number*300)
         output$`miRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -255,7 +255,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
     choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
     mirna_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> one_plot
     if(dataset_number$miRNA == 1 ){
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 200, width = 300)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300, width = 300)
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -265,7 +265,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
       )
       }
     else if(dataset_number$miRNA<5){
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 200, width = dataset_number$miRNA*200)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300, width = dataset_number$miRNA*300)
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -275,7 +275,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
       )
     }
     else{
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 200+6*dataset_number$miRNA)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300+6*dataset_number$miRNA)
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -287,3 +287,13 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
   }
 })
 
+# observeEvent of selectall -----------------------------------------------
+
+observeEvent(input$select_all_miRNA_TCGA, {
+  shinyjs::js$TCGAmiRNAselectall()
+})
+
+observeEvent(input$unselect_all_miRNA_TCGA, {
+  shinyjs::js$TCGAmiRNAunselectall()
+  status$miRNA_result <- FALSE
+})

@@ -35,7 +35,6 @@ fn_panel_protein <- function(){
 # dataset select ----------------------------------------------------------
 
 fn_protein_select <- function(.tcga,.mclp){
-  shiny::fluidRow(
     column(
       width = 12, offset = 0,
       tabsetPanel(id = "select_protein",
@@ -46,12 +45,9 @@ fn_protein_select <- function(.tcga,.mclp){
           inputId = "select_protein_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
           individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
-          checkboxGroupButtons(
-          inputId = "select_all_protein_TCGA", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
-          shinyjs::hide(switchInput(
-          inputId = "select_dataset6", label = "Dataset", value = FALSE,
-          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-          ))),
+            shinyBS::bsButton(inputId = "select_all_protein_TCGA", label = "select all", class = "btn"),
+            shinyBS::bsButton(inputId = "unselect_all_protein_TCGA", label = "unselect all", class = "btn")
+                 ) )),
         tabPanel("Tissues",
           tagList(
           column(width = 10,
@@ -59,19 +55,14 @@ fn_protein_select <- function(.tcga,.mclp){
           inputId = "select_protein_MCLP", label = "",status = "primary", selected = c('bladder'), 
           individual = TRUE, choices = .mclp, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
-          checkboxGroupButtons(
-          inputId = "select_all_protein_MCLP", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
-          shinyjs::hide(switchInput(
-          inputId = "select_dataset7", label = "Dataset", value = FALSE,
-          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-          )))
+            shinyBS::bsButton(inputId = "select_all_protein_MCLP", label = "select all", class = "btn"),
+            shinyBS::bsButton(inputId = "unselect_all_protein_MCLP", label = "unselect all", class = "btn")
+            ) ))
         )
       )
-    )
 }
 
 fn_protein_set_stat <- function(input_list_check){
-  shiny::fluidRow(
   column(
     width = 10, offset = 1,
     downloadLink(
@@ -86,13 +77,12 @@ fn_protein_set_stat <- function(input_list_check){
       outputId = "download_protein_input_logs", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
     )
-  ))
+  )
 }
 
 # result ------------------------------------------------------------------
 
 fn_protein_single_result <- function(){
-  shiny::fluidRow(
   column(
     width = 12,offset = 0,
     shinydashboard::tabBox(
@@ -110,12 +100,10 @@ fn_protein_single_result <- function(){
         title = "Table of expression",
         DT::dataTableOutput(outputId = "expr_dt_comparison_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
       )
-    )
   ))
 }
 
 fn_protein_multi_result <- function(list){
-  shiny::fluidRow(
     column(
       width = 12, offset = 0,
       shinydashboard::tabBox(
@@ -138,7 +126,7 @@ fn_protein_multi_result <- function(list){
           title = "Table of expression",
           DT::dataTableOutput(outputId = "expr_dt_comparison_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
         ))
-    ))
+    )
 }
 
 fn_plot_multiple_protein <- function(choice){

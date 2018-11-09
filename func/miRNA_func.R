@@ -35,7 +35,6 @@ fn_panel_miRNA <- function(){
 # dataset seletct ---------------------------------------------------------
 
 fn_miRNA_select <- function(.miRNA){
-  shiny::fluidRow(
     column(
       width = 12, offset = 0,
       tabsetPanel(
@@ -46,18 +45,13 @@ fn_miRNA_select <- function(.miRNA){
           inputId = "select_miRNA_TCGA", label = "", status = "primary",selected = c('ACC','BLCA','BRCA','CESC'),
           individual = TRUE, choices = .miRNA,checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
-          checkboxGroupButtons(
-          inputId = "select_all_miRNA_TCGA", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
-        shinyjs::hide(switchInput(
-          inputId = "select_dataset7", label = "Dataset", value = FALSE,
-          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-        ))))
-    )
-  )
+            shinyBS::bsButton(inputId = "select_all_miRNA_TCGA", label = "select all", class = "btn"),
+            shinyBS::bsButton(inputId = "unselect_all_miRNA_TCGA", label = "unselect all", class = "btn")
+          ))
+       )))
 }
 
 fn_miRNA_set_stat <- function(input_list_check){
-  shiny::fluidRow(
   column(
     width = 10, offset = 1,
     downloadLink(
@@ -73,12 +67,11 @@ fn_miRNA_set_stat <- function(input_list_check){
       outputId = "download_miRNA_input_logs", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
     )
-  ))
+  )
 }
 # result ------------------------------------------------------------------
 
 fn_mirna_single_result <- function(){
-  shiny::fluidRow(
   column(
     width = 12,offset = 0,
     shinydashboard::tabBox(
@@ -96,11 +89,9 @@ fn_mirna_single_result <- function(){
         title = "Table of expression",
         DT::dataTableOutput(outputId = "expr_dt_comparison_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px"))
     ))
-  )
 }
 
 fn_mirna_multi_result <- function(list){
-  shiny::fluidRow(
     column(
       width = 12, offset = 0,
       shinydashboard::tabBox(
@@ -123,7 +114,7 @@ fn_mirna_multi_result <- function(list){
           title = "Table of expression",
           DT::dataTableOutput(outputId = "expr_dt_comparison_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
         ))
-      ))
+      )
 }
 
 fn_plot_multiple_miRNA <- function(choice){

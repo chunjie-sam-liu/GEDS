@@ -82,7 +82,7 @@ page1 <- dashboardPage(
 )
 
 page <- fluidPage(
-          theme = shinytheme("yeti"),
+          theme = shinytheme("paper"),
           navbarPage("GEDS",
                    tabPanel(
                      "Welcome",icon = icon("home"),
@@ -102,7 +102,7 @@ page <- fluidPage(
 # shiny UI ----------------------------------------------------------------
 
 ui <- tagList(
-  div(id = "loading-content",class="lds-facebook", span(id = "loading-text","GEDS"),div(), div(), div()),
+  div(id = "loading-content", span(id = "loading-text","GEDS"),div(class="lds-facebook",div(), div(), div(), div(), div())),
   shinyjs::hidden(div(id = "app-content", page)),
   shiny::tags$head(
     shinyWidgets::useSweetAlert(),

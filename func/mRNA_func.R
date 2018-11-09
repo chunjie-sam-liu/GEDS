@@ -28,15 +28,13 @@ fn_panel_mRNA <- function(){
         )
       )
     )
-  )
-  )
+  ))
 }
 
 
 # dataset seletct ---------------------------------------------------------
 
 fn_mRNA_select <- function(.tcga,.gtex,.ccle){
-  shiny::fluidRow(
     column(
       width = 12, offset=0,
       tabsetPanel(id = "select_mRNA",
@@ -45,27 +43,21 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
           column(width = 10,
           checkboxGroupButtons(
           inputId = "select_mRNA_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
+          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"    )))),
           column(width = 1,
-          checkboxGroupButtons(
-          inputId = "select_all_mRNA_TCGA", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
-          shinyjs::hide(switchInput(
-          inputId = "select_dataset1", label = "Dataset", value = FALSE,
-          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-        ))),
-        tabPanel("Tissues",
+          shinyBS::bsButton(inputId = "select_all_mRNA_TCGA", label = "select all", class = "btn"),
+          shinyBS::bsButton(inputId = "unselect_all_mRNA_TCGA", label = "unselect all", class = "btn")
+          ))),
+          tabPanel("Tissues",
           tagList(
           column(width = 10,
           checkboxGroupButtons(
           inputId = "select_mRNA_GTEX", label = "",status = "primary", selected = c('adipose'), 
           individual = TRUE, choices = .gtex, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
-          checkboxGroupButtons(
-          inputId = "select_all_mRNA_GTEX", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
-          shinyjs::hide(switchInput(
-          inputId = "select_dataset2", label = "Dataset", value = FALSE,
-          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-          ))),
+            shinyBS::bsButton(inputId = "select_all_mRNA_GTEX", label = "select all", class = "btn"),
+            shinyBS::bsButton(inputId = "unselect_all_mRNA_GTEX", label = "unselect all", class = "btn")
+          )  )),
           tabPanel("Cell lines",
           tagList(
           column(width = 10,
@@ -73,19 +65,14 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
           inputId = "select_mRNA_CCLE", label = "",status = "primary", selected = c('adrenal cortex'), 
           individual = TRUE, choices = .ccle, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
-          checkboxGroupButtons(
-          inputId = "select_all_mRNA_CCLE", label = "",status = "primary",individual = TRUE, choices = c("select all","unselect all"), checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))))),
-          shinyjs::hide(switchInput(
-          inputId = "select_dataset3", label = "Dataset", value = FALSE,
-          onLabel = "All", offLabel = "None", size = "large", offStatus = "danger"
-        )))
+            shinyBS::bsButton(inputId = "select_all_mRNA_CCLE", label = "select all", class = "btn"),
+            shinyBS::bsButton(inputId = "unselect_all_mRNA_CCLE", label = "unselect all", class = "btn")
+          )  ))
     ))
-  )
 }
 
 # Gene set stat -----------------------------------------------------------
 fn_mRNA_set_stat <- function(input_list_check){
-  shiny::fluidRow(
   column(
     width = 10, offset = 1, 
     downloadLink(
@@ -100,14 +87,12 @@ fn_mRNA_set_stat <- function(input_list_check){
       outputId = "download_unmatched_mRNA_set", label = NULL, class = NULL,
       valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
     )
-  ))
+  )
 }
 
 # start analysis widgets --------------------------------------------------
 
 fn_mRNA_single_result <- function(){
-
-  shiny::fluidRow(
     column(
       width = 12,offset = 0,
       shinydashboard::tabBox(
@@ -126,11 +111,10 @@ fn_mRNA_single_result <- function(){
           DT::dataTableOutput(outputId = "expr_dt_comparison_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
         )
       )
-    ))
+    )
 }
 
 fn_mRNA_multi_result <- function(list){
-  shiny::fluidRow(
     column(
       width = 12, offset = 0,
       shinydashboard::tabBox(
@@ -153,7 +137,7 @@ fn_mRNA_multi_result <- function(list){
           title = "Table of expression",
           DT::dataTableOutput(outputId = "expr_dt_comparison_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
         ))
-    ))
+    )
 }
 
 fn_plot_multiple_mRNA <- function(choice){

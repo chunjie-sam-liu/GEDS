@@ -33,8 +33,6 @@ output$ui_protein_stat <- renderUI({if (status$protein_set) {fn_protein_set_stat
 output$ui_miRNA_stat <- renderUI({if (status$miRNA_set) {fn_miRNA_set_stat(input_miRNA_check)} else {NULL}})
 
 # Start analysis ----------------------------------------------------------
-output$ui_start_analysis <- renderUI({if (status$mRNA_set) {fn_start_analysis()} else {NULL}})
-
 output$ui_mRNA_result <- renderUI({
   if(status$mRNA_result) {
     if(multiple$mRNA){
