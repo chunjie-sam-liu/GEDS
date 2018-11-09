@@ -46,7 +46,6 @@ validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miR
   output$download_miRNA_input_logs <- fn_gs_download(data = input_miRNA_check$n_non_match,txt = "error_miRNA_set.txt")
   if(input_miRNA_check$n_match > 0) {
     status$miRNA_set <- TRUE
-    status$miRNA_result <- TRUE
     status$miRNA_valid <- TRUE } 
   else {
     status$miRNA_set <- FALSE
@@ -99,21 +98,48 @@ validate_input_miRNA_set <- eventReactive(
 )
 
 # miRNA table print -------------------------------------------------------
-expr_buble_plot_mirna <-  function(.expr){
-  .expr %>% dplyr::rename(TPM = expr) %>%
-    ggplot(mapping=aes(x=cancer_types,y=TPM,color=cancer_types)) +
-    geom_boxplot(width=0.5) +
-    facet_wrap(~name,ncol = 1,scales = "free") +
+expr_box_plot_mirna <-  function(.expr){
+  quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
+  .expr %>% dplyr::rename(TPM = expr,symbol = name) %>%
+    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
+    tidyr::spread(key = name, value = TPM) %>% 
+    ggplot(mapping = aes(x = cancer_types, middle = median,
+                         ymin = lower.whisker, ymax = upper.whisker,
+                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
+    geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
+    geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25)) +
+    facet_wrap(~symbol, ncol = 1,scales = "free_y", strip.position = 'right') +
     theme(
-      axis.line = element_line(color = "black"),
-      panel.background  = element_rect(fill = "white", color = "grey"),
+      text = element_text(colour = 'black'),
+      
+      axis.line = element_line(color = "black", size = 0.1),
       axis.title.x = element_blank(),
-      legend.position = "bottom",
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+      
+      strip.background = element_rect(fill = "white", color = "white"),
+      
+      panel.background = element_rect(fill = "white", color = "black", size = 0.5),
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
-      legend.title = element_blank(),
-      text = element_text(size = 20)
+      
+      legend.position = 'top',
+      legend.key = element_rect(fill = 'white')
+    ) +
+    labs(
+      x = 'Cancer Types',
+      y = 'TPM(log2)'
+    ) +
+    guides(
+      color = guide_legend(
+        # legend title
+        title = "Cancer Types",
+        title.position = "left",
+        
+        # legend label
+        label.position = "right",
+        # label.theme = element_text(size = 14),
+        reverse = TRUE
+      )
     )
 }
 expr_clean_datatable_mirna <- function(.expr_clean) {
@@ -140,17 +166,9 @@ expr_clean_datatable_mirna <- function(.expr_clean) {
 # ObserveEvent ------------------------------------------------------------
 observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
   if(length(input$select_miRNA_TCGA)>0 && status$miRNA_valid){
-    if(status$miRNA_trigger){status$miRNA_trigger <- FALSE} else{status$miRNA_trigger <- TRUE}
-    grep(pattern = "ALL", input$select_miRNA_TCGA, value = TRUE ) ->a
-    if(length(a) == 0){
-      TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) ->data_file
-      dataset_number$miRNA <-  length(input$select_miRNA_TCGA)
-    }
-    else{
-      TCGA_miRNA ->data_file
-      dataset_number$miRNA <-  length(miRNA_TCGA$cancer_types)
-    }
-    data_file %>% dplyr::mutate(
+      dataset_number$miRNA <-  length(input$select_miRNA_TCGA)  
+      TCGA_miRNA %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>%
+      dplyr::mutate(
       mirna = purrr::map(
         .x = summary,
         .f = function(.x) {
@@ -160,41 +178,45 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) ->> expr_clean
-    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> mirna_plot_result
-    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->>mirna_table_result
+    status$miRNA_result <- TRUE
+    if(status$miRNA_trigger){status$miRNA_trigger <- FALSE} else{status$miRNA_trigger <- TRUE}
+    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+      dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,gene,name,expr = tmp) ->> mirna_plot_result
+    expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+      dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,gene,name,expr = tmp) ->>mirna_table_result
     mirna_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name -> plot_number$miRNA
     choice$miRNA <- mirna_plot_result %>% dplyr::filter(name %in% plot_number$miRNA[1]) %>% dplyr::select(gene) %>% dplyr::distinct() %>% .$gene 
     number <- length(plot_number$miRNA)
     if(number < 5){
       if(dataset_number$miRNA == 1 ){
-        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()}, height = number*200, width = 300)
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_box_plot_mirna()}, height = number*300, width = 300)
         output$`miRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
           },
           content = function(file){
-            ggsave(file,expr_buble_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+            ggsave(file,expr_box_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
         )
         }
       else if(dataset_number$miRNA <5 ){
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% 
-            expr_buble_plot_mirna()},height = number*200, width = dataset_number$miRNA*200)
+            expr_box_plot_mirna()},height = number*300, width = dataset_number$miRNA*300)
         output$`miRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
           },
           content = function(file){
-            ggsave(file,expr_buble_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+            ggsave(file,expr_box_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
         )
       }
       else{
-        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_buble_plot_mirna()},height = 6*dataset_number$miRNA+number*200)
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_box_plot_mirna()},height = 6*dataset_number$miRNA+number*300)
         output$`miRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
           },
           content = function(file){
-            ggsave(file,expr_buble_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+            ggsave(file,expr_box_plot_mirna(mirna_plot_result),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
         )
       }
       multiple$miRNA <- FALSE
@@ -233,35 +255,45 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
     choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
     mirna_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> one_plot
     if(dataset_number$miRNA == 1 ){
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200, width = 300)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300, width = 300)
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
         },
         content = function(file){
-          ggsave(file,expr_buble_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+          ggsave(file,expr_box_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
       )
       }
     else if(dataset_number$miRNA<5){
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200, width = dataset_number$miRNA*200)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300, width = dataset_number$miRNA*300)
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
         },
         content = function(file){
-          ggsave(file,expr_buble_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+          ggsave(file,expr_box_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
       )
     }
     else{
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_buble_plot_mirna()}, height = 200+6*dataset_number$miRNA)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300+6*dataset_number$miRNA)
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
         },
         content = function(file){
-          ggsave(file,expr_buble_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+          ggsave(file,expr_box_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
       )
     }
   }
 })
 
+# observeEvent of selectall -----------------------------------------------
+
+observeEvent(input$select_all_miRNA_TCGA, {
+  shinyjs::js$TCGAmiRNAselectall()
+})
+
+observeEvent(input$unselect_all_miRNA_TCGA, {
+  shinyjs::js$TCGAmiRNAunselectall()
+  status$miRNA_result <- FALSE
+})

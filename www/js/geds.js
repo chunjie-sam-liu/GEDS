@@ -22,19 +22,44 @@ shinyjs.example_miRNA_set = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
   var selector = $("#" + params.id);
-  selector.val("mir21 mir613 mir68843p");
+  selector.val("hsa-let-7b-5p");
 };
 
-
-shinyjs.checkall = function() {
-  $("button.btn.checkbtn.btn-default").removeClass("active").addClass("active");
-  $('input[type="checkbox"]').prop("checked", true);
+shinyjs.TCGAmRNAselectall = function() {
+  $("div#select_mRNA_TCGA button.btn.checkbtn.btn-primary:not(.active)").click();
 };
-
-
-shinyjs.uncheckall = function() {
-  $("button.btn.checkbtn.btn-default").removeClass("active");
-  $('input[type="checkbox"]').prop("checked", false);
+shinyjs.TCGAmRNAunselectall = function() {
+  $("div#select_mRNA_TCGA button.btn.checkbtn.btn-primary.active").click();
+};
+shinyjs.GTEXmRNAselectall = function() {
+  $("div#select_mRNA_GTEX button.btn.checkbtn.btn-primary:not(.active)").click();
+};
+shinyjs.GTEXmRNAunselectall = function() {
+  $("div#select_mRNA_GTEX button.btn.checkbtn.btn-primary.active").click();
+};
+shinyjs.CCLEmRNAselectall = function() {
+  $("div#select_mRNA_CCLE button.btn.checkbtn.btn-primary:not(.active)").click();
+};
+shinyjs.CCLEmRNAunselectall = function() {
+  $("div#select_mRNA_CCLE button.btn.checkbtn.btn-primary.active").click();
+};
+shinyjs.TCGAproteinselectall = function() {
+  $("div#select_protein_TCGA button.btn.checkbtn.btn-primary:not(.active)").click();
+};
+shinyjs.TCGAproteinunselectall = function() {
+  $("div#select_protein_TCGA button.btn.checkbtn.btn-primary.active").click();
+};
+shinyjs.MCLPproteinselectall = function() {
+  $("div#select_protein_MCLP button.btn.checkbtn.btn-primary:not(.active)").click();
+};
+shinyjs.MCLPproteinunselectall = function() {
+  $("div#select_protein_MCLP button.btn.checkbtn.btn-primary.active").click();
+};
+shinyjs.TCGAmiRNAselectall = function() {
+  $("div#select_miRNA_TCGA button.btn.checkbtn.btn-primary:not(.active)").click();
+};
+shinyjs.TCGAmiRNAunselectall = function() {
+  $("div#select_miRNA_TCGA button.btn.checkbtn.btn-primary.active").click();
 };
 
 shinyjs.switch = function(params){

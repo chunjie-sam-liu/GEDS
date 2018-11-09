@@ -11,7 +11,7 @@ library(shinyBS)
 library(shinyWidgets)
 library(shinycssloaders)
 library(shinydashboard)
-
+library(shinythemes)
 # For frontend ------------------------------------------------------------
 
 library(DT)
@@ -74,19 +74,43 @@ body <- dashboardBody(
 
 # Dashboardpage -----------------------------------------------------------
 
-page <- dashboardPage(
+page1 <- dashboardPage(
   title = "GSEXPR - Gene Expression",
   header = header,
   sidebar = sidebar,
   body = body
 )
 
+page <- fluidPage(
+          theme = shinytheme("paper"),
+          navbarPage("GEDS",
+                   tabPanel(
+                     "Welcome",icon = icon("home"),
+                     source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value
+                   ),
+                   tabPanel(
+                     "Help", icon = icon("question"),
+                     source(file = file.path(config$wd, "ui", "help_ui.R"), local = TRUE)$value
+                    ),
+                   tabPanel(
+                     "Contact", icon= icon("envelope"),
+                     source(file = file.path(config$wd, "ui", "contact_ui.R"), local = TRUE)$value
+                   )
+          )
+)
 
 # shiny UI ----------------------------------------------------------------
 
 ui <- tagList(
-  div(style = "padding:450px", id = "loading-content",h2("Loading...")),
-  shinyjs::hidden(div(id = "app-content", page))
+  div(id = "loading-content", span(id = "loading-text","GEDS"),div(class="lds-facebook",div(), div(), div(), div(), div())),
+  shinyjs::hidden(div(id = "app-content", page)),
+  shiny::tags$head(
+    shinyWidgets::useSweetAlert(),
+    shinyjs::useShinyjs(),
+    shinyjs::extendShinyjs(script = file.path(config$wd, "www", "js", "geds.js")),
+    shiny::tags$link(rel = "stylesheet", type = "text/css", href = "css/main.css"),
+    shiny::tags$script(type = "text/javascript", src = "js/main.js")
+  )
 )
 
 

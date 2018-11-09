@@ -3,19 +3,139 @@
   background-color: #dd4b39;
   border-color: #dd4b39;
 }
-
+.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:hover, .navbar-default .navbar-nav>.active>a:focus {
+    color: #2196f3;
+}
+.navbar-default .navbar-nav>li>a {
+    color: lightslategray;
+}
+.navbar {
+    font-size: 20px;
+}
+.navbar-brand {
+    font-size: 28px;
+}
+h1, .h1 {
+    font-size: 50px;
+}
+a {
+    color: black;
+}
+.container-fluid {
+    padding-left: 1px;
+    padding-right: 0px;
+}
+button#select_all_mRNA_TCGA {
+    margin-top: 30px;
+    width: 127px;
+    margin-left: -16px;
+    margin-bottom: 1px;
+}
+button#unselect_all_mRNA_TCGA {
+    margin-left: -16px;
+}
+button#select_all_mRNA_GTEX {
+    margin-top: 30px;
+    width: 127px;
+    margin-left: -16px;
+    margin-bottom: 1px;
+}
+button#unselect_all_mRNA_GTEX {
+    margin-left: -16px;
+}
+button#select_all_mRNA_CCLE {
+    margin-top: 30px;
+    width: 127px;
+    margin-left: -16px;
+    margin-bottom: 1px;
+}
+button#unselect_all_mRNA_CCLE {
+    margin-left: -16px;
+}
+button#select_all_protein_TCGA {
+    margin-top: 30px;
+    width: 129px;
+    margin-left: -7px;
+    margin-bottom: 1px;
+}
+button#unselect_all_protein_TCGA {
+    margin-left: -7px;
+}
+button#select_all_protein_MCLP {
+    margin-top: 30px;
+    width: 129px;
+    margin-left: -7px;
+    margin-bottom: 1px;
+}
+button#unselect_all_protein_MCLP {
+    margin-left: -7px;
+}
+button#select_all_miRNA_TCGA {
+    margin-top: 30px;
+    width: 129px;
+    margin-left: -7px;
+    margin-bottom: 1px;
+}
+button#unselect_all_miRNA_TCGA {
+    margin-left: -7px;
+}
+#ui_panel_mRNA .form-group {
+    margin: 50px 0px;
+}
+#ui_panel_protein .form-group {
+    margin: 50px 0px;
+}
+#ui_panel_miRNA .form-group {
+    margin: 50px 0px;
+}
 #select_protein_TCGA .btn-primary {
-    width: 100px;
+    width: 101px;
+    margin-bottom: 1px;
 }
-
+#select_protein_MCLP .btn-primary {
+    width: 101px;
+    margin-bottom: 1px;
+}
+#select_protein_MCLP .btn.checkbtn .check-btn-icon-yes {
+    margin-left: -5px;
+}
+#select_protein_MCLP .btn.checkbtn .check-btn-icon-no {
+    margin-left: -5px;
+}
 #select_miRNA_TCGA .btn-primary {
-    width: 82px;
+    width: 72px;
+    margin-bottom: 1px;
 }
-
+#select_miRNA_TCGA .btn.checkbtn .check-btn-icon-yes {
+    margin-left: -5px;
+}
+#select_miRNA_TCGA .btn.checkbtn .check-btn-icon-no {
+    margin-left: -5px;
+}
 #select_mRNA_TCGA .btn-primary {
-    width: 80px;
+    width: 74px;
+    margin-bottom: 1px;
 }
-
+#select_mRNA_TCGA .btn.checkbtn .check-btn-icon-yes {
+    margin-left: -5px;
+}
+#select_mRNA_TCGA .btn.checkbtn .check-btn-icon-no {
+    margin-left: -5px;
+}
+#select_mRNA_GTEX .btn-primary {
+    width: 140px;
+    margin-bottom: 1px;
+}
+#select_mRNA_GTEX .btn.checkbtn .check-btn-icon-yes {
+    margin-left: -10px;
+}
+#select_mRNA_GTEX .btn.checkbtn .check-btn-icon-no {
+    margin-left: -10px;
+}
+#select_mRNA_CCLE .btn-primary {
+    width: 194px;
+    margin-bottom: 1px;
+}
 body {
 font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
 font-size: 18px !important;
@@ -29,4 +149,76 @@ h1,h2,h3 {
 .jumbotron h2 {
   font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
   text-align:center;
+}
+.loading-image{
+        position: absolute;
+        width: 660px; /*the image width*/
+        height: 500px; /*the image height*/
+        left: 50%;
+        top: 50%;
+        margin-left: -330px; /*half the image width*/
+        margin-top: -250px; /*half the image height*/
+    }
+#loading-content{
+  position: absolute;
+        width: 64px; /*the image width*/
+        height: 30px; /*the image height*/
+        left: 50%;
+        top: 50%;
+        margin-left: -32px; /*half the image width*/
+        margin-top: -15px; /*half the image height*/
+}
+#loading-text{
+  position: absolute;
+        font-size: 40px;
+        width: 90px; /*the image width*/
+        height: 100px; /*the image height*/
+        left: 50%;
+        top: 50%;
+        margin-left: -45px; /*half the image width*/
+        margin-top: -50px; /*half the image height*/
+}
+.lds-facebook {
+  display: inline-block;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+.lds-facebook div {
+  display: inline-block;
+  position: absolute;
+  left: 6px;
+  width: 10px;
+  background: #2196f3;
+  animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+.lds-facebook div:nth-child(1) {
+  left: 6px;
+  animation-delay: -0.24s;
+}
+.lds-facebook div:nth-child(2) {
+  left: 21px;
+  animation-delay: -0.12s;
+}
+.lds-facebook div:nth-child(3) {
+  left: 36px;
+  animation-delay: 0s;
+}
+.lds-facebook div:nth-child(4) {
+  left: 51px;
+  animation-delay: 0.12s;
+}
+.lds-facebook div:nth-child(5) {
+  left: 66px;
+  animation-delay: 0.24s;
+}
+@keyframes lds-facebook {
+  0% {
+    top: 6px;
+    height: 45px;
+  }
+  50%, 100% {
+    top: 19px;
+    height: 20px;
+  }
 }
