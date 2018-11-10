@@ -5,7 +5,7 @@
 fn_panel_protein <- function(){
   tagList(
   column(
-    width = 10, offset = 0,
+    width = 11, offset = 0,
     shinyWidgets::searchInput(
       inputId = "input_protein_set",
       label = "",
@@ -40,23 +40,23 @@ fn_protein_select <- function(.tcga,.mclp){
       tabsetPanel(id = "select_protein",
         tabPanel("Cancer Types",
           tagList(
-          column(width = 10,
+          column(width = 11,
           checkboxGroupButtons(
           inputId = "select_protein_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
           individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_protein_TCGA", label = "select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_protein_TCGA", label = "unselect all", class = "btn")
+            shinyBS::bsButton(inputId = "select_all_protein_TCGA", label = "Select all", class = "btn"),
+            shinyBS::bsButton(inputId = "unselect_all_protein_TCGA", label = "Unselect all", class = "btn")
                  ) )),
-        tabPanel("Tissues",
+        tabPanel("Normal Tissues",
           tagList(
-          column(width = 10,
+          column(width = 11,
           checkboxGroupButtons(
           inputId = "select_protein_MCLP", label = "",status = "primary", selected = c('bladder'), 
           individual = TRUE, choices = .mclp, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_protein_MCLP", label = "select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_protein_MCLP", label = "unselect all", class = "btn")
+            shinyBS::bsButton(inputId = "select_all_protein_MCLP", label = "Select all", class = "btn"),
+            shinyBS::bsButton(inputId = "unselect_all_protein_MCLP", label = "Unselect all", class = "btn")
             ) ))
         )
       )
@@ -88,13 +88,15 @@ fn_protein_single_result <- function(){
     shinydashboard::tabBox(
       id = "protein_expr_plot", title = "", width = 12,
       tabPanel("Figure of expression",
-               column(width=2,
+               fluidRow(
+               column(width=1,
                       download_bt(NS("protein",id=NULL))
-               ),
+               )),
+               fluidRow(
                column(width=12,
                 plotOutput(outputId = "expr_bubble_plot_protein", height = "100%", width = "100%") %>% 
                 withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-               )
+               ))
       ),
       tabPanel(
         title = "Table of expression",
@@ -131,11 +133,13 @@ fn_protein_multi_result <- function(list){
 
 fn_plot_multiple_protein <- function(choice){
   tagList(
-    column(width=2,
+    fluidRow(
+    column(width=1,
            download_bt(NS("protein",id=NULL))
-    ),
+    )),
+    fluidRow(
     column(width=12,
       plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-    )
+    ))
   )
 }

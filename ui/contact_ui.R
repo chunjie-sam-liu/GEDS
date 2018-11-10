@@ -29,7 +29,7 @@ tabItem(
       ),
       
       shiny::tags$address(
-        shiny::tags$p(shiny::tags$strong("Chun-Jie Liu, Ph.D. Candidate")),
+        shiny::tags$p(shiny::tags$strong("Chun-Jie Liu, Ph.D. Postdoc fellow")),
         shiny::fluidRow(
           shiny::column(width = 1, offset = 0, shiny::div(shiny::strong("Email: "))),
           shiny::column(width = 3, offset = 0, shiny::plotOutput(outputId = "cj", height = "20px", width = "200px"))
