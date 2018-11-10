@@ -21,9 +21,9 @@ h1, .h1 {
 a {
     color: black;
 }
-.container-fluid {
-    padding-left: 1px;
-    padding-right: 0px;
+.navbar {
+    margin-left: -10px;
+    margin-right: -10px;
 }
 button#select_all_mRNA_TCGA {
     margin-top: 30px;

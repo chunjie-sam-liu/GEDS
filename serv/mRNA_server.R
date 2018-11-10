@@ -107,12 +107,15 @@ expr_box_plot_mRNA <-  function(.expr){
     scale_color_manual(values = c("midnightblue", "red3")) -> p
   }
   else{
+    nu <- length(.expr$cancer_types)
+    TCGA_color %>% head(n=nu) %>% dplyr::select(color) %>% dplyr::pull(color) ->.color
     .expr %>% dplyr::rename(FPKM = expr) %>%
       dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
       tidyr::spread(key = name, value = FPKM) %>% 
       ggplot(mapping = aes(x = cancer_types, middle = median,
                            ymin = lower.whisker, ymax = upper.whisker,
-                           lower = lower.hinge, upper = upper.hinge, color = cancer_types)) -> p
+                           lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
+    scale_color_manual(values = .color) -> p
   }
     p +
     geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
@@ -148,6 +151,7 @@ expr_box_plot_mRNA <-  function(.expr){
         # legend label
         label.position = "right",
         # label.theme = element_text(size = 14),
+        nrow = 2,
         reverse = TRUE
       )
     )
@@ -196,7 +200,8 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
     else if(input$select_mRNA == "Tissues" && length(input$select_mRNA_GTEX)>0){
       re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_GTEX)
-        GTEX_mRNA %>% dplyr::filter(SMTS %in% input$select_mRNA_GTEX) %>%
+        GTEX_mRNA %>% dplyr::mutate(types = stringr::str_to_title(SMTS)) %>% dplyr::select(SMTS=types,summary) %>% 
+          dplyr::filter(SMTS %in% input$select_mRNA_GTEX) %>%
         dplyr::mutate(
         expr = purrr::map(
           .x = summary,
@@ -210,7 +215,8 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
     else if(input$select_mRNA == "Cell lines" && length(input$select_mRNA_CCLE)>0){
       re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
-        CCLE_mRNA %>% dplyr::filter(tissue %in% input$select_mRNA_CCLE) %>%
+        CCLE_mRNA %>% dplyr::mutate(types = stringr::str_to_title(tissue)) %>% dplyr::select(tissue=types,summary) %>% 
+          dplyr::filter(tissue %in% input$select_mRNA_CCLE) %>%
         dplyr::mutate(
         expr = purrr::map(
           .x = summary,

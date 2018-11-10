@@ -130,12 +130,12 @@ choice <- reactiveValues(
 #GTEX_mRNA <- readr::read_rds(file.path(config$database, "mRNA","GTEX_mRNA_summary.rds.gz"))
 #CCLE_mRNA <- readr::read_rds(file.path(config$database, "mRNA","CCLE_mRNA_summary.rds.gz"))
 
-#TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_new.rds.gz"))
+TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_new.rds.gz"))
 MCLP_protein <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_filter_new.rds.gz"))
 TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","TCGA_miRNA_summary.rds.gz"))
 
+TCGA_color <- readr::read_rds(file.path(config$database, "TCGA_color.rds.gz"))
 # Load gene list ----------------------------------------------------------
-
 mRNA_TCGA <- readr::read_rds(file.path(config$database,"mRNA","TCGA_sort_cancertype.rds.gz"))
 mRNA_GTEX <- readr::read_rds(file.path(config$database,"mRNA","GTEX_new_tissues_without.rds.gz"))
 mRNA_CCLE <- readr::read_rds(file.path(config$database,"mRNA","CCLE_tissues_without.rds.gz"))
