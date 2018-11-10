@@ -100,12 +100,14 @@ validate_input_miRNA_set <- eventReactive(
 # miRNA table print -------------------------------------------------------
 expr_box_plot_mirna <-  function(.expr){
   quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
+  TCGA_color %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>% dplyr::select(color) %>% dplyr::pull(color) ->.color
   .expr %>% dplyr::rename(TPM = expr,symbol = name) %>%
     dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
     tidyr::spread(key = name, value = TPM) %>% 
     ggplot(mapping = aes(x = cancer_types, middle = median,
                          ymin = lower.whisker, ymax = upper.whisker,
                          lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
+    scale_color_manual(values = .color) +
     geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
     geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25)) +
     facet_wrap(~symbol, ncol = 1,scales = "free_y", strip.position = 'right') +

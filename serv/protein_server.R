@@ -138,7 +138,16 @@ expr_buble_plot_protein <-  function(.expr){
     tidyr::spread(key = name, value = FPKM) %>% 
     ggplot(mapping = aes(x = cancer_types, middle = median,
                          ymin = lower.whisker, ymax = upper.whisker,
-                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
+                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) ->p
+    if(input$select_protein == "Cancer Types"){
+      TCGA_color %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>% dplyr::select(color) %>% dplyr::pull(color) ->.color
+    }
+    else{
+      nu <- length(.expr$cancer_types)
+      TCGA_color %>% head(n=nu) %>% dplyr::select(color) %>% dplyr::pull(color) ->.color
+    }
+    p +
+    scale_color_manual(values = .color) +
     geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
     geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25)) +
     facet_wrap(~protein, ncol = 1,scales = "free_y", strip.position = 'right') +

@@ -10,11 +10,10 @@ fn_welcome_msg <- function() {
 # analysis ----------------------------------------------------------------
 
 fn_analysis <-  function(){
-  shiny::fluidRow(
   column(
-    width = 11,offset =1,
+    width = 10,offset =1,
     shinydashboard::tabBox(
-      title = "",id = "tabset1", height = "140px",width=10,
+      title = "",id = "tabset1", height = "140px", width=12,
           tabPanel("mRNA", 
                   shiny::uiOutput(outputId = "ui_panel_mRNA"),
                   shiny::uiOutput(outputId = "ui_mRNA_select"),
@@ -35,7 +34,7 @@ fn_analysis <-  function(){
                   shiny::uiOutput(outputId = "ui_miRNA_result")
           )
         )
-  ))
+  )
 }
 
 # download gene set button ------------------------------------------------
