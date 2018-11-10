@@ -197,11 +197,10 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
       ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
         dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
         dplyr::select(cancer_types=tmp,symbol,expr) -> expr_clean }
-    else if(input$select_mRNA == "Tissues" && length(input$select_mRNA_GTEX)>0){
+    else if(input$select_mRNA == "Normal Tissues" && length(input$select_mRNA_GTEX)>0){
       re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_GTEX)
-        GTEX_mRNA %>% dplyr::mutate(types = stringr::str_to_title(SMTS)) %>% dplyr::select(SMTS=types,summary) %>% 
-          dplyr::filter(SMTS %in% input$select_mRNA_GTEX) %>%
+        GTEX_mRNA %>% dplyr::filter(SMTS %in% input$select_mRNA_GTEX) %>%
         dplyr::mutate(
         expr = purrr::map(
           .x = summary,
@@ -215,8 +214,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
     else if(input$select_mRNA == "Cell lines" && length(input$select_mRNA_CCLE)>0){
       re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
-        CCLE_mRNA %>% dplyr::mutate(types = stringr::str_to_title(tissue)) %>% dplyr::select(tissue=types,summary) %>% 
-          dplyr::filter(tissue %in% input$select_mRNA_CCLE) %>%
+        CCLE_mRNA  %>% dplyr::filter(tissue %in% input$select_mRNA_CCLE) %>%
         dplyr::mutate(
         expr = purrr::map(
           .x = summary,
@@ -240,7 +238,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
     number <- length(plot_number$mRNA)
     if(number < 5){
       if(dataset_number$mRNA == 1 ){
-        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = number*300, width = 300)
+        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = number*300, width = 260)
         output$`mRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -249,7 +247,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
             ggsave(file,expr_box_plot_mRNA(mRNA_plot_result),device = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
         )}
       else if(dataset_number$mRNA <5 ){
-        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = number*300, width = dataset_number$mRNA*300)
+        output$expr_bubble_plot_mRNA <- renderPlot({expr_box_plot_mRNA(mRNA_plot_result)},height = number*300, width = dataset_number$mRNA*260)
         output$`mRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -304,7 +302,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
     choice$mRNA <- paste(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
     mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> one_plot
     if(dataset_number$mRNA == 1 ){
-      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()}, height = 300, width = 300)
+      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()}, height = 300, width = 260)
       output$`mRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -314,7 +312,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
       )
     }
     else if(dataset_number$mRNA<5 && dataset_number$mRNA>1){
-      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 300, width = dataset_number$mRNA*300)
+      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 300, width = dataset_number$mRNA*260)
       output$`mRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")

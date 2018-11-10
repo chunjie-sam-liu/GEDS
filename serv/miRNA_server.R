@@ -140,6 +140,7 @@ expr_box_plot_mirna <-  function(.expr){
         # legend label
         label.position = "right",
         # label.theme = element_text(size = 14),
+        nrow = 2,
         reverse = TRUE
       )
     )
@@ -191,7 +192,7 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
     number <- length(plot_number$miRNA)
     if(number < 5){
       if(dataset_number$miRNA == 1 ){
-        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_box_plot_mirna()}, height = number*300, width = 300)
+        output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% expr_box_plot_mirna()}, height = number*300, width = 260)
         output$`miRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -202,7 +203,7 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
         }
       else if(dataset_number$miRNA <5 ){
         output$expr_bubble_plot_mirna <- renderPlot({mirna_plot_result %>% 
-            expr_box_plot_mirna()},height = number*300, width = dataset_number$miRNA*300)
+            expr_box_plot_mirna()},height = number*300, width = dataset_number$miRNA*260)
         output$`miRNA-picdownload` <- downloadHandler(
           filename = function() {
             paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -257,7 +258,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
     choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
     mirna_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> one_plot
     if(dataset_number$miRNA == 1 ){
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300, width = 300)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300, width = 260)
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
@@ -267,7 +268,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
       )
       }
     else if(dataset_number$miRNA<5){
-      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300, width = dataset_number$miRNA*300)
+      output[[choice$miRNA]] <- renderPlot({one_plot %>% expr_box_plot_mirna()}, height = 300, width = dataset_number$miRNA*260)
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
