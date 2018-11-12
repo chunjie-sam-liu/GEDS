@@ -1,16 +1,33 @@
 /*main css for gsexpr*/
 .btn-primary.active, .btn-primary:active, .open>.dropdown-toggle.btn-primary {
-  background-color: #dd4b39;
-  border-color: #dd4b39;
+  background-color: #b3d2ee;
+  border-color: #b3d2ee;
 }
 .btn {
   text-transform: none;
 }
 button.btn.checkbtn.btn-primary.active:hover {
-    background-color: red;
+    background-color: #7fbfbf;
+    border-color: #7fbfbf;
+}
+button.btn.checkbtn.btn-primary:hover {
+    background-color: #b0c7c2;
+    border-color: #b0c7c2;
+}
+.btn-primary:focus {
+    background-color: #D6E3C1;
+}
+.btn-primary.active:focus {
+    background-color: #b3d2ee;
+}
+button.btn.checkbtn.btn-primary {
+    color: black;
 }
 .nav-tabs>li>a, .nav-tabs>li>a:focus {
     box-shadow: inset 0 -1px 0 black;
+}
+.btn-primary {
+    background-color: #D6E3C1;
 }
 textarea, textarea.form-control, input.form-control, input[type=text], input[type=password], input[type=email], input[type=number], [type=text].form-control, [type=password].form-control, [type=email].form-control, [type=tel].form-control, [contenteditable].form-control {
     box-shadow: inset 0 -1px 0 black;
