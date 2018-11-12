@@ -127,8 +127,8 @@ choice <- reactiveValues(
 
 # Load data ---------------------------------------------------------------
 TCGA_mRNA <- readr::read_rds(file.path(config$database, "mRNA","TCGA_mRNA_summary.rds.gz"))
-GTEX_mRNA <- readr::read_rds(file.path(config$database, "mRNA","GTEX_mRNA_summary.rds.gz"))
-CCLE_mRNA <- readr::read_rds(file.path(config$database, "mRNA","CCLE_mRNA_summary.rds.gz"))
+# GTEX_mRNA <- readr::read_rds(file.path(config$database, "mRNA","GTEX_mRNA_summary.rds.gz"))
+# CCLE_mRNA <- readr::read_rds(file.path(config$database, "mRNA","CCLE_mRNA_summary.rds.gz"))
 
 
 #TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_summary.rds.gz"))

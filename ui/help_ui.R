@@ -6,8 +6,9 @@ tabItem(
   
   # welcome
   
-  fluidRow(shiny::uiOutput(outputId = "ui_introduction")),
-  fluidRow(shiny::uiOutput(outputId = "ui_feature_figure")),
+  # fluidRow(shiny::uiOutput(outputId = "ui_introduction")),
+  # fluidRow(shiny::uiOutput(outputId = "ui_feature_figure")),
+  fluidRow(shiny::uiOutput(outputId = 'ui_help_content')),
   
   
 
