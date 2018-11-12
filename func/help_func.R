@@ -11,9 +11,25 @@ fn_tutorial <- function() {
 
 # document ----------------------------------------------------------------
 
+help_data_table <- function(source) {
+  # load data
+  .d <- readr::read_rds(path = file.path(config$))
+}
+
+
 fn_document <- function() {
   shiny::tagList(
-    shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein RPPA expression in TCGA cancer types, GTEx normal tissues and CCLE cancer cell lines.")
+    shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein RPPA expression. The all expression data is from TCGA cancer types, GTEx normal tissues and CCLE cancer cell lines."),
+    
+    shiny::tags$dl(
+      class = "dl-vertical",
+      shiny::tags$dt("TCGA cancer types:"),
+      shiny::tags$dd(
+        shiny::tags$div(
+          shiny::uiOutput(outputId = 'tcga_data_table')
+        )
+      )
+  )
   )
 }
 
