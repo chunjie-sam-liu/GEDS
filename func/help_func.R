@@ -4,8 +4,6 @@
 
 fn_tutorial <- function() {
   shiny::tagList(
-    shiny::tags$h1(shiny::icon(name = "hand-o-right"), "Tutorial")
-    
     
   )
 }
@@ -15,7 +13,7 @@ fn_tutorial <- function() {
 
 fn_document <- function() {
   shiny::tagList(
-    shiny::tags$h1(shiny::icon(name = "hand-o-right"), "Tutorial")
+    shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein RPPA expression in TCGA cancer types, GTEx normal tissues and CCLE cancer cell lines.")
   )
 }
 
@@ -23,13 +21,15 @@ fn_document <- function() {
 
 fn_help_content <- function(){
   column(
-    width = 12, offset = 0,
+    width = 10,offset = 1, aling = 'left',
     
-    shiny::tags$h1(
-      class = "text-success text-left",
+    shiny::tags$h3(
+      class = "text-left",
       shiny::icon(name = "angle-double-right", class = "fa-fw"),
       "Tutorial and Documentation"
     ),
+    
+    shiny::tags$hr(),
     
     shiny::tags$div(
       
@@ -60,7 +60,7 @@ fn_help_content <- function(){
           fn_tutorial()
         ),
         shiny::tags$div(
-          role = "tabpanel", class = "tab-pane", id = "ui_document",
+          role = "tabpanel", class = "tab-pane", id = "ui_document", 
           fn_document()
         )
       )

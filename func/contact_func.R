@@ -7,7 +7,7 @@ email <- function(.txt) {
   grid::grid.newpage()
   grid::grid.text(
     label = .txt, hjust = 0, vjust = 1, x = 0, y = 1, 
-    gp = grid::gpar(col = "#666666", fontsize = 18)
+    gp = grid::gpar(col = "#2196f3", fontsize = 18, fontface = 'bold', fontfamily = 'times')
   )
 }
 
@@ -27,7 +27,7 @@ address <- function(title, id) {
 
 fn_contact_info <- function() {
   column(
-    width = 12, offset = 0, align = "left",
+    width = 10,offset = 1, align = 'left',
     
     shiny::tags$h3(
       class = "text-left",
