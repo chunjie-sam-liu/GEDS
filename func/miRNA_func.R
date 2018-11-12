@@ -5,7 +5,7 @@
 fn_panel_miRNA <- function(){
   tagList(
   column(
-    width = 10, offset = 0,
+    width = 11, offset = 0,
     shinyWidgets::searchInput(
       inputId = "input_miRNA_set",
       label = "",
@@ -40,13 +40,13 @@ fn_miRNA_select <- function(.miRNA){
       tabsetPanel(
         tabPanel("Cancer Types",
           tagList(
-          column(width = 10,
+          column(width = 11,
           checkboxGroupButtons(
           inputId = "select_miRNA_TCGA", label = "", status = "primary",selected = c('ACC','BLCA','BRCA','CESC'),
           individual = TRUE, choices = .miRNA,checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
           column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_miRNA_TCGA", label = "select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_miRNA_TCGA", label = "unselect all", class = "btn")
+            shinyBS::bsButton(inputId = "select_all_miRNA_TCGA", label = "Select all", class = "btn"),
+            shinyBS::bsButton(inputId = "unselect_all_miRNA_TCGA", label = "Unselect all", class = "btn")
           ))
        )))
 }
@@ -77,13 +77,15 @@ fn_mirna_single_result <- function(){
     shinydashboard::tabBox(
       id = "expr_plot", title = "", width = 12,
       tabPanel("Figure of expression",
-               column(width=2,
+               fluidRow(
+               column(width=1,
                       download_bt(NS("miRNA",id=NULL))
-               ),
+               )),
+               fluidRow(
                column(width=12,
                 plotOutput(outputId = "expr_bubble_plot_mirna", height = "100%", width = "100%") %>% 
                 withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-               )
+               ))
           ),
       tabPanel(
         title = "Table of expression",
@@ -119,10 +121,12 @@ fn_mirna_multi_result <- function(list){
 
 fn_plot_multiple_miRNA <- function(choice){
   tagList(
-    column(width=2,
+    fluidRow(
+    column(width=1,
            download_bt(NS("miRNA",id=NULL))
-    ),
+    )),
+    fluidRow(
     column(width=12,
       plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-    ))
+    )))
 }

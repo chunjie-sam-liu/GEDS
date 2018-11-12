@@ -1,5 +1,5 @@
 # saved as footer.r
-shiny::fluidRow(
+fluidRow(
   style = "text-align:center",
   shiny::tags$hr(),
   shiny::tags$p(

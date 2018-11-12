@@ -130,9 +130,10 @@ TCGA_mRNA <- readr::read_rds(file.path(config$database, "mRNA","TCGA_mRNA_summar
 GTEX_mRNA <- readr::read_rds(file.path(config$database, "mRNA","GTEX_mRNA_summary.rds.gz"))
 CCLE_mRNA <- readr::read_rds(file.path(config$database, "mRNA","CCLE_mRNA_summary.rds.gz"))
 
-TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_new.rds.gz"))
-MCLP_protein <- readr::read_rds(file.path(config$database, "protein","MCLP_expr_filter_new.rds.gz"))
-TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","TCGA_miRNA_summary.rds.gz"))
+
+#TCGA_protein <- readr::read_rds(file.path(config$database, "protein","TCGA_protein_summary.rds.gz"))
+# MCLP_protein <- readr::read_rds(file.path(config$database, "protein","MCLP_protein_summary.rds.gz"))
+#TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","TCGA_miRNA_summary.rds.gz"))
 
 TCGA_color <- readr::read_rds(file.path(config$database, "TCGA_color.rds.gz"))
 # Load gene list ----------------------------------------------------------

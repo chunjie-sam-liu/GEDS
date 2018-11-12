@@ -110,11 +110,11 @@ CCLE_filter %>% multidplyr::partition(cluster = cluster) %>%
             .x %>% 
                 purrrlyr::by_row(
                     ..f = function(.y) {
-                        .y %>% dplyr::select(-symbol) %>% unlist() -> .xv
+                        .y %>% dplyr::select(-symbol,-protein) %>% unlist() -> .xv
                         c(quantile(.xv),mean(.xv)) %>% unname()
                     }
                 ) %>% dplyr::rename(summary = .out) %>% 
-            dplyr::select(symbol,summary)
+            dplyr::select(symbol,protein,summary) %>%tidyr::unnest()
         }
       )
     ) %>% 
@@ -126,28 +126,28 @@ CCLE_filter %>% multidplyr::partition(cluster = cluster) %>%
     CCLE_summary %>% dplyr::select(-expr) %>% readr::write_rds("CCLE_summary.rds.gz",compress="gz")
 
 #miRNA
-cluster <- multidplyr::create_cluster(33)
-TCGA %>% multidplyr::partition(cluster = cluster) %>%
+cluster <- multidplyr::create_cluster(19)
+MCLP %>% multidplyr::partition(cluster = cluster) %>%
     multidplyr::cluster_library("magrittr") %>%
     dplyr::mutate(
       mean = purrr::map(
-        .x = mirna,
+        .x = expression,
         .f = function(.x){
             .x %>% 
                 purrrlyr::by_row(
                     ..f = function(.y) {
-                        .y %>% dplyr::select(-gene,-name) %>% unlist() -> .xv
+                        .y %>% tidyr::gather(key = barcode, value = expr, -c(symbol,protein)) %>% tidyr::drop_na() %>% .$expr -> .xv
                         c(quantile(.xv),mean(.xv)) %>% unname()
                     }
                 ) %>% dplyr::rename(summary = .out) %>%
-            dplyr::select(gene,name,summary)
+            dplyr::select(symbol,protein,summary)
         }
       )
     ) %>% 
     dplyr::collect() %>%
     dplyr::as_tibble() %>%
     dplyr::ungroup() %>%
-    dplyr::select(-PARTITION_ID) ->TCGA_summary
+    dplyr::select(-PARTITION_ID) ->MCLP_summary
     parallel::stopCluster(cluster)
 
 TCGA %>% dplyr::filter(cancer_types %in% c("SKCM","SARC")) %>%
@@ -167,13 +167,28 @@ tibble::tibble(l=.vvv) %>%
       expression = purrr::map(
         .x = l,
         .f = function(.x) {
-          paste(.x,"-") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE)->a
+          paste(.x,"-") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., test$match, value = TRUE)->a
+          test %>% dplyr::filter(match %in% a) %>% .$symbol->b
           if(length(a)<1){
-            paste(.x,",") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE)->a
+            paste(.x,",") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., test$match, value = TRUE)->a
+            test %>% dplyr::filter(match %in% a) %>% .$symbol->b
             if(length(a)<1){
-              grep(pattern = .x, .total_symbol$match2, value = TRUE) ->a
+              grep(pattern = .x, test$match2, value = TRUE) ->a
+              test %>% dplyr::filter(match2 %in% a) %>% .$symbol->b
             }
           }
+          b
         }
       )
     ) -> .v_dedup
+
+    %>%
+          dplyr::mutate(
+          expr = purrr::map(
+            .x = summary,
+            .f = function(.x) {
+              .x %>%
+                dplyr::filter(symbol %in% match_protein) %>% tidyr::unnest()
+            }
+          )
+          ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(expr=summary)-> expr_clean
