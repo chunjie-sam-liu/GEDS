@@ -1,4 +1,8 @@
 /*main css for gsexpr*/
+div{
+  color: black;
+}
+
 .btn-primary.active, .btn-primary:active, .open>.dropdown-toggle.btn-primary {
   background-color: #b3d2ee;
   border-color: #b3d2ee;
@@ -36,7 +40,7 @@ textarea, textarea.form-control, input.form-control, input[type=text], input[typ
     color: #2196f3;
 }
 .navbar-default .navbar-nav>li>a {
-    color: lightslategray;
+    color: black;
 }
 .navbar {
     font-size: 20px;
@@ -48,7 +52,7 @@ h1, .h1 {
     font-size: 50px;
 }
 a {
-    color: black;
+    color: #2196f3;
 }
 .navbar {
     margin-left: -10px;
@@ -182,6 +186,7 @@ h1,h2,h3 {
   font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
 }
 
+
 .jumbotron h2 {
   font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
   text-align:center;
@@ -257,4 +262,12 @@ h1,h2,h3 {
     top: 19px;
     height: 20px;
   }
+}
+
+
+/* add by chunjie-sam-liu for help tutorial and doc typeset */
+
+div#ui_document {
+  padding:30px 20px;
+  text-align: justify;
 }
