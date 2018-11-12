@@ -13,8 +13,8 @@ config$version <- "0.0.1"
 # default getwd()
 # in development mode, change the config$wd to your working directory
 
- config$wd <- "/data/xiamx/github/GEDS"
-#config$wd <- "/data/liucj/github/GEDS"
+ # config$wd <- "/data/xiamx/github/GEDS"
+config$wd <- "/data/liucj/github/GEDS"
 
 # Databases ---------------------------------------------------------------
 config$database <- "/data/shiny-data/GEDS"
