@@ -3,7 +3,7 @@
 # panel -------------------------------------------------------------------
 
 fn_panel_mRNA <- function(){
-  column(width = 12,
+  tagList(
     column(
       width = 11, offset = 0,
       shinyWidgets::searchInput(

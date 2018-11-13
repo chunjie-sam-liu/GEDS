@@ -100,14 +100,15 @@ validate_input_miRNA_set <- eventReactive(
 # miRNA table print -------------------------------------------------------
 expr_box_plot_mirna <-  function(.expr){
   quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
-  TCGA_color %>% dplyr::filter(cancer_types %in% input$select_miRNA_TCGA) %>% dplyr::select(color) %>% dplyr::pull(color) ->.color
   .expr %>% dplyr::rename(TPM = expr,symbol = name) %>%
-    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
+    tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>% 
+    dplyr::mutate(types = stringr::str_to_title(types)) %>% 
+    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>% 
     tidyr::spread(key = name, value = TPM) %>% 
     ggplot(mapping = aes(x = cancer_types, middle = median,
                          ymin = lower.whisker, ymax = upper.whisker,
-                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
-    scale_color_manual(values = .color) +
+                         lower = lower.hinge, upper = upper.hinge, color = types)) +
+    scale_color_manual(values = c("midnightblue", "red3")) +
     geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
     geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25)) +
     facet_wrap(~symbol, ncol = 1,scales = "free_y", strip.position = 'right') +
@@ -177,10 +178,12 @@ observeEvent(c(input$select_miRNA_TCGA,reset$miRNA),{
         .f = function(.x) {
           .x %>%
             dplyr::filter(name %in% match$miRNA) %>% 
-            tidyr::unnest()
+            tidyr::gather(key = barcode, value = expr, -c(gene,name)) %>% tidyr::unnest()
         }
       )
-    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) ->> expr_clean
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
+        dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
+        dplyr::select(cancer_types=tmp,gene,name,expr) ->> expr_clean
     status$miRNA_result <- TRUE
     if(status$miRNA_trigger){status$miRNA_trigger <- FALSE} else{status$miRNA_trigger <- TRUE}
     expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
