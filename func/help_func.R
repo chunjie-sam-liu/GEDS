@@ -13,7 +13,7 @@ fn_tutorial <- function() {
 
 help_data_table <- function(source) {
   # load data
-  .d <- readr::read_rds(path = file.path(config$))
+  
 }
 
 
@@ -37,7 +37,7 @@ fn_document <- function() {
 
 fn_help_content <- function(){
   column(
-    width = 10,offset = 1, aling = 'left',
+    width = 10, offset = 1, aling = 'left',
     
     shiny::tags$h3(
       class = "text-left",
