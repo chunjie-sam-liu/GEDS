@@ -5,7 +5,7 @@ library(magrittr)
 
 # path --------------------------------------------------------------------
 
-path_data <- '/data/shiny-data/GEDS'
+path_data <- '/home/liucj/shiny-data/GEDS'
 
 
 # load data ---------------------------------------------------------------
@@ -50,10 +50,7 @@ gtex_mrna <- readr::read_rds(path = file.path(path_data, 'mRNA', 'GTEX_mRNA_tiss
   dplyr::mutate(tissue = stringr::str_to_title(string = tissue)) %>% 
   dplyr::arrange(-mrna_normal_tissue)
 
-names(gtex_mrna) %>% 
-  stringr::str_replace_all(pattern = '[^[:alnum:]]+', replacement = ' ') %>% 
-  stringr::str_to_title() ->
-  names(gtex_mrna)
+names(gtex_mrna) <- c('Tissue', 'mRNA Normal Tissue')
 
 ccle_mrna <- readr::read_rds(path = file.path(path_data, 'mRNA', 'CCLE_mRNA_cellline_summary.rds.gz')) %>% 
   dplyr::mutate(tissue = stringr::str_replace_all(string = tissue, pattern = '[^[:alnum:]]+', replacement = ' ')) %>% 
@@ -61,10 +58,7 @@ ccle_mrna <- readr::read_rds(path = file.path(path_data, 'mRNA', 'CCLE_mRNA_cell
   dplyr::rename(mrna_cell_line = cellline_num) %>% 
   dplyr::arrange(-mrna_cell_line)
 
-names(ccle_mrna) %>% 
-  stringr::str_replace_all(pattern = '[^[:alnum:]]+', replacement = ' ') %>% 
-  stringr::str_to_title() ->
-  names(ccle_mrna)
+names(ccle_mrna) <- c('Tissue', 'mRNA Cell Line')
   
 
 mclp_protein <- readr::read_rds(path = file.path(path_data, 'protein', 'MCLP_protein_cellline_summary.rds.gz')) %>% 
