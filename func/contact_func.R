@@ -27,7 +27,7 @@ address <- function(title, id) {
 
 fn_contact_info <- function() {
   column(
-    width = 10,offset = 1, align = 'left',
+    width = 10, offset = 1, align = 'left',
     
     shiny::tags$h3(
       class = "text-left",
