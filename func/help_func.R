@@ -8,7 +8,23 @@ stat_data <- readr::read_rds(path = file.path(config$database, 'geds-data-stat.r
 
 fn_tutorial <- function() {
   shiny::tagList(
-    'placeholder'
+    shiny::tags$h3(shiny::icon(name = "angle-down"), "Tutorial"),
+    
+    shiny::tags$img(
+      src = "./img/tutorial.jpg",
+      class = "center-block img-responsive" ),
+    shiny::tags$br(),
+    
+    shiny::tags$h3(shiny::icon(name = "angle-down"), "Figure and table"),
+    
+    shiny::tags$img(
+      src = "./img/figure.jpg",
+      class = "center-block img-responsive" ),
+    shiny::tags$p("This figure displayed the expression of the input list in the dataset user selected."),
+    shiny::tags$img(
+      src = "./img/table.jpg",
+      class = "center-block img-responsive" ),
+    shiny::tags$p("This table cantained the detail information and the average expression about the input list. User could click the arrow besides column names to change the rank or input on the line to filter. ")
   )
 }
 

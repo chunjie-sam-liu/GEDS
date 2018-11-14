@@ -27,6 +27,9 @@ button.btn.checkbtn.btn-primary:hover {
 button.btn.checkbtn.btn-primary {
     color: black;
 }
+button.btn.radiobtn.btn-primary {
+    color: black;
+}
 .nav-tabs>li>a, .nav-tabs>li>a:focus {
     box-shadow: inset 0 -1px 0 black;
 }
