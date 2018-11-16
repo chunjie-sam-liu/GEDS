@@ -26,7 +26,14 @@ library(ggplot2)
 
 page <- fluidPage(
           theme = shinytheme("paper"),
-          navbarPage("GEDS",
+          navbarPage(title = HTML(paste(
+            img(
+              src = "./img/logo.png",
+              align = "middle",
+              class = "img-responsvie",
+              style = "height:55px !important; margin-top: -15px"
+            ), ""
+          )),
                    tabPanel(
                      "Welcome",icon = icon("home"),
                      source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value
@@ -38,7 +45,9 @@ page <- fluidPage(
                    tabPanel(
                      "Contact", icon= icon("envelope"),
                      source(file = file.path(config$wd, "ui", "contact_ui.R"), local = TRUE)$value
-                   )
+                   ),
+            fluid = TRUE,
+          collapsible = TRUE
           )
 )
 
