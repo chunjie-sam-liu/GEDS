@@ -119,7 +119,7 @@ expr_buble_plot_protein <-  function(.expr){
       axis.title.x = element_blank(),
       axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
       
-      strip.background = element_rect(fill = "white", color = "white"),
+      strip.background = element_rect(fill = NA, color = "white"),
       
       panel.background = element_rect(fill = "white", color = "black", size = 0.5),
       panel.grid.major.y = element_blank(),

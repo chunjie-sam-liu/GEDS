@@ -49,7 +49,7 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
           shinyBS::bsButton(inputId = "select_all_mRNA_TCGA", label = "Select all", class = "btn"),
           shinyBS::bsButton(inputId = "unselect_all_mRNA_TCGA", label = "Unselect all", class = "btn")
           ))),
-          tabPanel("Normal Tissues",
+          tabPanel("Normal tissues",
           tagList(
           column(width = 11,
           checkboxGroupButtons(
