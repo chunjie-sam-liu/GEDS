@@ -100,34 +100,53 @@ expr_box_plot_mRNA <-  function(.expr){
     tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>% 
     dplyr::mutate(types = stringr::str_to_title(types)) %>% 
     dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>% 
-    tidyr::spread(key = name, value = FPKM) %>% 
-    ggplot(mapping = aes(x = cancer_types, middle = median,
+    tidyr::spread(key = name, value = FPKM) -> dd
+    dd %>% 
+      dplyr::filter(types == 'Tumor') %>% 
+      dplyr::arrange(symbol, median) %>% 
+      dplyr::mutate(.r = dplyr::row_number() %>% rev()) %>% 
+      dplyr::select(cancer_types, symbol, .r) %>% 
+      dplyr::right_join(dd, by = c('cancer_types', 'symbol')) %>% 
+      dplyr::mutate(.r = 0.3 * .r) %>%
+      dplyr::arrange(-.r) -> ddd
+    ddd %>% 
+    ggplot(mapping = aes(x = .r, middle = median,
                          ymin = lower.whisker, ymax = upper.whisker,
                          lower = lower.hinge, upper = upper.hinge, color = types)) +
     scale_color_manual(values = c("midnightblue", "red3")) -> p
   }
   else{
     nu <- length(.expr$cancer_types)
-    TCGA_color %>% head(n=nu) %>% dplyr::select(color) %>% dplyr::pull(color) ->.color
+    TCGA_color %>% head(n = nu) %>% dplyr::select(color) %>% dplyr::pull(color) -> .color
     .expr %>% dplyr::rename(FPKM = expr) %>%
-      dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
-      tidyr::spread(key = name, value = FPKM) %>% 
-      ggplot(mapping = aes(x = cancer_types, middle = median,
+      dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>%
+      tidyr::spread(key = name, value = FPKM) -> dd 
+    dd %>% 
+      dplyr::arrange(symbol, median) %>% 
+      dplyr::mutate(.r = dplyr::row_number() %>% rev()) %>% 
+      dplyr::select(cancer_types, symbol, .r) %>% 
+      dplyr::right_join(dd, by = c('cancer_types', 'symbol')) %>% 
+      dplyr::mutate(.r = 0.4 * .r) %>%
+      dplyr::arrange(-.r) -> ddd
+    ddd %>% 
+      ggplot(mapping = aes(x = .r, middle = median,
                            ymin = lower.whisker, ymax = upper.whisker,
                            lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
     scale_color_manual(values = .color) -> p
   }
     p +
-    geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
-    geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25)) +
-    facet_wrap(~symbol, ncol = 1,scales = "free_y", strip.position = 'right') +
+    geom_errorbar(width = 0.1, position = position_dodge(0.25, preserve = 'single')) +
+    geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25, preserve = 'single')) +
+    facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
+    scale_x_continuous(breaks = ddd$.r,labels = ddd$cancer_types) +
     # facet_wrap(~symbol, ncol = 1, scales = "free") +
     theme(
-      text = element_text(colour = 'black'),
+      text = element_text(colour = 'black', size = 18),
       
       axis.line = element_line(color = "black", size = 0.1),
       axis.title.x = element_blank(),
       axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+      axis.text.y = element_text(color = 'black', size = 14),
       
       strip.background = element_rect(fill = NA, color = "white"),
       
@@ -197,7 +216,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
       ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
         dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
         dplyr::select(cancer_types=tmp,symbol,expr) -> expr_clean }
-    else if(input$select_mRNA == "Normal Tissues" && length(input$select_mRNA_GTEX)>0){
+    else if(input$select_mRNA == "Normal tissues" && length(input$select_mRNA_GTEX)>0){
       re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_GTEX)
         GTEX_mRNA %>% dplyr::filter(SMTS %in% input$select_mRNA_GTEX) %>%

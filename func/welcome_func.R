@@ -3,12 +3,20 @@
 fn_welcome_msg <- function() {
   column(
     width = 12, offset = 0,
-    shiny::tags$img(
-      src = "./img/logo.png",
-      class = "center-block img-responsive",
-      style = "height: 150px;"
-    ),
-    shiny::tags$h1("GEDS: Gene Expression Display Server")
+    tagList(
+      column(width = 2,offset = 1,
+        shiny::tags$img(
+        src = "./img/logo.png",
+        class = "center-block img-responsive",
+        style = "height: 150px;"
+      )
+      ),
+      column(width = 9,
+        shiny::tags$h1("GEDS: Gene Expression Display Server"),
+        shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein RPPA expression. The mRNA expression data contains 33 cancer types from TCGA, 30 normal tissues from GTEx and 25 tissues CCLE cancer cell lines.")
+        )
+    )
+    
   )
 }
 
@@ -18,7 +26,7 @@ fn_analysis <-  function(){
   column(
     width = 10,offset =1,
     shinydashboard::tabBox(
-      title = "",id = "tabset1", height = "140px", width=12,
+      title = "",id = "tabset1", width=12,
           tabPanel("mRNA", 
                   shiny::uiOutput(outputId = "ui_panel_mRNA"),
                   shiny::uiOutput(outputId = "ui_mRNA_select"),

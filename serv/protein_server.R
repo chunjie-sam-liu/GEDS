@@ -183,7 +183,7 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
           }
         )
       ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) -> expr_clean }
-    else if(input$select_protein == "Normal Tissues" && length(input$select_protein_MCLP)>0 ){
+    else if(input$select_protein == "Normal tissues" && length(input$select_protein_MCLP)>0 ){
       re <- "1"
       dataset_number$protein <-  length(input$select_protein_MCLP)
       MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) %>%
