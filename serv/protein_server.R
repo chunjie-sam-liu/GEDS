@@ -162,8 +162,8 @@ expr_clean_datatable_protein <- function(.expr_clean) {
     style = "bootstrap",
     class = "table-bordered table-condensed"
   ) %>% 
-    DT::formatSignif(columns = c("mean"), digits = 2) %>%
-    DT::formatRound(columns = c("mean"), 2)
+    DT::formatSignif(columns = c("expr"), digits = 2) %>%
+    DT::formatRound(columns = c("expr"), 2)
 }
 
 # ObserveEvent ------------------------------------------------------------
@@ -182,7 +182,7 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
               dplyr::filter(symbol %in% match$protein)  %>% tidyr::unnest()
           }
         )
-      ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=summary) -> expr_clean }
+      ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=tumor) -> expr_clean }
     else if(input$select_protein == "Normal tissues" && length(input$select_protein_MCLP)>0 ){
       re <- "1"
       dataset_number$protein <-  length(input$select_protein_MCLP)
@@ -195,12 +195,12 @@ observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_prote
                 dplyr::filter(symbol %in% match$protein) %>% tidyr::unnest()
             }
           )
-          ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary)-> expr_clean }
+          ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary) -> expr_clean }
   if(re == "1"){
   if(status$protein_trigger){status$protein_trigger <- FALSE} else{status$protein_trigger <- TRUE}
   status$protein_result <- TRUE
   expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> protein_plot_result
-  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> mRNA_table_result
+  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> protein_table_result
   protein_plot_result %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein -> plot_number$protein
   choice$protein <- protein_plot_result %>% dplyr::filter(protein %in% plot_number$protein[1]) %>% dplyr::select(protein) %>% 
     dplyr::distinct() %>% .$protein

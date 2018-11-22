@@ -13,7 +13,7 @@ fn_welcome_msg <- function() {
       ),
       column(width = 9,
         shiny::tags$h1("GEDS: Gene Expression Display Server"),
-        shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein RPPA expression. The mRNA expression data contains 33 cancer types from TCGA, 30 normal tissues from GTEx and 25 tissues CCLE cancer cell lines.")
+        shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein RPPA expression.")
         )
     )
     
@@ -29,22 +29,23 @@ fn_analysis <-  function(){
       title = "",id = "tabset1", width=12,
           tabPanel("mRNA", 
                   shiny::uiOutput(outputId = "ui_panel_mRNA"),
-                  shiny::uiOutput(outputId = "ui_mRNA_select"),
+                  #shiny::uiOutput(outputId = "ui_mRNA_select"),
                   shiny::uiOutput(outputId = "ui_mRNA_stat"),
                   shiny::uiOutput(outputId = "ui_mRNA_result")
-                  
                   ),
           tabPanel("Protein", 
                   shiny::uiOutput(outputId = "ui_panel_protein"),
-                  shiny::uiOutput(outputId = "ui_protein_select"),
+                  #shiny::uiOutput(outputId = "ui_protein_select"),
                   shiny::uiOutput(outputId = "ui_protein_stat"),
-                  shiny::uiOutput(outputId = "ui_protein_result")
+                  #shiny::uiOutput(outputId = "ui_protein_result")
+                  shiny::uiOutput(outputId = "ui_protein_result_all")
           ),
           tabPanel("miRNA", 
                   shiny::uiOutput(outputId = "ui_panel_miRNA"),
-                  shiny::uiOutput(outputId = "ui_miRNA_select"),
+                  #shiny::uiOutput(outputId = "ui_miRNA_select"),
                   shiny::uiOutput(outputId = "ui_miRNA_stat"),
-                  shiny::uiOutput(outputId = "ui_miRNA_result")
+                  #shiny::uiOutput(outputId = "ui_miRNA_result")
+                  shiny::uiOutput(outputId = "ui_miRNA_result_all")
           )
         )
   )

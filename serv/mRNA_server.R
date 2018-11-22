@@ -92,28 +92,192 @@ validate_input_mRNA_set <- eventReactive(
   }
 )
 
+#####add new
+observeEvent(c(reset$mRNA),{
+  if(status$mRNA_set){
+  dataset_number$mRNA <- 30
+  TCGA_result()
+  GTEX_result()
+  CCLE_result()
+  a <- TCGA_mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
+  b <- GTEX_mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
+  c <- CCLE_mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
+  plot_number$mRNA <- c(a,b,c) %>% tibble::tibble(x = .) %>% dplyr::distinct() %>% .$x
+  if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
+  status$mRNA_result <- TRUE
+  return(TCGA_mRNA_plot_result)
+  return(GTEX_mRNA_plot_result)
+  return(CCLE_mRNA_plot_result)
+}}
+)
+TCGA_result <- function(){
+  TCGA_mRNA %>% 
+    dplyr::mutate(
+      expr = purrr::map(
+        .x = summary,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(symbol %in% match$mRNA) %>% dplyr::select(-entrez_id) %>%
+            tidyr::gather(key = barcode, value = expr, -c(symbol)) %>% tidyr::unnest()
+        }
+      )
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
+    dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
+    dplyr::select(cancer_types = tmp,site,symbol,expr) -> expr_clean 
+  expr_clean %>% dplyr::group_by(cancer_types,site,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,site,symbol,expr = tmp) ->> TCGA_mRNA_plot_result
+  expr_clean %>% dplyr::group_by(cancer_types,site,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
+    dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> TCGA_mRNA_table_result
+    output$expr_dt_comparison_TCGA_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(TCGA_mRNA_table_result)})
+    return(TCGA_mRNA_plot_result)
+}
+
+GTEX_result <- function(){
+  GTEX_mRNA %>%
+    dplyr::mutate(
+      expr = purrr::map(
+        .x = summary,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(symbol %in% match$mRNA) %>% dplyr::select(-ensembl_gene_id) %>%
+            tidyr::unnest()
+        }
+      )
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean 
+  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) ->> GTEX_mRNA_plot_result
+  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
+    dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> GTEX_mRNA_table_result
+  output$expr_dt_comparison_GTEX_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_mRNA_table_result)})
+  return(GTEX_mRNA_plot_result)
+}
+
+CCLE_result <- function(){
+  CCLE_mRNA  %>% 
+    dplyr::mutate(
+      expr = purrr::map(
+        .x = summary,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(symbol %in% match$mRNA) %>% tidyr::unnest()
+        }
+      )
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary) -> expr_clean
+  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) ->> CCLE_mRNA_plot_result
+  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
+    dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> CCLE_mRNA_table_result
+  output$expr_dt_comparison_CCLE_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(CCLE_mRNA_table_result)})
+  return(CCLE_mRNA_plot_result)
+}
+#####add new
+
 # mRNA table_print -------------------------------------------------------------
-expr_box_plot_mRNA <-  function(.expr){
+expr_box_plot_mRNA <-  function(.expr,.type){
   quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
-  if(input$select_mRNA == "Cancer types"){
-  .expr %>% dplyr::rename(FPKM = expr) %>%
-    tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>% 
-    dplyr::mutate(types = stringr::str_to_title(types)) %>% 
-    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>% 
-    tidyr::spread(key = name, value = FPKM) -> dd
-    dd %>% 
-      dplyr::filter(types == 'Tumor') %>% 
-      dplyr::arrange(symbol, median) %>% 
-      dplyr::mutate(.r = dplyr::row_number() %>% rev()) %>% 
-      dplyr::select(cancer_types, symbol, .r) %>% 
-      dplyr::right_join(dd, by = c('cancer_types', 'symbol')) %>% 
-      dplyr::mutate(.r = 0.3 * .r) %>%
-      dplyr::arrange(-.r) -> ddd
-    ddd %>% 
-    ggplot(mapping = aes(x = .r, middle = median,
+  ###before
+  #if(input$select_mRNA == "Cancer types"){
+    #nu <- length(input$select_mRNA_TCGA)
+  ###before
+  ###add new
+  if(.type == "TCGA"){
+    nu = 33
+  ### add new
+    .expr %>% dplyr::rename(FPKM = expr) %>%
+      tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>%
+      dplyr::mutate(tmp = paste(site,"(",cancer_types,")")) %>%
+      dplyr::select(cancer_types=tmp,types,symbol,FPKM) %>%
+      dplyr::mutate(types = stringr::str_to_title(types)) %>% 
+      dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>% 
+    ###before
+      #tidyr::spread(key = name, value = FPKM) -> dd
+    #if(nu > 1){
+    #dd %>% 
+      #dplyr::filter(types == 'Tumor') %>% 
+      #dplyr::arrange(symbol, median) %>% 
+      #dplyr::mutate(.r = dplyr::row_number() %>% rev()) %>% 
+      #dplyr::select(cancer_types, symbol, .r) %>% 
+      #dplyr::right_join(dd, by = c('cancer_types', 'symbol')) -> s
+      #if(nu < 5){
+        #s %>%
+        #dplyr::mutate(.r = 0.5 * .r) %>%
+        #dplyr::arrange(-.r) -> ddd
+      #}
+      #else{
+        #s %>% 
+        #dplyr::mutate(.r = 0.3 * .r-0.3) %>%
+        #dplyr::arrange(-.r) -> ddd
+      #}
+    #ddd %>% 
+    #ggplot(mapping = aes(x = .r, middle = median,
+     #                    ymin = lower.whisker, ymax = upper.whisker,
+      #                   lower = lower.hinge, upper = upper.hinge, color = types)) +
+      #scale_x_continuous(breaks = ddd$.r,labels = ddd$cancer_types) +
+      #scale_color_manual(values = c("midnightblue", "red3")) -> p
+  #}
+  #else{
+    #dd %>% 
+      #ggplot(mapping = aes(x = cancer_types, middle = median,
+       #                    ymin = lower.whisker, ymax = upper.whisker,
+        #                   lower = lower.hinge, upper = upper.hinge, color = types)) +
+      #scale_color_manual(values = c("midnightblue", "red3")) -> p
+  #}
+    ###before
+    ###add new
+    tidyr::spread(key = name, value = FPKM) %>% 
+    dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(median)) %>% dplyr::ungroup() -> t
+    t %>% dplyr::filter(types %in% "Tumor") %>% .$cancer_types -> order
+    t %>%
+    ggplot(mapping = aes(x = cancer_types, middle = median,
                          ymin = lower.whisker, ymax = upper.whisker,
                          lower = lower.hinge, upper = upper.hinge, color = types)) +
+    scale_x_discrete(limits= order) +
     scale_color_manual(values = c("midnightblue", "red3")) -> p
+    p +
+      geom_errorbar(width = 0.3, position = position_dodge(0.75, preserve = 'single')) +
+      geom_boxplot(stat = 'identity', width = 0.6, position = position_dodge(0.75, preserve = 'single')) +
+      facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
+      # facet_wrap(~symbol, ncol = 1, scales = "free") +
+      
+      theme(
+        text = element_text(colour = 'black', size = 18),
+        
+        axis.line = element_line(color = "black", size = 0.1),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+        axis.text.y = element_text(color = 'black', size = 14),
+        
+        strip.background = element_rect(fill = NA, color = "white"),
+        
+        panel.background = element_rect(fill = "white", color = "black", size = 0.5),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        
+        legend.position = 'top',
+        legend.key = element_rect(fill = 'white'),
+        plot.title = element_text(hjust = 0.5,size = 18)
+      ) +
+      labs(
+        x = 'Cancer Types',
+        y = 'FPKM(log2)'
+      ) +
+      guides(
+        color = guide_legend(
+          # legend title
+          title = "Cancer Types",
+          title.position = "left",
+          
+          # legend label
+          label.position = "right",
+          # label.theme = element_text(size = 14),
+          nrow = 2,
+          reverse = TRUE
+        )
+      )
+    ###add new
   }
   else{
     nu <- length(.expr$cancer_types)
@@ -133,47 +297,92 @@ expr_box_plot_mRNA <-  function(.expr){
                            ymin = lower.whisker, ymax = upper.whisker,
                            lower = lower.hinge, upper = upper.hinge, color = cancer_types)) +
     scale_color_manual(values = .color) -> p
-  }
+    ###add new
     p +
-    geom_errorbar(width = 0.1, position = position_dodge(0.25, preserve = 'single')) +
-    geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25, preserve = 'single')) +
-    facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
-    scale_x_continuous(breaks = ddd$.r,labels = ddd$cancer_types) +
-    # facet_wrap(~symbol, ncol = 1, scales = "free") +
-    theme(
-      text = element_text(colour = 'black', size = 18),
+      geom_errorbar(width = 0.1, position = position_dodge(0.25, preserve = 'single')) +
+      geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25, preserve = 'single')) +
+      facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
+      # facet_wrap(~symbol, ncol = 1, scales = "free") +
       
-      axis.line = element_line(color = "black", size = 0.1),
-      axis.title.x = element_blank(),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
-      axis.text.y = element_text(color = 'black', size = 14),
-      
-      strip.background = element_rect(fill = NA, color = "white"),
-      
-      panel.background = element_rect(fill = "white", color = "black", size = 0.5),
-      panel.grid.major.y = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      
-      legend.position = 'top',
-      legend.key = element_rect(fill = 'white')
-    ) +
-    labs(
-      x = 'Cancer Types',
-      y = 'FPKM(log2)'
-    ) +
-    guides(
-      color = guide_legend(
-        # legend title
-        title = "Cancer Types",
-        title.position = "left",
+      theme(
+        text = element_text(colour = 'black', size = 18),
         
-        # legend label
-        label.position = "right",
-        # label.theme = element_text(size = 14),
-        nrow = 2,
-        reverse = TRUE
+        axis.line = element_line(color = "black", size = 0.1),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+        axis.text.y = element_text(color = 'black', size = 14),
+        
+        strip.background = element_rect(fill = NA, color = "white"),
+        
+        panel.background = element_rect(fill = "white", color = "black", size = 0.5),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        
+        legend.position = 'top',
+        legend.key = element_rect(fill = 'white'),
+        plot.title = element_text(hjust = 0.5,size = 18)
+      ) +
+      labs(
+        #title = "GTeX",
+        x = 'Cancer Types',
+        y = 'FPKM(log2)'
+      ) +
+      guides(
+        color = guide_legend(
+          # legend title
+          title = "Cancer Types",
+          title.position = "left",
+          
+          # legend label
+          label.position = "right",
+          # label.theme = element_text(size = 14),
+          reverse = TRUE
+        )
       )
-    )
+    ###add new
+  }
+  ###before
+    #p +
+    #geom_errorbar(width = 0.1, position = position_dodge(0.25, preserve = 'single')) +
+    #geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25, preserve = 'single')) +
+    #facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
+    
+    #theme(
+     #text = element_text(colour = 'black', size = 18),
+      
+      #axis.line = element_line(color = "black", size = 0.1),
+      #axis.title.x = element_blank(),
+      #axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+      #axis.text.y = element_text(color = 'black', size = 14),
+      
+      #strip.background = element_rect(fill = NA, color = "white"),
+      
+      #panel.background = element_rect(fill = "white", color = "black", size = 0.5),
+      #panel.grid.major.y = element_blank(),
+      #panel.grid.minor.y = element_blank(),
+      
+      #legend.position = 'top',
+      #legend.key = element_rect(fill = 'white'),
+      #plot.title = element_text(hjust = 0.5,size = 18)
+    #) +
+    #labs(
+      #x = 'Cancer Types',
+      #y = 'FPKM(log2)'
+    #) +
+    #guides(
+      #color = guide_legend(
+        ## legend title
+        #title = "Cancer Types",
+        #title.position = "left",
+        
+        ## legend label
+        #label.position = "right",
+        
+        #nrow = 2,
+        #reverse = TRUE
+      #)
+    #)
+    ###before
 }
 expr_clean_datatable_mRNA <- function(.expr_clean) {
   DT::datatable(
@@ -202,8 +411,9 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
   if(length(input$select_mRNA)>0 && status$mRNA_set){
     if(input$select_mRNA == "Cancer types" && length(input$select_mRNA_TCGA)>0){
       re <- "1"
-        dataset_number$mRNA <-  length(input$select_mRNA_TCGA)
-        TCGA_mRNA %>% dplyr::filter(cancer_types %in% input$select_mRNA_TCGA) %>%
+        TCGA_mRNA %>% dplyr::filter(site %in% input$select_mRNA_TCGA) -> p
+        dataset_number$mRNA <- p %>% .$cancer_types %>% length()
+        p %>%
         dplyr::mutate(
         expr = purrr::map(
           .x = summary,
@@ -215,7 +425,13 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
         )
       ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
         dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
-        dplyr::select(cancer_types=tmp,symbol,expr) -> expr_clean }
+        dplyr::select(cancer_types = tmp,site,symbol,expr) -> expr_clean 
+        expr_clean %>% dplyr::group_by(cancer_types,site,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+          dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,site,symbol,expr = tmp) ->> mRNA_plot_result
+        expr_clean %>% dplyr::group_by(cancer_types,site,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+          dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
+          dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> mRNA_table_result
+        }
     else if(input$select_mRNA == "Normal tissues" && length(input$select_mRNA_GTEX)>0){
       re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_GTEX)
@@ -229,7 +445,13 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
               tidyr::unnest()
           }
         )
-      ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean }
+        ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean 
+        expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+          dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) ->> mRNA_plot_result
+        expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+          dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
+          dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> mRNA_table_result
+        }
     else if(input$select_mRNA == "Cell lines" && length(input$select_mRNA_CCLE)>0){
       re <- "1"
         dataset_number$mRNA <-  length(input$select_mRNA_CCLE)
@@ -242,15 +464,16 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_TCGA,input$select_mRNA_GTEX,i
               dplyr::filter(symbol %in% match$mRNA) %>% tidyr::unnest()
           }
         )
-        ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary)-> expr_clean }
+        ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary) -> expr_clean
+        expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+          dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) ->> mRNA_plot_result
+        expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+          dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
+          dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> mRNA_table_result
+        }
     if(re == "1"){
       if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
-      status$mRNA_result <- TRUE
-    expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
-      dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) ->> mRNA_plot_result
-    expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
-      dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
-      dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr)->>mRNA_table_result
+    status$mRNA_result <- TRUE
     mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol -> plot_number$mRNA
     choice$mRNA <- mRNA_plot_result %>% dplyr::filter(symbol %in% plot_number$symbol[1]) %>% 
       dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
@@ -318,8 +541,13 @@ observeEvent(status$mRNA_valid, {
 observe(validate_input_mRNA_set())
 observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), {
   if(length(input$select_mRNA_result)>0 && status$mRNA_set){
-    choice$mRNA <- paste(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
-    mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> one_plot
+    ### before
+    #choice$mRNA <- paste(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
+    #mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> one_plot
+    ### before
+    ### add new
+    choice$mRNA <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
+    ### add new
     if(dataset_number$mRNA == 1 ){
       output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()}, height = 300, width = 260)
       output$`mRNA-picdownload` <- downloadHandler(
@@ -341,7 +569,31 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
       )
     }
     else{
-      output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 300+6*dataset_number$mRNA)
+      ###before
+      #output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 300+6*dataset_number$mRNA)
+      #output$`mRNA-picdownload` <- downloadHandler(
+        #filename = function() {
+          #paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
+        #},
+        #content = function(file){
+          #ggsave(file,expr_box_plot_mRNA(one_plot),device = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
+      #)
+      ###before
+      ###add new
+      TCGA_mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_plot
+      GTEX_mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
+      CCLE_mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_plot
+      TCGA_plot <- expr_box_plot_mRNA(TCGA_one_plot,"TCGA")
+      GTEX_plot <- expr_box_plot_mRNA(GTEX_one_plot,"GTEX")
+      CCLE_plot <- expr_box_plot_mRNA(CCLE_one_plot,"CCLE")
+      ggpubr::ggarrange(
+        TCGA_plot,GTEX_plot,CCLE_plot,
+        labels = c("TCGA","GTEX","CCLE"),
+        ncol = 1,nrow = 3
+      ) -> plot_result
+      output[[choice$mRNA]] <- renderPlot({
+        plot_result
+      }, height = 1500 )
       output$`mRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
@@ -349,6 +601,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
         content = function(file){
           ggsave(file,expr_box_plot_mRNA(one_plot),device = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
       )
+      ###add new
     }
   }
 })

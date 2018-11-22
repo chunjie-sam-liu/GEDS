@@ -21,7 +21,7 @@ output$ui_panel_miRNA <- renderUI({fn_panel_miRNA()})
 # cancer types selection --------------------------------------------------
 
 output$ui_mRNA_select <- renderUI({if (status$mRNA_set) {
-  fn_mRNA_select(.tcga = mRNA_TCGA$cancer_types, .gtex = mRNA_GTEX$tissue, .ccle = mRNA_CCLE$tissue)}  else {NULL}})
+  fn_mRNA_select(.tcga = mRNA_TCGA %>% dplyr::arrange(site) %>% dplyr::select(site) %>% dplyr::distinct() %>% .$site, .gtex = mRNA_GTEX$tissue, .ccle = mRNA_CCLE$tissue)}  else {NULL}})
 output$ui_protein_select <- renderUI({if (status$protein_set) {
   fn_protein_select(.tcga = protein_TCGA$cancer_types, .mclp = protein_MCLP$tissue)} else {NULL}})
 output$ui_miRNA_select <- renderUI({if (status$miRNA_set) {fn_miRNA_select(miRNA_TCGA$cancer_types)} else {NULL}})
@@ -35,18 +35,20 @@ output$ui_miRNA_stat <- renderUI({if (status$miRNA_set) {fn_miRNA_set_stat(input
 # Start analysis ----------------------------------------------------------
 output$ui_mRNA_result <- renderUI({
   if(status$mRNA_result) {
-    if(multiple$mRNA){
+    #if(multiple$mRNA){
       fn_mRNA_multi_result(list = plot_number$mRNA)
-    }
-    else{
-      fn_mRNA_single_result()
-    }}
+    #}
+    #else{
+      #fn_mRNA_single_result()
+    #}
+  }
   else {NULL}
 })
 output$plot_multiple_mRNA <- renderUI({
   if(status$mRNA_result){
-    if(multiple$mRNA){
-      fn_plot_multiple_mRNA(choice$mRNA)}
+    #if(multiple$mRNA){
+      fn_plot_multiple_mRNA(choice$mRNA)
+      #}
   }})
 
 output$ui_protein_result <- renderUI({
@@ -67,18 +69,20 @@ output$plot_multiple_protein <- renderUI({
 
 output$ui_miRNA_result <- renderUI({
   if(status$miRNA_result) {
-    if(multiple$miRNA){
+    #if(multiple$miRNA){
       fn_mirna_multi_result(list = plot_number$miRNA)
-    }
-    else{
-      fn_mirna_single_result()
-    }
+    #}
+    #else{
+      #fn_mirna_single_result()
+    #}
   } 
   else {NULL}
   })
 output$plot_multiple_miRNA <- renderUI({
   if(status$miRNA_result){
-    if(multiple$miRNA){
-      fn_plot_multiple_miRNA(choice$miRNA)}
-    }})
+    #if(multiple$miRNA){
+      fn_plot_multiple_miRNA(choice$miRNA)
+      #}
+    }
+  })
 
