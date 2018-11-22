@@ -138,7 +138,20 @@ fn_mRNA_multi_result <- function(list){
         ),
         tabPanel(
           title = "Table of expression",
-          DT::dataTableOutput(outputId = "expr_dt_comparison_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          tagList(
+          column(
+            width = 12, offset = 0,
+            DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          ),
+          column(
+            width = 12, offset = 0,
+            DT::dataTableOutput(outputId = "expr_dt_comparison_GTEX_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          ),
+          column(
+            width = 12, offset = 0,
+            DT::dataTableOutput(outputId = "expr_dt_comparison_CCLE_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          )
+          )
         ))
     )
 }
