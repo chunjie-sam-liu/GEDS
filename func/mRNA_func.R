@@ -9,7 +9,7 @@ fn_panel_mRNA <- function(){
       shinyWidgets::searchInput(
         inputId = "input_mRNA_set",
         label = "",
-        placeholder = 'Please input HGNC symbol gene set separated by space or " , "or " ; "',
+        placeholder = 'Please input a set of gene official symbols or aliases separated by space or "," or ";".',
         btnSearch = icon("search"),
         btnReset = icon("remove"),
         width = "100%"
@@ -76,18 +76,7 @@ fn_mRNA_select <- function(.tcga,.gtex,.ccle){
 fn_mRNA_set_stat <- function(input_list_check){
   column(
     width = 10, offset = 1, 
-    downloadLink(
-      outputId = "download_total_mRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
-    ),
-    downloadLink(
-      outputId = "download_valid_mRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
-    ),
-    downloadLink(
-      outputId = "download_unmatched_mRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
-    )
+    verbatimTextOutput("mRNA_invalid")
   )
 }
 

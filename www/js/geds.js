@@ -10,7 +10,7 @@ shinyjs.example_mRNA_set = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
   var selector = $("#" + params.id);
-  selector.val("TP53");
+  selector.val("TP53 FOXM1 PTEN MYB");
 };
 shinyjs.example_protein_set = function(params){
   var defaultParams = {id: null};
@@ -22,7 +22,7 @@ shinyjs.example_miRNA_set = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
   var selector = $("#" + params.id);
-  selector.val("hsa-let-7b-5p");
+  selector.val("hsa-let-7b-5p hsa-miR-9-5p hsa-miR-9-3p");
 };
 
 shinyjs.TCGAmRNAselectall = function() {

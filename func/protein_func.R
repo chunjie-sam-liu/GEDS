@@ -65,18 +65,7 @@ fn_protein_select <- function(.tcga,.mclp){
 fn_protein_set_stat <- function(input_list_check){
   column(
     width = 10, offset = 1,
-    downloadLink(
-      outputId = "download_total_protein_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
-    ),
-    downloadLink(
-      outputId = "download_valid_protein_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
-    ),
-    downloadLink(
-      outputId = "download_protein_input_logs", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
-    )
+    verbatimTextOutput("protein_invalid")
   )
 }
 

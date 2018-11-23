@@ -54,19 +54,7 @@ fn_miRNA_select <- function(.miRNA){
 fn_miRNA_set_stat <- function(input_list_check){
   column(
     width = 10, offset = 1,
-    downloadLink(
-      outputId = "download_total_miRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
-    ),
-    
-    downloadLink(
-      outputId = "download_valid_miRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
-    ),
-    downloadLink(
-      outputId = "download_miRNA_input_logs", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
-    )
+    verbatimTextOutput("miRNA_invalid")
   )
 }
 # result ------------------------------------------------------------------
