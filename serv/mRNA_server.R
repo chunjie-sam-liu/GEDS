@@ -96,9 +96,9 @@ validate_input_mRNA_set <- eventReactive(
 observeEvent(c(reset$mRNA),{
   if(status$mRNA_set){
   dataset_number$mRNA <- 30
-  TCGA_result()
-  GTEX_result()
-  CCLE_result()
+  TCGA_mRNA_result()
+  GTEX_mRNA_result()
+  CCLE_mRNA_result()
   a <- TCGA_mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
   b <- GTEX_mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
   c <- CCLE_mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
@@ -110,7 +110,7 @@ observeEvent(c(reset$mRNA),{
   return(CCLE_mRNA_table_result)
 }}
 )
-TCGA_result <- function(){
+TCGA_mRNA_result <- function(){
   TCGA_mRNA %>% 
     dplyr::mutate(
       expr = purrr::map(
@@ -133,7 +133,7 @@ TCGA_result <- function(){
     return(TCGA_mRNA_plot_result)
 }
 
-GTEX_result <- function(){
+GTEX_mRNA_result <- function(){
   GTEX_mRNA %>%
     dplyr::mutate(
       expr = purrr::map(
@@ -154,7 +154,7 @@ GTEX_result <- function(){
   return(GTEX_mRNA_table_result)
 }
 
-CCLE_result <- function(){
+CCLE_mRNA_result <- function(){
   CCLE_mRNA  %>% 
     dplyr::mutate(
       expr = purrr::map(
@@ -180,7 +180,6 @@ expr_box_plot_mRNA <-  function(.expr,.type){
   quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
   ###add new
   if(.type == "TCGA"){
-    nu = 33
   ### add new
     .expr %>% dplyr::rename(FPKM = expr) %>%
       tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>%
@@ -244,13 +243,12 @@ expr_box_plot_mRNA <-  function(.expr,.type){
   }
   else{
     nu <- length(.expr$cancer_types)
-    TCGA_color %>% head(n = nu) %>% dplyr::select(color) %>% dplyr::pull(color) -> .color
     .expr %>% dplyr::rename(FPKM = expr) %>%
       dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(FPKM)) %>% dplyr::ungroup() -> t
     t %>%  .$cancer_types -> order
     t %>%
       ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
-      scale_x_discrete(limits= order) +
+      scale_x_discrete(limits = order) +
       geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#2a4b5a") +
       facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
       # facet_wrap(~symbol, ncol = 1, scales = "free") +
@@ -288,11 +286,6 @@ expr_box_plot_mRNA <-  function(.expr,.type){
           y = 'FPKM(log2)'
         ) -> q}
     q +
-      labs(
-        #title = "GTeX",
-        x = 'Cancer Types',
-        y = 'FPKM(log2)'
-      ) +
       guides(
         color = guide_legend(
           # legend title
@@ -465,10 +458,6 @@ observeEvent(status$mRNA_valid, {
 observe(validate_input_mRNA_set())
 observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), {
   if(length(input$select_mRNA_result)>0 && status$mRNA_set){
-    ### before
-    #choice$mRNA <- paste(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
-    #mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> one_plot
-    ### before
     ### add new
     choice$mRNA <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
     ### add new
@@ -493,16 +482,6 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
       )
     }
     else{
-      ###before
-      #output[[choice$mRNA]] <- renderPlot({one_plot %>% expr_box_plot_mRNA()},height = 300+6*dataset_number$mRNA)
-      #output$`mRNA-picdownload` <- downloadHandler(
-        #filename = function() {
-          #paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
-        #},
-        #content = function(file){
-          #ggsave(file,expr_box_plot_mRNA(one_plot),device = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
-      #)
-      ###before
       ###add new
       TCGA_mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_plot
       GTEX_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
@@ -522,7 +501,7 @@ observeEvent(c(input$select_mRNA,input$select_mRNA_result,status$mRNA_trigger), 
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
         },
         content = function(file){
-          ggsave(file,expr_box_plot_mRNA(one_plot),device = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
+          ggsave(file,plot_result,device = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
       )
       ###add new
     }

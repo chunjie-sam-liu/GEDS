@@ -114,7 +114,7 @@ fn_mirna_multi_result <- function(list){
         ),
         tabPanel(
           title = "Table of expression",
-          DT::dataTableOutput(outputId = "expr_dt_comparison_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
         ))
       )
 }

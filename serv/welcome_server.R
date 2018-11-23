@@ -53,18 +53,20 @@ output$plot_multiple_mRNA <- renderUI({
 
 output$ui_protein_result <- renderUI({
   if(status$protein_result) {
-    if(multiple$protein){
+    #if(multiple$protein){
       fn_protein_multi_result(list = plot_number$protein)
+    #}
+    #else{
+     # fn_protein_single_result()
+    #}
     }
-    else{
-      fn_protein_single_result()
-    }}
     else {NULL}
     })
 output$plot_multiple_protein <- renderUI({
   if(status$protein_result){
-    if(multiple$protein){
-      fn_plot_multiple_protein(choice$protein)}
+    #if(multiple$protein){
+      fn_plot_multiple_protein(choice$protein)
+    #}
   }})
 
 output$ui_miRNA_result <- renderUI({

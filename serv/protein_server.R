@@ -91,26 +91,81 @@ validate_input_protein_set <- eventReactive(
   }
 )
 
+###add new
+observeEvent(c(reset$protein),{
+  if(status$protein_set){
+    dataset_number$protein <- 30
+    TCGA_protein_result()
+    MCLP_protein_result()
+    a <- TCGA_protein_plot_result %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein
+    b <- MCLP_protein_table_result %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein
+    plot_number$protein <- c(a,b) %>% tibble::tibble(x = .) %>% dplyr::distinct() %>% .$x
+    if(status$protein_trigger){status$protein_trigger <- FALSE} else{status$protein_trigger <- TRUE}
+    status$protein_result <- TRUE
+    return(TCGA_protein_plot_result)
+    return(MCLP_protein_table_result)
+  }}
+)
+
+TCGA_protein_result <- function(){
+  TCGA_protein %>%
+    dplyr::mutate(
+      expr = purrr::map(
+        .x = summary,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(symbol %in% match$protein)  %>% tidyr::unnest()
+        }
+      )
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=tumor) -> expr_clean
+  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> TCGA_protein_plot_result
+  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_protein_table_result
+  output$expr_dt_comparison_TCGA_protein <- DT::renderDataTable({expr_clean_datatable_protein(TCGA_protein_table_result)})
+  return(TCGA_protein_plot_result)
+  
+}
+
+MCLP_protein_result <- function(){
+  MCLP_protein %>%
+    dplyr::mutate(
+      expr = purrr::map(
+        .x = summary,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(symbol %in% match$protein) %>% tidyr::unnest()
+        }
+      )
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary) -> expr_clean
+  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> MCLP_protein_table_result
+  output$expr_dt_comparison_MCLP_protein <- DT::renderDataTable({expr_clean_datatable_protein(MCLP_protein_table_result)})
+  return(MCLP_protein_table_result)
+}
+
+###add new
+
 # protein table_print -------------------------------------------------------------
-expr_buble_plot_protein <-  function(.expr){
+expr_buble_plot_protein <-  function(.expr,.type){
   quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
+  if(.type == "TCGA"){
+  nu <- .expr$cancer_types %>% length()
+  print(.expr)
   .expr %>% dplyr::rename(FPKM = expr) %>%
+    dplyr::mutate(tmp = paste(site,"(",cancer_types,")")) %>%
+    dplyr::select(cancer_types=tmp,symbol,protein,FPKM) %>%
     dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
     tidyr::spread(key = name, value = FPKM) %>% 
+      dplyr::group_by(protein) %>% dplyr::arrange(symbol,desc(median)) %>% dplyr::ungroup() -> t
+    t %>% .$cancer_types -> order
+    t %>%
     ggplot(mapping = aes(x = cancer_types, middle = median,
                          ymin = lower.whisker, ymax = upper.whisker,
-                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) ->p
-    if(input$select_protein == "Cancer Types"){
-      TCGA_color %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>% dplyr::select(color) %>% dplyr::pull(color) ->.color
-    }
-    else{
-      nu <- length(.expr$cancer_types)
-      TCGA_color %>% head(n=nu) %>% dplyr::select(color) %>% dplyr::pull(color) ->.color
-    }
+                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) -> p
+    TCGA_color %>% head(n = nu) %>% dplyr::select(color) %>% dplyr::pull(color) -> .color
     p +
     scale_color_manual(values = .color) +
-    geom_errorbar(width = 0.1, position = position_dodge(0.25)) +
-    geom_boxplot(stat = 'identity', width = 0.2, position = position_dodge(0.25)) +
+    scale_x_discrete(limits= order) +
+    geom_errorbar(width = 0.3, position = position_dodge(0.75)) +
+    geom_boxplot(stat = 'identity', width = 0.6, position = position_dodge(0.75)) +
     facet_wrap(~protein, ncol = 1,scales = "free_y", strip.position = 'right') +
     theme(
       text = element_text(colour = 'black'),
@@ -118,6 +173,7 @@ expr_buble_plot_protein <-  function(.expr){
       axis.line = element_line(color = "black", size = 0.1),
       axis.title.x = element_blank(),
       axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+      axis.text.y = element_text(color = 'black', size = 14),
       
       strip.background = element_rect(fill = NA, color = "white"),
       
@@ -125,10 +181,12 @@ expr_buble_plot_protein <-  function(.expr){
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
       
-      legend.position = 'top',
-      legend.key = element_rect(fill = 'white')
+      legend.position = 'none',
+      legend.key = element_rect(fill = 'white'),
+      plot.title = element_text(hjust = 0.5,size = 30)
     ) +
     labs(
+      title = 'TCGA',
       x = 'Cancer Types',
       y = 'RPPA expression'
     ) +
@@ -145,6 +203,56 @@ expr_buble_plot_protein <-  function(.expr){
         reverse = TRUE
       )
     )
+  }
+  else{
+    .expr %>% dplyr::rename(FPKM = expr) %>%
+      dplyr::group_by(protein) %>% 
+      dplyr::arrange(symbol,desc(FPKM)) %>% 
+      dplyr::ungroup() -> t
+    t %>%  .$cancer_types -> order
+    t %>%
+      ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
+      scale_x_discrete(limits = order) +
+      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#2a4b5a") +
+      facet_wrap(~protein, ncol = 1, scales = "free", strip.position = 'right') +
+      # facet_wrap(~symbol, ncol = 1, scales = "free") +
+      
+      theme(
+        text = element_text(colour = 'black', size = 18),
+        
+        axis.line = element_line(color = "black", size = 0.1),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+        axis.text.y = element_text(color = 'black', size = 14),
+        
+        strip.background = element_rect(fill = NA, color = "white"),
+        
+        panel.background = element_rect(fill = "white", color = "black", size = 0.5),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        
+        legend.position = 'none',
+        legend.key = element_rect(fill = 'white'),
+        plot.title = element_text(hjust = 0.5,size = 30)
+      ) +   
+      labs(
+        title = "MCLP",
+        x = 'Cancer Types',
+        y = 'RPPA expression'
+      ) +
+      guides(
+        color = guide_legend(
+          # legend title
+          title = "Cancer Types",
+          title.position = "left",
+          
+          # legend label
+          label.position = "right",
+          # label.theme = element_text(size = 14),
+          reverse = TRUE
+        )
+      )
+  }
 }
 expr_clean_datatable_protein <- function(.expr_clean) {
   DT::datatable(
@@ -167,81 +275,6 @@ expr_clean_datatable_protein <- function(.expr_clean) {
 }
 
 # ObserveEvent ------------------------------------------------------------
-observeEvent(c(input$select_protein,input$select_protein_TCGA,input$select_protein_MCLP,reset$protein),{
-  re <- "0"
-  if(length(input$select_protein)>0 && status$protein_set){
-    if(input$select_protein == "Cancer Types" && length(input$select_protein_TCGA)>0){
-      re <- "1"
-      dataset_number$protein <-  length(input$select_protein_TCGA)
-      TCGA_protein %>% dplyr::filter(cancer_types %in% input$select_protein_TCGA) %>%
-      dplyr::mutate(
-        expr = purrr::map(
-          .x = summary,
-          .f = function(.x) {
-            .x %>%
-              dplyr::filter(symbol %in% match$protein)  %>% tidyr::unnest()
-          }
-        )
-      ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=tumor) -> expr_clean }
-    else if(input$select_protein == "Normal tissues" && length(input$select_protein_MCLP)>0 ){
-      re <- "1"
-      dataset_number$protein <-  length(input$select_protein_MCLP)
-      MCLP_protein %>% dplyr::filter(tis %in% input$select_protein_MCLP) %>%
-          dplyr::mutate(
-          expr = purrr::map(
-            .x = summary,
-            .f = function(.x) {
-              .x %>%
-                dplyr::filter(symbol %in% match$protein) %>% tidyr::unnest()
-            }
-          )
-          ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary) -> expr_clean }
-  if(re == "1"){
-  if(status$protein_trigger){status$protein_trigger <- FALSE} else{status$protein_trigger <- TRUE}
-  status$protein_result <- TRUE
-  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> protein_plot_result
-  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> protein_table_result
-  protein_plot_result %>% dplyr::select(protein) %>% dplyr::distinct() %>% .$protein -> plot_number$protein
-  choice$protein <- protein_plot_result %>% dplyr::filter(protein %in% plot_number$protein[1]) %>% dplyr::select(protein) %>% 
-    dplyr::distinct() %>% .$protein
-  number <- length(plot_number$protein)
-  if(number < 5){
-    if(dataset_number$protein == 1){
-      output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*300, width = 260)
-      output$`protein-picdownload` <- downloadHandler(
-        filename = function() {
-          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
-        },
-        content = function(file){
-          ggsave(file,expr_buble_plot_protein(protein_plot_result),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
-      )
-    }
-    else if(dataset_number$protein <5 ){
-      output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = number*300, width = dataset_number$protein*260)
-      output$`protein-picdownload` <- downloadHandler(
-        filename = function() {
-          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
-        },
-        content = function(file){
-          ggsave(file,expr_buble_plot_protein(protein_plot_result),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
-      )
-    }
-    else{
-      output$expr_bubble_plot_protein <- renderPlot({expr_buble_plot_protein(protein_plot_result)},height = 6*dataset_number$protein+number*300)
-      output$`protein-picdownload` <- downloadHandler(
-        filename = function() {
-          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
-        },
-        content = function(file){
-          ggsave(file,expr_buble_plot_protein(protein_plot_result),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
-      )
-    }
-    multiple$protein <- FALSE
-  }
-  else{multiple$protein <- TRUE}
-  output$expr_dt_comparison_protein <- DT::renderDataTable({expr_clean_datatable_protein(protein_table_result)})
-  return(protein_plot_result)}
-}})
 
 observeEvent(status$protein_trigger, {
   if (error$protein_set != "" && !is.null(error$protein_set)) {
@@ -269,8 +302,7 @@ observeEvent(status$protein_valid, {
 observe(validate_input_protein_set())
 observeEvent(c(input$select_protein,input$select_protein_result,status$protein_trigger), {
   if(length(input$select_protein_result)>0 && status$protein_set){
-    choice$protein <- paste(input$select_protein,input$select_protein_result,status$protein_trigger) %>% stringr::str_replace_all(' ','')
-    protein_plot_result %>% dplyr::filter(protein %in% input$select_protein_result) -> one_plot
+    choice$protein <- paste(input$select_protein_result,status$protein_trigger) %>% stringr::str_replace_all(' ','')
     if(dataset_number$protein == 1){
       output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 300, width = 260)
       output$`protein-picdownload` <- downloadHandler(
@@ -292,13 +324,23 @@ observeEvent(c(input$select_protein,input$select_protein_result,status$protein_t
       )
     }
     else{
-      output[[choice$protein]] <- renderPlot({one_plot %>% expr_buble_plot_protein()},height = 300+6*dataset_number$protein)
+      TCGA_protein_plot_result %>% dplyr::filter(protein %in% input$select_protein_result) -> TCGA_one_plot
+      MCLP_protein_table_result %>% dplyr::filter(protein %in% input$select_protein_result) -> MCLP_one_plot
+      TCGA_plot <- expr_buble_plot_protein(TCGA_one_plot,"TCGA")
+      MCLP_plot <- expr_buble_plot_protein(MCLP_one_plot,"MCLP")
+      ggpubr::ggarrange(
+        TCGA_plot,MCLP_plot,
+        ncol = 1,nrow = 3, heights = c(1.2,1)
+      ) -> plot_result
+      output[[choice$protein]] <- renderPlot({
+        plot_result
+      },height = 800)
       output$`protein-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
         },
         content = function(file){
-          ggsave(file,expr_buble_plot_protein(one_plot),device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
+          ggsave(file,plot_result,device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
       )
     }
   }

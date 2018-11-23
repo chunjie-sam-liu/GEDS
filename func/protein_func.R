@@ -126,8 +126,16 @@ fn_protein_multi_result <- function(list){
         ),
         tabPanel(
           title = "Table of expression",
-          DT::dataTableOutput(outputId = "expr_dt_comparison_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-        ))
+          tagList(
+          column(
+          width = 12, offset = 0,
+          DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          ),
+          column(
+            width = 12, offset = 0,
+            DT::dataTableOutput(outputId = "expr_dt_comparison_MCLP_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          )
+        )))
     )
 }
 
