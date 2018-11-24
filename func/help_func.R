@@ -58,10 +58,10 @@ help_data_table <- function(source) {
 
 fn_document <- function() {
   shiny::tagList(
-    shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein RPPA expression. The all expression data is from TCGA cancer types, GTEx normal tissues and CCLE cancer cell lines."),
+    shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein expression. The all expression data is from TCGA cancer types, GTEx normal tissues and CCLE cancer cell lines."),
     shiny::tags$dl(
       class = "dl-vertical",
-      shiny::tags$dt("TCGA Sample Statistics"),
+      shiny::tags$dt(shiny::tags$a("TCGA", href = "https://cancergenome.nih.gov/", target = "_blank", style = "color:#008176"), "Sample Statistics"),
       shiny::tags$dd(
         shiny::fluidRow(
           shiny::column(
@@ -71,7 +71,7 @@ fn_document <- function() {
           )
         )
       ),
-      shiny::tags$dt("GTEx and Cell Line Statistics"),
+      shiny::tags$dt(shiny::tags$a("GTEx,", href = "https://www.gtexportal.org/home/datasets", target = "_blank", style = "color:#008176"), shiny::tags$a("CCLE", href = "https://portals.broadinstitute.org/ccle", target = "_blank", style = "color:#008176"), "and", shiny::tags$a("MCLP", href = "https://tcpaportal.org/mclp/#/", target = "_blank", style = "color:#008176"), "Sample Statistics"),
       shiny::tags$dd(
         shiny::fluidRow(
           shiny::column(
