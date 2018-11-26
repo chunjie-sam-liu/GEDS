@@ -68,9 +68,9 @@ download_bt <- function(id){
       numericInput(
         inputId = ns("d_height"),
         label = "Height",
-        value = 6,
-        min = 1,
-        max = 20
+        value = 15,
+        min = 10,
+        max = 40
       ),
       downloadButton(
         outputId = ns("picdownload"),

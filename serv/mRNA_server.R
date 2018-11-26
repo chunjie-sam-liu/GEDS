@@ -133,7 +133,7 @@ TCGA_mRNA_result <- function(){
   expr_clean %>% dplyr::group_by(cancer_types,site,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
     dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
     dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> TCGA_mRNA_table_result
-    output$expr_dt_comparison_TCGA_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(TCGA_mRNA_table_result)})
+    output$expr_dt_comparison_TCGA_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(TCGA_mRNA_table_result,"Cancer Types (TCGA)")})
     return(TCGA_mRNA_plot_result)
 }
 
@@ -152,7 +152,7 @@ GTEX_mRNA_result <- function(){
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> GTEX_mRNA_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
     dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> GTEX_mRNA_table_result
-  output$expr_dt_comparison_GTEX_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_mRNA_table_result)})
+  output$expr_dt_comparison_GTEX_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_mRNA_table_result,"Normal Tissues (GTEx)")})
   return(GTEX_mRNA_table_result)
 }
 
@@ -170,7 +170,7 @@ CCLE_mRNA_result <- function(){
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> CCLE_mRNA_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
     dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> CCLE_mRNA_table_result
-  output$expr_dt_comparison_CCLE_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(CCLE_mRNA_table_result)})
+  output$expr_dt_comparison_CCLE_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(CCLE_mRNA_table_result,"Cell lines (CCLE)")})
   return(CCLE_mRNA_table_result)
 }
 #####add new
@@ -207,7 +207,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         
         axis.line = element_line(color = "black", size = 0.1),
         axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+        axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
         axis.text.y = element_text(color = 'black', size = 14),
         
         strip.background = element_rect(fill = NA, color = "white"),
@@ -244,7 +244,8 @@ expr_box_plot_mRNA <-  function(.expr,.type){
   else{
     nu <- length(.expr$cancer_types)
     .expr %>% dplyr::rename(FPKM = expr) %>%
-      dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(FPKM)) %>% dplyr::ungroup() -> t
+      dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(FPKM)) %>% dplyr::ungroup() %>%
+      dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% dplyr::select(cancer_types = tmp, symbol, alias, FPKM)-> t
     t %>%  .$cancer_types -> order
     t %>%
       ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
@@ -258,7 +259,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         
         axis.line = element_line(color = "black", size = 0.1),
         axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+        axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
         axis.text.y = element_text(color = 'black', size = 14),
         
         strip.background = element_rect(fill = NA, color = "white"),
@@ -274,7 +275,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
     if(.type == "GTEX"){
       p +   
         labs(
-          title = "Tissues (GTEx)",
+          title = "Normal Tissues (GTEx)",
           x = 'Cancer Types',
           y = 'FPKM'
         ) -> q} 
@@ -301,7 +302,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
     ###add new
   }
 }
-expr_clean_datatable_mRNA <- function(.expr_clean) {
+expr_clean_datatable_mRNA <- function(.expr_clean,.title) {
   DT::datatable(
     data = .expr_clean,
     options = list(
@@ -309,6 +310,10 @@ expr_clean_datatable_mRNA <- function(.expr_clean) {
       autoWidth = TRUE,
       dom = "Bfrtip",
       buttons = c("copy", "csv", "print")
+    ),
+    caption = shiny::tags$caption(
+      .title,
+      style = 'font-size: 20; color: black'
     ),
     rownames = FALSE,
     colnames = c("Cancer types/tissues", "Symbol", "Alias", "Mean expr(log2)"),
@@ -360,7 +365,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       CCLE_plot <- expr_box_plot_mRNA(CCLE_one_plot,"CCLE")
       ggpubr::ggarrange(
         TCGA_plot,CCLE_plot,GTEX_plot,
-        ncol = 1,nrow = 3, heights = c(1.5,1.2,1)
+        ncol = 1,nrow = 3, heights = c(1.3,1.3,1)
       ) -> plot_result
       output[[choice$mRNA]] <- renderPlot({
         plot_result

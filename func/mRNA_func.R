@@ -13,7 +13,8 @@ fn_panel_mRNA <- function(){
         btnSearch = icon("search"),
         btnReset = icon("remove"),
         width = "100%"
-      )
+      ),
+      shiny::uiOutput(outputId = "ui_mRNA_stat")
     ),
     column(
       width = 1,
@@ -36,7 +37,7 @@ fn_panel_mRNA <- function(){
 # Gene set stat -----------------------------------------------------------
 fn_mRNA_set_stat <- function(){
   column(
-    width = 10, offset = 1, 
+    width = 12, offset = 0, 
     verbatimTextOutput("mRNA_invalid")
   )
 }

@@ -132,7 +132,7 @@ TCGA_miRNA_result <- function(){
     dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,site,gene,name,expr = tmp) ->> TCGA_miRNA_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
     dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,site,gene,name,expr = tmp) ->> TCGA_miRNA_table_result
-  output$expr_dt_comparison_TCGA_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(TCGA_miRNA_table_result)})
+  output$expr_dt_comparison_TCGA_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(TCGA_miRNA_table_result,"Cancer Types (TCGA)")})
   return(TCGA_miRNA_plot_result)
 }
 ###add new
@@ -163,7 +163,7 @@ expr_box_plot_mirna <-  function(.expr){
       
       axis.line = element_line(color = "black", size = 0.1),
       axis.title.x = element_blank(),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+      axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
       axis.text.y = element_text(color = 'black', size = 14),
       
       strip.background = element_rect(fill = NA, color = "white"),
@@ -196,7 +196,7 @@ expr_box_plot_mirna <-  function(.expr){
       )
     )
 }
-expr_clean_datatable_mirna <- function(.expr_clean) {
+expr_clean_datatable_mirna <- function(.expr_clean,.title) {
   DT::datatable(
     data = .expr_clean,
     options = list(
@@ -204,6 +204,10 @@ expr_clean_datatable_mirna <- function(.expr_clean) {
       autoWidth = TRUE,
       dom = "Bfrtip",
       buttons = c("copy", "csv", "print")
+    ),
+    caption = shiny::tags$caption(
+      .title,
+      style = 'font-size: 20; color: black'
     ),
     rownames = FALSE,
     colnames = c("Cancer Types", "Symbol","Name", "Mean Rppa expr."),

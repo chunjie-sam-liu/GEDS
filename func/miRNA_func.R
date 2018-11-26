@@ -13,7 +13,8 @@ fn_panel_miRNA <- function(){
       btnSearch = icon("search"),
       btnReset = icon("remove"),
       width = "100%"
-    )
+    ),
+    shiny::uiOutput(outputId = "ui_miRNA_stat")
   ),
   column(
     width = 1,

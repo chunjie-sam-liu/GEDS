@@ -71,7 +71,7 @@ TCGA_protein_result <- function(){
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=tumor) -> expr_clean
   expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> TCGA_protein_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_protein_table_result
-  output$expr_dt_comparison_TCGA_protein <- DT::renderDataTable({expr_clean_datatable_protein(TCGA_protein_table_result)})
+  output$expr_dt_comparison_TCGA_protein <- DT::renderDataTable({expr_clean_datatable_protein(TCGA_protein_table_result,"Cancer Types (TCGA)")})
   return(TCGA_protein_plot_result)
   
 }
@@ -88,7 +88,7 @@ MCLP_protein_result <- function(){
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary) -> expr_clean
   expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> MCLP_protein_table_result
-  output$expr_dt_comparison_MCLP_protein <- DT::renderDataTable({expr_clean_datatable_protein(MCLP_protein_table_result)})
+  output$expr_dt_comparison_MCLP_protein <- DT::renderDataTable({expr_clean_datatable_protein(MCLP_protein_table_result,"Cell lines (MCLP)")})
   return(MCLP_protein_table_result)
 }
 
@@ -101,8 +101,8 @@ expr_buble_plot_protein <-  function(.expr,.type){
   nu <- .expr$cancer_types %>% length()
   .expr %>% dplyr::rename(FPKM = expr) %>%
     dplyr::mutate(tmp = paste(site,"(",cancer_types,")")) %>%
-    dplyr::select(cancer_types=tmp,symbol,protein,FPKM) %>%
-    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names))%>%
+    dplyr::select(cancer_types = tmp,symbol,protein,FPKM) %>%
+    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>%
     tidyr::spread(key = name, value = FPKM) %>% 
       dplyr::group_by(protein) %>% dplyr::arrange(symbol,desc(median)) %>% dplyr::ungroup() -> t
     t %>% .$cancer_types -> order
@@ -122,7 +122,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
       
       axis.line = element_line(color = "black", size = 0.1),
       axis.title.x = element_blank(),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+      axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
       axis.text.y = element_text(color = 'black', size = 14),
       
       strip.background = element_rect(fill = NA, color = "white"),
@@ -158,7 +158,8 @@ expr_buble_plot_protein <-  function(.expr,.type){
     .expr %>% dplyr::rename(FPKM = expr) %>%
       dplyr::group_by(protein) %>% 
       dplyr::arrange(symbol,desc(FPKM)) %>% 
-      dplyr::ungroup() -> t
+      dplyr::ungroup() %>%
+      dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% dplyr::select(cancer_types=tmp,symbol,protein,FPKM) -> t
     t %>%  .$cancer_types -> order
     t %>%
       ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
@@ -172,7 +173,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         
         axis.line = element_line(color = "black", size = 0.1),
         axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, colour = 'black'),
+        axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
         axis.text.y = element_text(color = 'black', size = 14),
         
         strip.background = element_rect(fill = NA, color = "white"),
@@ -204,7 +205,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
       )
   }
 }
-expr_clean_datatable_protein <- function(.expr_clean) {
+expr_clean_datatable_protein <- function(.expr_clean,.title) {
   DT::datatable(
     data = .expr_clean,
     options = list(
@@ -212,6 +213,10 @@ expr_clean_datatable_protein <- function(.expr_clean) {
       autoWidth = TRUE,
       dom = "Bfrtip",
       buttons = c("copy", "csv", "print")
+    ),
+    caption = htmltools::tags$caption(
+      .title,
+      style = 'font-size: 20; color: black'
     ),
     rownames = FALSE,
     colnames = c("Cancer Types/Tissues", "Symbol", "Protein", "Mean expr."),
