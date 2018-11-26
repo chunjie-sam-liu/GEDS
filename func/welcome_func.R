@@ -14,7 +14,7 @@ fn_welcome_msg <- function() {
       column(width = 9,
         shiny::tags$h1("GEDS: Gene Expression Display Server"),
         shiny::tags$p("GEDS is an integrative expression platform for gene mRNA, miRNA expression and protein RPPA expression."),
-        shiny::tags$p("On GEDS, users can input a set of names for genes, miRNAs and proteins, and click the search button, then it will show you their expressions in different cancer types, normal tissues and/or cell lines.")
+        shiny::tags$p("On GEDS, users can input a set of names for genes, miRNAs and proteins, then click the search button, then it will show you their expressions in different cancer types, normal tissues and/or cell lines.")
         )
     )
     
@@ -34,17 +34,17 @@ fn_analysis <-  function(){
                   shiny::uiOutput(outputId = "ui_mRNA_stat"),
                   shiny::uiOutput(outputId = "ui_mRNA_result")
                   ),
-          tabPanel("Protein", 
-                  shiny::uiOutput(outputId = "ui_panel_protein"),
-                  #shiny::uiOutput(outputId = "ui_protein_select"),
-                  shiny::uiOutput(outputId = "ui_protein_stat"),
-                  shiny::uiOutput(outputId = "ui_protein_result")
-          ),
           tabPanel("miRNA", 
-                  shiny::uiOutput(outputId = "ui_panel_miRNA"),
-                  #shiny::uiOutput(outputId = "ui_miRNA_select"),
-                  shiny::uiOutput(outputId = "ui_miRNA_stat"),
-                  shiny::uiOutput(outputId = "ui_miRNA_result")
+                 shiny::uiOutput(outputId = "ui_panel_miRNA"),
+                 #shiny::uiOutput(outputId = "ui_miRNA_select"),
+                 shiny::uiOutput(outputId = "ui_miRNA_stat"),
+                 shiny::uiOutput(outputId = "ui_miRNA_result")
+          ),
+          tabPanel("Protein", 
+                 shiny::uiOutput(outputId = "ui_panel_protein"),
+                 #shiny::uiOutput(outputId = "ui_protein_start"),
+                 shiny::uiOutput(outputId = "ui_protein_stat"),
+                 shiny::uiOutput(outputId = "ui_protein_result")
           )
         )
   )

@@ -1,59 +1,13 @@
 # source by server.R
 # saved as protein_server.R
 
-# Check input gene set ----------------------------------------------------
-check_protein_set <- function(.s) {
-  .s %>%stringr::str_split(pattern = "[ ,;]+", simplify = TRUE) %>%.[1, ] -> .ss
-  .ss
-}
-
 # Validate gene with TCGA gene symbol -------------------------------------
 
 validate_protein_set <- function(.v,  .total_symbol, input_protein_check = input_protein_check) {
-  
-  .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
-  tibble::tibble(symbol=.vvv) %>%
-    dplyr::mutate(
-      expression = purrr::map(
-        .x = symbol,
-        .f = function(.x) {
-          grep(pattern = (paste(",",.x,",") %>% 
-            stringr::str_replace_all(' ','')), .total_symbol$alias_match, value = TRUE ) ->a
-          .total_symbol %>% dplyr::filter(alias_match %in% a) %>% .$symbol->b
-          grep(pattern = (paste(",",.x,",") %>% 
-            stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
-          .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
-          e <- c(b,d)
-          if(length(e)>0){e} else{"drop"}
-        }
-      )
-    ) -> .v_dedup
-  input_protein_check$non_match <- .v_dedup %>% dplyr::filter(expression %in% "drop") %>% .$symbol
-  .vvv %in% input_protein_check$non_match ->.inter
-  input_protein_check$match <-  .vvv[!.inter]
-  input_protein_check$total <- c(input_protein_check$match,input_protein_check$non_match)
-  input_protein_check$n_non_match <- length(input_protein_check$non_match)
-  input_protein_check$n_match <- length(.vvv[!.inter])
-  input_protein_check$n_total <- length(input_protein_check$non_match) + length(.vvv[!.inter])
-  if(input_protein_check$n_match > 0) {
     status$protein_set <- TRUE
     status$protein_valid <- TRUE 
-    match$protein <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
-      tibble::tibble(x=.) %>% dplyr::distinct() %>% .$x
-    if(length(input_protein_check$non_match) > 0){
-      status$protein_invalid <- TRUE
-      output$protein_invalid <- renderText({paste("The list below is invalid:", input_protein_check$non_match %>% toString(), sep = "\n")})
-    }
-    else{
-      status$protein_invalid <- FALSE
-    }
-    } 
-  else {
-    status$protein_set <- FALSE
-    status$protein_result <- FALSE
-    status$protein_valid <- FALSE}
+    match$protein <- .v
 }
-
 # Example -----------------------------------------------------------------
 
 observeEvent(input$protein_example, {
@@ -66,21 +20,22 @@ observeEvent(input$protein_example, {
 
 # Clear input -------------------------------------------------------------
 
-observeEvent(input$input_protein_set_reset, {
+validate_protein_reset <- eventReactive(
+  eventExpr = input$protein_reset,
+  ignoreNULL = TRUE,
+  valueExpr = {
   shinyjs::reset("input_protein_set")
   closeAlert(session = session, alertId = "guide-alert")
   status$protein_set <- FALSE
   status$protein_result <- FALSE
   status$protein_valid <- TRUE
   status$protein_trigger <- FALSE
-  output$expr_bubble_plot_protein <- NULL
-  output$expr_dt_comparison_protein <- NULL
 })
 
 # Monitor search ----------------------------------------------------------
 
 validate_input_protein_set <- eventReactive(
-  eventExpr = input$input_protein_set_search,
+  eventExpr = input$protein_search,
   ignoreNULL = TRUE,
   valueExpr = {
     if(reset$protein){reset$protein <- FALSE} else{reset$protein <- TRUE}
@@ -89,10 +44,8 @@ validate_input_protein_set <- eventReactive(
       status$protein_trigger <- if (status$protein_trigger == TRUE) FALSE else TRUE
       return()
     }
-    # check gene
-    .v_igs <- check_protein_set(.s = input$input_protein_set)
     # validate genes
-    validate_protein_set(.v = .v_igs, .total_symbol = total_protein_symbol, input_protein_check = input_protein_check)
+    validate_protein_set(.v = input$input_protein_set, .total_symbol = total_protein_symbol, input_protein_check = input_protein_check)
   }
 )
 
@@ -119,7 +72,7 @@ TCGA_protein_result <- function(){
         .x = summary,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(symbol %in% match$protein)  %>% tidyr::unnest()
+            dplyr::filter(protein %in% match$protein)  %>% tidyr::unnest()
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=tumor) -> expr_clean
@@ -137,7 +90,7 @@ MCLP_protein_result <- function(){
         .x = summary,
         .f = function(.x) {
           .x %>%
-            dplyr::filter(symbol %in% match$protein) %>% tidyr::unnest()
+            dplyr::filter(protein %in% match$protein) %>% tidyr::unnest()
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary) -> expr_clean
@@ -190,7 +143,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
       plot.title = element_text(hjust = 0.5,size = 30)
     ) +
     labs(
-      title = 'Cancer Types (The Cancer Genome Atlas (TCGA))',
+      title = 'Cancer Types (TCGA)',
       x = 'Cancer Types',
       y = 'Protein expression'
     ) +
@@ -240,7 +193,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         plot.title = element_text(hjust = 0.5,size = 30)
       ) +   
       labs(
-        title = "Cell lines (MD Anderson Cell Lines Project (MCLP))",
+        title = "Cell lines (MCLP)",
         x = 'Cancer Types',
         y = 'Protein expression'
       ) +
@@ -304,23 +257,46 @@ observeEvent(status$protein_valid, {
 
 # observe -----------------------------------------------------------------
 observe(validate_input_protein_set())
+observe(validate_protein_reset())
 observeEvent(c(input$select_protein_result,status$protein_trigger), {
-  if(length(input$select_protein_result)>0 && status$protein_set){
-    choice$protein <- paste(input$select_protein_result,status$protein_trigger) %>% stringr::str_replace_all(' ','')
-    TCGA_protein_plot_result %>% dplyr::filter(protein %in% input$select_protein_result) -> TCGA_one_plot
-    MCLP_protein_table_result %>% dplyr::filter(protein %in% input$select_protein_result) -> MCLP_one_plot
-    if(length(TCGA_one_plot$cancer_types)*length(MCLP_one_plot$cancer_types) > 0){
-      TCGA_protein_plot_result %>% dplyr::filter(protein %in% input$select_protein_result) -> TCGA_one_plot
-      MCLP_protein_table_result %>% dplyr::filter(protein %in% input$select_protein_result) -> MCLP_one_plot
+  if(status$protein_set){
+    TCGA_protein_plot_result %>% dplyr::filter(protein %in% match$protein) -> TCGA_one_plot
+    MCLP_protein_table_result %>% dplyr::filter(protein %in% match$protein) -> MCLP_one_plot
+    t <- 0
+    m <- 0
+    if(length(TCGA_one_plot$cancer_types) > 0){
+      TCGA_protein_plot_result %>% dplyr::filter(protein %in% match$protein) -> TCGA_one_plot
       TCGA_plot <- expr_buble_plot_protein(TCGA_one_plot,"TCGA")
+      t <- 1
+    }
+    if(length(MCLP_one_plot$cancer_types) > 0){
+      MCLP_protein_table_result %>% dplyr::filter(protein %in% match$protein) -> MCLP_one_plot
       MCLP_plot <- expr_buble_plot_protein(MCLP_one_plot,"MCLP")
+      m <- 1
+    }
+    if(t == 1 && m == 1){
       ggpubr::ggarrange(
         TCGA_plot,MCLP_plot,
-        ncol = 1,nrow = 3, heights = c(1.2,1)
+        ncol = 1,nrow = 2, heights = c(1.2,1)
       ) -> plot_result
-      output[[choice$protein]] <- renderPlot({
+      output[[match$protein]] <- renderPlot({
         plot_result
-      },height = 1000)
+      },height = 800)
+    }
+    else if(t == 1){
+      plot_result <- TCGA_plot
+      output[[match$protein]] <- renderPlot({
+        plot_result
+      },height = 440)
+    }
+    else if(m == 1){
+      plot_result <- MCLP_plot
+      output[[match$protein]] <- renderPlot({
+        plot_result
+      },height = 400)
+    }
+    if(m == 1 || t == 1){
+      
       output$`protein-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
@@ -328,6 +304,5 @@ observeEvent(c(input$select_protein_result,status$protein_trigger), {
         content = function(file){
           ggsave(file,plot_result,device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
       )
-    }
-  }
+  }}
 })

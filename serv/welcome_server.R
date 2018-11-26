@@ -15,10 +15,12 @@ output$ui_analysis <- renderUI({fn_analysis()})
 # search panel ------------------------------------------------------------
 
 output$ui_panel_mRNA <- renderUI({fn_panel_mRNA()})
-output$ui_panel_protein <- renderUI({fn_panel_protein()})
+output$ui_panel_protein <- renderUI({fn_panel_protein(.choice = protein_symbol_choices)})
 output$ui_panel_miRNA <- renderUI({fn_panel_miRNA()})
 
 # cancer types selection --------------------------------------------------
+
+output$ui_protein_start <- renderUI({fn_protein_start() })
 
 output$ui_mRNA_select <- renderUI({if (status$mRNA_set) {
   fn_mRNA_select(.tcga = mRNA_TCGA %>% dplyr::arrange(site) %>% dplyr::select(site) %>% dplyr::distinct() %>% .$site, .gtex = mRNA_GTEX$tissue, .ccle = mRNA_CCLE$tissue)}  else {NULL}})
@@ -65,7 +67,7 @@ output$ui_protein_result <- renderUI({
 output$plot_multiple_protein <- renderUI({
   if(status$protein_result){
     #if(multiple$protein){
-      fn_plot_multiple_protein(choice$protein)
+      fn_plot_multiple_protein(match$protein)
     #}
   }})
 

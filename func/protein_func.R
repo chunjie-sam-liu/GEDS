@@ -2,7 +2,7 @@
 
 # panel -------------------------------------------------------------------
 
-fn_panel_protein <- function(){
+fn_panel_protein_old <- function(){
   tagList(
   column(
     width = 11, offset = 0,
@@ -31,34 +31,30 @@ fn_panel_protein <- function(){
   ))
 }
 
+fn_panel_protein <- function(.choice){
+  column(
+    width = 12, offset = 0,
+    tagList(
+      column(width = 10,offset = 0,
+    pickerInput(
+      inputId = "input_protein_set", choices = .choice$protein, width = "600px", options = list(
+        `live-search` = TRUE, size = 5, title = "Select interested protein symbol")
+    )),
+    column(width = 2,
+      shinyBS::bsButton(inputId = "protein_reset", label = "", icon = icon(name = "remove")),
+      shinyBS::bsButton(inputId = "protein_search", label = "", icon = icon(name = "search"))
+    )
+    )
+  )
+}
 
 # dataset select ----------------------------------------------------------
 
-fn_protein_select <- function(.tcga,.mclp){
+fn_protein_start <- function(){
     column(
       width = 12, offset = 0,
-      tabsetPanel(id = "select_protein",
-        tabPanel("Cancer Types",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_protein_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
-          column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_protein_TCGA", label = "Select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_protein_TCGA", label = "Unselect all", class = "btn")
-                 ) )),
-        tabPanel("Normal tissues",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_protein_MCLP", label = "",status = "primary", selected = c('bladder'), 
-          individual = TRUE, choices = .mclp, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
-          column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_protein_MCLP", label = "Select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_protein_MCLP", label = "Unselect all", class = "btn")
-            ) ))
-        )
+      shinyBS::bsButton(inputId = "protein_reset", label = "protein_reset", icon = icon(name = "remove")),
+      shinyBS::bsButton(inputId = "protein_search", label = "protein_search", icon = icon(name = "search"))
       )
 }
 
@@ -102,12 +98,6 @@ fn_protein_multi_result <- function(list){
         tabPanel(
           title = "Figure of expression",
           tagList(
-            column(
-              width = 12, offset = 0,
-              radioGroupButtons(
-                inputId = "select_protein_result", label = "", status = "primary", size = "lg",
-                individual = TRUE, choices = list
-              )),
             column(
               width = 12, offset = 0,
               shiny::uiOutput(outputId = "plot_multiple_protein")

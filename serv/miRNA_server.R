@@ -179,7 +179,7 @@ expr_box_plot_mirna <-  function(.expr){
       plot.title = element_text(hjust = 0.5,size = 30)
     ) +
     labs(
-      title = "Cancer Types (The Cancer Genome Atlas (TCGA))",
+      title = "Cancer Types (TCGA)",
       x = 'Cancer Types',
       y = 'TPM(log2)'
     ) +

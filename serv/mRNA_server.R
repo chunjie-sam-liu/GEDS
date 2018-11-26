@@ -222,7 +222,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         plot.title = element_text(hjust = 0.5,size = 30)
       ) +
       labs(
-        title = "Cancer Types (The Cancer Genome Atlas (TCGA))",
+        title = "Cancer Types (TCGA)",
         x = 'Cancer Types',
         y = 'RSEM(log2)'
       ) +
@@ -274,14 +274,14 @@ expr_box_plot_mRNA <-  function(.expr,.type){
     if(.type == "GTEX"){
       p +   
         labs(
-          title = "Tissues (The Genotype-Tissue Expression(GTEx))",
+          title = "Tissues (GTEx)",
           x = 'Cancer Types',
           y = 'FPKM'
         ) -> q} 
     else{
       p +   
         labs(
-          title = "Cell lines (Cancer Cell Line Encyclopedia(CCLE))",
+          title = "Cell lines (CCLE)",
           x = 'Cancer Types',
           y = 'FPKM'
         ) -> q}
