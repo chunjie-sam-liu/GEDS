@@ -33,47 +33,8 @@ fn_panel_mRNA <- function(){
 }
 
 
-# dataset seletct ---------------------------------------------------------
-
-fn_mRNA_select <- function(.tcga,.gtex,.ccle){
-    column(
-      width = 12, offset=0,
-      tabsetPanel(id = "select_mRNA",
-        tabPanel("Cancer types",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_mRNA_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"    )))),
-          column(width = 1,
-          shinyBS::bsButton(inputId = "select_all_mRNA_TCGA", label = "Select all", class = "btn"),
-          shinyBS::bsButton(inputId = "unselect_all_mRNA_TCGA", label = "Unselect all", class = "btn")
-          ))),
-          tabPanel("Normal tissues",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_mRNA_GTEX", label = "",status = "primary", selected = c('adipose'), 
-          individual = TRUE, choices = .gtex, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
-          column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_mRNA_GTEX", label = "Select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_mRNA_GTEX", label = "Unselect all", class = "btn")
-          )  )),
-          tabPanel("Cell lines",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_mRNA_CCLE", label = "",status = "primary", selected = c('adrenal cortex'), 
-          individual = TRUE, choices = .ccle, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
-          column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_mRNA_CCLE", label = "Select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_mRNA_CCLE", label = "Unselect all", class = "btn")
-          )  ))
-    ))
-}
-
 # Gene set stat -----------------------------------------------------------
-fn_mRNA_set_stat <- function(input_list_check){
+fn_mRNA_set_stat <- function(){
   column(
     width = 10, offset = 1, 
     verbatimTextOutput("mRNA_invalid")

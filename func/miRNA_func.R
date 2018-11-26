@@ -51,7 +51,7 @@ fn_miRNA_select <- function(.miRNA){
        )))
 }
 
-fn_miRNA_set_stat <- function(input_list_check){
+fn_miRNA_set_stat <- function(){
   column(
     width = 10, offset = 1,
     verbatimTextOutput("miRNA_invalid")

@@ -41,7 +41,7 @@ validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_
     match$mRNA <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% tibble::tibble(x = .) %>% dplyr::distinct() %>% .$x
     if(length(input_mRNA_check$non_match) > 0){
       status$mRNA_invalid <- TRUE
-      output$mRNA_invalid <- renderText({paste("The list below is invalid:", input_mRNA_check$non_match %>% toString(), sep = "\n")})
+      output$mRNA_invalid <- renderText({paste("The list below is invalid:", input_mRNA_check$non_match %>% toString())})
     }
     else{
       status$mRNA_invalid <- FALSE

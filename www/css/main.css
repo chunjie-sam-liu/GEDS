@@ -4,12 +4,13 @@ div{
 }
 pre#mRNA_invalid {
     font-size: 16px;
+    text-align: left;
+    color: red;
 }
-button#protein_reset {
-    margin-top: 82px;
-}
-button#protein_search {
-    margin-top: 82px;
+pre#miRNA_invalid {
+    font-size: 16px;
+    text-align: left;
+    color: red;
 }
 .btn-primary.active, .btn-primary:active, .open>.dropdown-toggle.btn-primary {
   background-color: #b3d2ee;

@@ -12,16 +12,17 @@ check_mirna_set <- function(.s) {
 validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miRNA_check) {
   .v[.v != ""] %>% unique()  -> .vv
   gsub(pattern = "-",replacement = "", .vv) %>% sapply(FUN = tolower, USE.NAMES = FALSE) %>% 
-    grep(pattern="mir|let",.,value=TRUE)-> .vvv
+    grep(pattern="mir|let",.,value=TRUE) -> .vvv
+  input_miRNA_check$non_match <- gsub(pattern = "-",replacement = "", .vv) %>% sapply(FUN = tolower, USE.NAMES = FALSE) %>% grep(pattern="mir|let",.,value=TRUE, invert = TRUE)
   tibble::tibble(symbol=.vvv) %>%
     dplyr::mutate(
       expression = purrr::map(
         .x = symbol,
         .f = function(.x) {
-          paste(.x,"-") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE)->a
+          paste(.x,"-") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE) -> a
           .total_symbol %>% dplyr::filter(match %in% a) %>% .$symbol->b
-          if(length(a)<1){
-            paste(.x,",") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE)->a
+          if(length(a) < 1){
+            paste(.x,",") %>% stringr::str_replace(" ",'') %>% grep(pattern = ., .total_symbol$match, value = TRUE) -> a
             .total_symbol %>% dplyr::filter(match %in% a) %>% .$symbol->b
             if(length(a)<1){
               grep(pattern = .x, .total_symbol$match2, value = TRUE) ->a
@@ -32,8 +33,8 @@ validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miR
         }
       )
     ) -> .v_dedup
-  input_miRNA_check$non_match <- .v_dedup %>% dplyr::filter(expression %in% "drop") %>% .$symbol
-  .vvv %in% input_miRNA_check$non_match -> .inter
+  ddd <- .v_dedup %>% dplyr::filter(expression %in% "drop") %>% .$symbol
+  .vvv %in% ddd -> .inter
   input_miRNA_check$match <-  .vvv[!.inter]
   input_miRNA_check$n_match <- length(.vvv[!.inter])
   input_miRNA_check$total <- c(input_miRNA_check$match,input_miRNA_check$non_match)
@@ -42,11 +43,10 @@ validate_miRNA_set <- function(.v,  .total_symbol, input_miRNA_check = input_miR
   if(input_miRNA_check$n_match > 0) {
     status$miRNA_set <- TRUE
     status$miRNA_valid <- TRUE 
-    match$miRNA <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% 
-      tibble::tibble(x = .) %>% dplyr::distinct() %>% .$x
+    match$miRNA <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% tibble::tibble(x = .) %>% dplyr::distinct() %>% .$x
     if(length(input_miRNA_check$non_match) > 0){
       status$miRNA_invalid <- TRUE
-      output$miRNA_invalid <- renderText({paste("The list below is invalid:", input_miRNA_check$non_match %>% toString(), sep = "\n")})
+      output$miRNA_invalid <- renderText({paste("The list below is invalid:", input_miRNA_check$non_match %>% toString())})
     }
     else{
       status$miRNA_invalid <- FALSE
@@ -140,7 +140,6 @@ TCGA_miRNA_result <- function(){
 # miRNA table print -------------------------------------------------------
 expr_box_plot_mirna <-  function(.expr){
   quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
-  print(.expr)
   .expr %>% dplyr::rename(TPM = expr,symbol = name) %>%
     tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>% 
     dplyr::mutate(tmp = paste(site,"(",cancer_types,")")) %>%

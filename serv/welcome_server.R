@@ -30,9 +30,8 @@ output$ui_miRNA_select <- renderUI({if (status$miRNA_set) {fn_miRNA_select(miRNA
 
 # Statistics of input gene list -------------------------------------------
 
-output$ui_mRNA_stat <- renderUI({if (status$mRNA_invalid) {fn_mRNA_set_stat(input_mRNA_check)} else {NULL}})
-output$ui_protein_stat <- renderUI({if (status$protein_invalid) {fn_protein_set_stat(input_protein_check)} else {NULL}})
-output$ui_miRNA_stat <- renderUI({if (status$miRNA_invalid) {fn_miRNA_set_stat(input_miRNA_check)} else {NULL}})
+output$ui_mRNA_stat <- renderUI({if (status$mRNA_invalid) {fn_mRNA_set_stat()} else {NULL}})
+output$ui_miRNA_stat <- renderUI({if (status$miRNA_invalid) {fn_miRNA_set_stat()} else {NULL}})
 
 # Start analysis ----------------------------------------------------------
 output$ui_mRNA_result <- renderUI({
