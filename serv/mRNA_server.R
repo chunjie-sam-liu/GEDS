@@ -364,8 +364,8 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       GTEX_plot <- expr_box_plot_mRNA(GTEX_one_plot,"GTEX")
       CCLE_plot <- expr_box_plot_mRNA(CCLE_one_plot,"CCLE")
       ggpubr::ggarrange(
-        TCGA_plot,CCLE_plot,GTEX_plot,
-        ncol = 1,nrow = 3, heights = c(1.3,1.3,1)
+        TCGA_plot,GTEX_plot,CCLE_plot,
+        ncol = 1,nrow = 3, heights = c(1.3,1,1.3)
       ) -> plot_result
       output[[choice$mRNA]] <- renderPlot({
         plot_result

@@ -7,8 +7,7 @@ fn_panel_protein <- function(.choice){
   column(
     width = 12, offset = 0,
     pickerInput(
-      inputId = "input_protein_set", choices = .choice$protein, width = "600px", options = list(
-        `live-search` = TRUE, size = 5, title = "Select interested protein symbol")
+      inputId = "input_protein_set", choices = .choice$protein, width = "800px", options = list( `live-search` = TRUE, size = 5, title = "Select interested protein symbol")
     )
   )
 }

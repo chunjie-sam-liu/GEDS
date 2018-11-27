@@ -2,6 +2,12 @@
 div{
   color: black;
 }
+span.filter-option.pull-left {
+  font-size: 15px;
+}
+ul.dropdown-menu.inner {
+  font-size: 15px;
+}
 pre#mRNA_invalid {
     font-size: 16px;
     text-align: left;
