@@ -2,6 +2,9 @@
 div{
   color: black;
 }
+.dt-buttons.btn-group {
+    float: right;
+}
 span.filter-option.pull-left {
   font-size: 15px;
 }
@@ -196,7 +199,7 @@ button#unselect_all_miRNA_TCGA {
 }
 body {
 font-family: Times, TimesNR, 'New Century Schoolbook', Georgia, 'New York', serif;
-font-size: 18px !important;
+font-size: 18px ;
 font-weight: 200 !important;
 line-height: 1.5 !important;
 }

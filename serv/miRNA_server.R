@@ -202,6 +202,7 @@ expr_clean_datatable_mirna <- function(.expr_clean,.title) {
     options = list(
       pageLength = 10,
       autoWidth = TRUE,
+      searching = FALSE,
       dom = "Bfrtip",
       buttons = c("copy", "csv", "print")
     ),

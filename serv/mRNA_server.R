@@ -307,13 +307,14 @@ expr_clean_datatable_mRNA <- function(.expr_clean,.title) {
     data = .expr_clean,
     options = list(
       pageLength = 10,
+      searching = FALSE,
       autoWidth = TRUE,
       dom = "Bfrtip",
       buttons = c("copy", "csv", "print")
     ),
     caption = shiny::tags$caption(
       .title,
-      style = 'font-size: 20; color: black'
+      style = 'font-size: 25px; color: black'
     ),
     rownames = FALSE,
     colnames = c("Cancer types/tissues", "Symbol", "Alias", "Mean expr(log2)"),
