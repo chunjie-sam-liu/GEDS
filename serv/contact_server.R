@@ -1,15 +1,11 @@
 # sourced by "server.R"
 
+source(file.path(config$func, "contact_func.R"))
+
 # Source the function -----------------------------------------------------
 
-email <- function(.txt) {
-  grid::grid.newpage()
-  grid::grid.text(
-    label = .txt, hjust = 0, vjust = 1, x = 0, y = 1, 
-    gp = grid::gpar(col = "#008176", fontsize = 18)
-  )
-}
+output$ui_contact_info <- shiny::renderUI({fn_contact_info()})
 
 output$ay <- shiny::renderPlot({email('guoay@hust.edu.cn')})
-output$cj <- shiny::renderPlot({email('samliu@hust.edu.cn')})
+output$cj <- shiny::renderPlot({email('chunjie-sam-liu@foxmail.com')})
 output$mx <- shiny::renderPlot(email('xiamx@hust.edu.cn'))

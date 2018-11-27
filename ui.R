@@ -26,7 +26,16 @@ library(ggplot2)
 
 page <- fluidPage(
           theme = shinytheme("paper"),
-          navbarPage("GEDS",
+          navbarPage(
+            windowTitle = 'GEDS - Gene Expression Display Server',
+            title = HTML(paste("",
+            img(
+              src = "./img/logo.png",
+              align = "middle",
+              class = "img-responsvie",
+              style = "height:55px !important; margin-top: -15px"
+            )
+          )),
                    tabPanel(
                      "Welcome",icon = icon("home"),
                      source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value
@@ -38,7 +47,9 @@ page <- fluidPage(
                    tabPanel(
                      "Contact", icon= icon("envelope"),
                      source(file = file.path(config$wd, "ui", "contact_ui.R"), local = TRUE)$value
-                   )
+                   ),
+            fluid = TRUE,
+          collapsible = TRUE
           )
 )
 
@@ -52,6 +63,7 @@ ui <- tagList(
     shinyjs::useShinyjs(),
     shinyjs::extendShinyjs(script = file.path(config$wd, "www", "js", "geds.js")),
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "css/main.css"),
+    shiny::tags$link(rel = "shortcut icon", href = "img/logo.ico"),
     shiny::tags$script(type = "text/javascript", src = "js/main.js")
   )
 )

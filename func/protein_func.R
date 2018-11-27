@@ -2,83 +2,24 @@
 
 # panel -------------------------------------------------------------------
 
-fn_panel_protein <- function(){
+
+fn_panel_protein <- function(.choice){
   tagList(
   column(
-    width = 11, offset = 0,
-    shinyWidgets::searchInput(
-      inputId = "input_protein_set",
-      label = "",
-      placeholder = 'Please input protein set separated by space or " , "or " ; "',
-      btnSearch = icon("search"),
-      btnReset = icon("remove"),
-      width = "100%"
+    width = 12, offset = 0,
+    pickerInput(
+      inputId = "input_protein_set", choices = .choice$protein, width = "1000px", options = list( `live-search` = TRUE, size = 5, title = "Select interested protein symbol")
     )
   ),
   column(
-    width = 1,
-    shiny::tags$div(
-      class = "form-group shiny-input-container",
-      shiny::tags$label("for" = "margin"),
-      shiny::tags$div(
-        class = "input-group search-text",
-        shiny::tags$span(
-          class = "input-group-btn",
-          shinyBS::bsButton(inputId = "protein_example", label = "Example", icon = icon(name = "check"))
-        )
-      )
+    width = 10,offset = 1,
+    shiny::tags$p(
+      style = "font-size: 9pt; color: red",
+      "Protein level expression is quantified by reverse phase protein array (RPPA). It includes the cancer related ~200 protein and corresponding phosphorylated status."
     )
   ))
 }
 
-
-# dataset select ----------------------------------------------------------
-
-fn_protein_select <- function(.tcga,.mclp){
-    column(
-      width = 12, offset = 0,
-      tabsetPanel(id = "select_protein",
-        tabPanel("Cancer Types",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_protein_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
-          column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_protein_TCGA", label = "Select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_protein_TCGA", label = "Unselect all", class = "btn")
-                 ) )),
-        tabPanel("Normal Tissues",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_protein_MCLP", label = "",status = "primary", selected = c('bladder'), 
-          individual = TRUE, choices = .mclp, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
-          column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_protein_MCLP", label = "Select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_protein_MCLP", label = "Unselect all", class = "btn")
-            ) ))
-        )
-      )
-}
-
-fn_protein_set_stat <- function(input_list_check){
-  column(
-    width = 10, offset = 1,
-    downloadLink(
-      outputId = "download_total_protein_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
-    ),
-    downloadLink(
-      outputId = "download_valid_protein_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
-    ),
-    downloadLink(
-      outputId = "download_protein_input_logs", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
-    )
-  )
-}
 
 # result ------------------------------------------------------------------
 
@@ -115,19 +56,21 @@ fn_protein_multi_result <- function(list){
           tagList(
             column(
               width = 12, offset = 0,
-              radioGroupButtons(
-                inputId = "select_protein_result", label = "", status = "primary", size = "lg",
-                individual = TRUE, choices = list
-              )),
-            column(
-              width = 12, offset = 0,
               shiny::uiOutput(outputId = "plot_multiple_protein")
             ))
         ),
         tabPanel(
           title = "Table of expression",
-          DT::dataTableOutput(outputId = "expr_dt_comparison_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-        ))
+          tagList(
+          column(
+          width = 12, offset = 0,
+          DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          ),
+          column(
+            width = 12, offset = 0,
+            DT::dataTableOutput(outputId = "expr_dt_comparison_MCLP_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          )
+        )))
     )
 }
 

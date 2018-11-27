@@ -5,10 +5,14 @@
 source(file.path(config$func, "help_func.R"))
 
 
+# ui help content ---------------------------------------------------------
 
-# introduction ------------------------------------------------------------
+output$ui_help_content <- shiny::renderUI({fn_help_content()})
 
-output$ui_introduction <- renderUI({fn_introduction()})
 
-# figure ------------------------------------------------------------------
-output$ui_feature_figure <- renderUI({fn_feature_figure()})
+# data table -------------------------------------------------------------
+
+output$tcga_data_table <- DT::renderDataTable({help_data_table(source = 'tcga_sample_stat')})
+output$gtex_data_table <- DT::renderDataTable({help_data_table(source = 'gtex_mrna_stat')})
+output$ccle_data_table <- DT::renderDataTable({help_data_table(source = 'ccle_mrna_stat')})
+output$mclp_data_table <- DT::renderDataTable({help_data_table(source = 'mclp_protein_stat')})

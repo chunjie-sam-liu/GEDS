@@ -13,7 +13,8 @@ fn_panel_miRNA <- function(){
       btnSearch = icon("search"),
       btnReset = icon("remove"),
       width = "100%"
-    )
+    ),
+    shiny::uiOutput(outputId = "ui_miRNA_stat")
   ),
   column(
     width = 1,
@@ -51,22 +52,10 @@ fn_miRNA_select <- function(.miRNA){
        )))
 }
 
-fn_miRNA_set_stat <- function(input_list_check){
+fn_miRNA_set_stat <- function(){
   column(
     width = 10, offset = 1,
-    downloadLink(
-      outputId = "download_total_miRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
-    ),
-    
-    downloadLink(
-      outputId = "download_valid_miRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
-    ),
-    downloadLink(
-      outputId = "download_miRNA_input_logs", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
-    )
+    verbatimTextOutput("miRNA_invalid")
   )
 }
 # result ------------------------------------------------------------------
@@ -114,7 +103,7 @@ fn_mirna_multi_result <- function(list){
         ),
         tabPanel(
           title = "Table of expression",
-          DT::dataTableOutput(outputId = "expr_dt_comparison_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
         ))
       )
 }

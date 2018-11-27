@@ -13,11 +13,14 @@ config$version <- "0.0.1"
 # default getwd()
 # in development mode, change the config$wd to your working directory
 
- config$wd <- "/data/xiamx/github/GEDS"
+
+#config$wd <- "/data/xiamx/github/GEDS"
 #config$wd <- "/data/liucj/github/GEDS"
+config$wd <- "/home/liucj/github/GEDS"
 
 # Databases ---------------------------------------------------------------
-config$database <- "/data/shiny-data/GEDS"
+#config$database <- "/data/shiny-data/GEDS"
+config$database <- '/home/liucj/shiny-data/GEDS'
 
 
 
@@ -65,9 +68,9 @@ download_bt <- function(id){
       numericInput(
         inputId = ns("d_height"),
         label = "Height",
-        value = 6,
-        min = 1,
-        max = 20
+        value = 15,
+        min = 10,
+        max = 40
       ),
       downloadButton(
         outputId = ns("picdownload"),

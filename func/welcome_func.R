@@ -3,7 +3,21 @@
 fn_welcome_msg <- function() {
   column(
     width = 12, offset = 0,
-    shiny::tags$h1("GEDS: Gene Expression Display Server")
+    tagList(
+      column(width = 2,offset = 1,
+        shiny::tags$img(
+        src = "./img/logo.png",
+        class = "center-block img-responsive",
+        style = "height: 150px;"
+      )
+      ),
+      column(width = 9,
+        shiny::tags$h1("GEDS: Gene Expression Display Server"),
+        shiny::tags$p("GEDS is an integrative gene expression platform for human cancer tissue, cancer cell line and normal tissue with mRNA level, protein level and miRNA."),
+        shiny::tags$p("On GEDS, users can input a set of names for genes, miRNAs and proteins, then click the search button, then it will show you their expressions in different cancer types, normal tissues and/or cell lines.")
+        )
+    )
+    
   )
 }
 
@@ -13,25 +27,22 @@ fn_analysis <-  function(){
   column(
     width = 10,offset =1,
     shinydashboard::tabBox(
-      title = "",id = "tabset1", height = "140px", width=12,
+      title = "",id = "tabset1", width=12,
           tabPanel("mRNA", 
                   shiny::uiOutput(outputId = "ui_panel_mRNA"),
-                  shiny::uiOutput(outputId = "ui_mRNA_select"),
-                  shiny::uiOutput(outputId = "ui_mRNA_stat"),
+                  #shiny::uiOutput(outputId = "ui_mRNA_select"),
                   shiny::uiOutput(outputId = "ui_mRNA_result")
-                  
                   ),
-          tabPanel("Protein", 
-                  shiny::uiOutput(outputId = "ui_panel_protein"),
-                  shiny::uiOutput(outputId = "ui_protein_select"),
-                  shiny::uiOutput(outputId = "ui_protein_stat"),
-                  shiny::uiOutput(outputId = "ui_protein_result")
-          ),
           tabPanel("miRNA", 
-                  shiny::uiOutput(outputId = "ui_panel_miRNA"),
-                  shiny::uiOutput(outputId = "ui_miRNA_select"),
-                  shiny::uiOutput(outputId = "ui_miRNA_stat"),
-                  shiny::uiOutput(outputId = "ui_miRNA_result")
+                 shiny::uiOutput(outputId = "ui_panel_miRNA"),
+                 #shiny::uiOutput(outputId = "ui_miRNA_select"),
+                 shiny::uiOutput(outputId = "ui_miRNA_result")
+          ),
+          tabPanel("protein", 
+                 shiny::uiOutput(outputId = "ui_panel_protein"),
+                 #shiny::uiOutput(outputId = "ui_protein_start"),
+                 #shiny::uiOutput(outputId = "ui_protein_stat"),
+                 shiny::uiOutput(outputId = "ui_protein_result")
           )
         )
   )

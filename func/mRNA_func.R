@@ -3,17 +3,18 @@
 # panel -------------------------------------------------------------------
 
 fn_panel_mRNA <- function(){
-  column(width = 12,
+  tagList(
     column(
       width = 11, offset = 0,
       shinyWidgets::searchInput(
         inputId = "input_mRNA_set",
         label = "",
-        placeholder = 'Please input HGNC symbol gene set separated by space or " , "or " ; "',
+        placeholder = 'Please input a set of gene official symbols or aliases separated by space or "," or ";".',
         btnSearch = icon("search"),
         btnReset = icon("remove"),
         width = "100%"
-      )
+      ),
+      shiny::uiOutput(outputId = "ui_mRNA_stat")
     ),
     column(
       width = 1,
@@ -33,61 +34,11 @@ fn_panel_mRNA <- function(){
 }
 
 
-# dataset seletct ---------------------------------------------------------
-
-fn_mRNA_select <- function(.tcga,.gtex,.ccle){
-    column(
-      width = 12, offset=0,
-      tabsetPanel(id = "select_mRNA",
-        tabPanel("Cancer types",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_mRNA_TCGA", label = "",status = "primary", selected = c('ACC','BLCA','BRCA','CESC'), 
-          individual = TRUE, choices = .tcga, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon"    )))),
-          column(width = 1,
-          shinyBS::bsButton(inputId = "select_all_mRNA_TCGA", label = "Select all", class = "btn"),
-          shinyBS::bsButton(inputId = "unselect_all_mRNA_TCGA", label = "Unselect all", class = "btn")
-          ))),
-          tabPanel("Normal Tissues",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_mRNA_GTEX", label = "",status = "primary", selected = c('adipose'), 
-          individual = TRUE, choices = .gtex, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
-          column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_mRNA_GTEX", label = "Select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_mRNA_GTEX", label = "Unselect all", class = "btn")
-          )  )),
-          tabPanel("Cell lines",
-          tagList(
-          column(width = 11,
-          checkboxGroupButtons(
-          inputId = "select_mRNA_CCLE", label = "",status = "primary", selected = c('adrenal cortex'), 
-          individual = TRUE, choices = .ccle, checkIcon = list(yes = icon("ok", lib = "glyphicon"),no = icon("remove",lib = "glyphicon")))),
-          column(width = 1,
-            shinyBS::bsButton(inputId = "select_all_mRNA_CCLE", label = "Select all", class = "btn"),
-            shinyBS::bsButton(inputId = "unselect_all_mRNA_CCLE", label = "Unselect all", class = "btn")
-          )  ))
-    ))
-}
-
 # Gene set stat -----------------------------------------------------------
-fn_mRNA_set_stat <- function(input_list_check){
+fn_mRNA_set_stat <- function(){
   column(
-    width = 10, offset = 1, 
-    downloadLink(
-      outputId = "download_total_mRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_total, subtitle = "Total Input", icon = icon("users"), color = "yellow")
-    ),
-    downloadLink(
-      outputId = "download_valid_mRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_match, subtitle = "Valid", icon = icon("credit-card"),color = "green")
-    ),
-    downloadLink(
-      outputId = "download_unmatched_mRNA_set", label = NULL, class = NULL,
-      valueBox(value = input_list_check$n_non_match, subtitle = "Invalid",icon = icon("line-chart"), color = "red")
-    )
+    width = 12, offset = 0, 
+    verbatimTextOutput("mRNA_invalid")
   )
 }
 
@@ -138,7 +89,20 @@ fn_mRNA_multi_result <- function(list){
         ),
         tabPanel(
           title = "Table of expression",
-          DT::dataTableOutput(outputId = "expr_dt_comparison_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          tagList(
+          column(
+            width = 12, offset = 0,
+            DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          ),
+          column(
+            width = 12, offset = 0,
+            DT::dataTableOutput(outputId = "expr_dt_comparison_GTEX_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          ),
+          column(
+            width = 12, offset = 0,
+            DT::dataTableOutput(outputId = "expr_dt_comparison_CCLE_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+          )
+          )
         ))
     )
 }
