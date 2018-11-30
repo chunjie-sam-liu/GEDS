@@ -49,6 +49,15 @@ fn_analysis <-  function(){
 }
 
 # download gene set button ------------------------------------------------
+fn_showdata <- function(){
+  column(
+    width = 12,offset = 0,
+      shiny::tags$img(
+        src = "./img/combine.png",
+        class = "center-block img-responsive" )
+  )
+}
+
 
 fn_gs_download <- function(data,txt){
   downloadHandler(
