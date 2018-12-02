@@ -41,9 +41,13 @@ page <- fluidPage(
                      source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value
                    ),
                    tabPanel(
-                     "Help", icon = icon("question"),
+                     "Tutorial", icon = icon("compass"),
                      source(file = file.path(config$wd, "ui", "help_ui.R"), local = TRUE)$value
                     ),
+                   tabPanel(
+                     "Document", icon = icon("book"),
+                      source(file = file.path(config$wd, "ui", "document_ui.R"), local = TRUE)$value
+                   ),
                    tabPanel(
                      "Contact", icon= icon("envelope"),
                      source(file = file.path(config$wd, "ui", "contact_ui.R"), local = TRUE)$value

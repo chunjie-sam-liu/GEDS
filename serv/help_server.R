@@ -7,7 +7,8 @@ source(file.path(config$func, "help_func.R"))
 
 # ui help content ---------------------------------------------------------
 
-output$ui_help_content <- shiny::renderUI({fn_help_content()})
+output$ui_help_content <- shiny::renderUI({fn_tutorial()})
+output$ui_document <- shiny::renderUI({fn_document()})
 
 
 # data table -------------------------------------------------------------

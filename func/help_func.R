@@ -7,10 +7,17 @@ stat_data <- readr::read_rds(path = file.path(config$database, 'geds-data-stat.r
 # tutorial ----------------------------------------------------------------
 
 fn_tutorial <- function() {
-  shiny::tagList(
-    shiny::tags$h3(shiny::icon(name = "chevron-circle-down"), "Tutorial", style = 'text-align: left'),
+  column(
+    width = 10,offset = 1,
+    shiny::tags$h3(
+      class = "text-left",
+      shiny::icon(name = "angle-double-right", class = "fa-fw"),
+      "Tutorial"
+    ),
     
-    shiny::tags$h4("Guide", style = 'text-align: left'),
+    shiny::tags$hr(),
+    
+    shiny::tags$h3(shiny::icon(name = "chevron-circle-down"), "Guide", style = 'text-align: left'),
     shiny::tags$img(
       src = "./img/tutorial.jpg",
       class = "center-block img-responsive" ),
@@ -79,8 +86,15 @@ help_data_table <- function(source) {
 }
 
 fn_document <- function() {
-  shiny::tagList(
-    shiny::tags$p("GEDS is an integrative gene expression platform for human cancer tissue, cancer cell line and normal tissue with mRNA level, protein level and miRNA."),
+  column(
+    width = 10, offset = 1,
+    shiny::tags$h3(
+      class = "text-left",
+      shiny::icon(name = "angle-double-right", class = "fa-fw"),
+      "Document"
+    ),
+    shiny::tags$hr(),
+    shiny::tags$p("GEDS is an integrative gene expression platform for human cancer tissues, cancer cell lines and normal tissues with mRNA level, protein level and miRNA."),
     shiny::tags$li("mRNA level expression is quantified by RNA-seq data and consists of cancer tissue, normal tissue and cancer cell line. They are obtained from",shiny::tags$a("The Cancer Genome Atlas (TCGA)", href = "https://cancergenome.nih.gov/", target = "_blank", style = "color:#008176"), ",", shiny::tags$a("Genotype-Tissue Expression (GTEx)", href = "https://gtexportal.org/home/", target = "_blank", style = "color:#008176"), "and", shiny::tags$a("Cancer Cell Line Encyclopedia (CCLE)", href = "https://portals.broadinstitute.org/ccle", target = "_blank", style = "color:#008176"), "."),
     shiny::tags$li("Protein level expression is quantified by reverse phase protein array (RPPA). It includes the cancer related ~200 protein and corresponding phosphorylated status. The data are from", shiny::tags$a("The Cancer Proteome Atlas (TCPA)", href = "https://tcpaportal.org/tcpa/", target = "_blank", style = "color:#008176"), "and", shiny::tags$a("MD Anderson Cell Lines Project (MCLP)", href = "https://tcpaportal.org/mclp/#/", target = "_blank", style = "color:#008176"), "."),
     shiny::tags$li("miRNA expression is collected from", shiny::tags$a("TCGA", href = "https://cancergenome.nih.gov/", target = "_blank", style = "color:#008176"), "with tumor and normal tissue in several cancer types."),
@@ -124,53 +138,3 @@ fn_document <- function() {
   )
 }
 
-# help content ------------------------------------------------------------
-
-fn_help_content <- function(){
-  column(
-    width = 10, offset = 1, aling = 'left',
-    
-    shiny::tags$h3(
-      class = "text-left",
-      shiny::icon(name = "angle-double-right", class = "fa-fw"),
-      "Tutorial and Documentation"
-    ),
-    
-    shiny::tags$hr(),
-    
-    shiny::tags$div(
-      
-      # nav tabs
-      shiny::tags$ul(
-        class = "nav nav-tabs", role = "tablist",
-        shiny::tags$li(
-          role = "presentation", class = "active",
-          shiny::tags$a(
-            href = "#ui_tutorial", "aria-controls" = "ui_tutorial", 
-            role = "tab", "data-toggle" = "tab", "Tutorial"
-          )
-        ),
-        shiny::tags$li(
-          role = "presentation",
-          shiny::tags$a(
-            href = "#ui_document", "aria-controls" = "ui_document", 
-            role = "tab", "data-toggle" = "tab", "Document"
-          )
-        )
-      ),
-      
-      # tab panes
-      shiny::tags$div(
-        class = "tab-content",
-        shiny::tags$div(
-          role = "tabpanel", class = "tab-pane active", id = "ui_tutorial",
-          fn_tutorial()
-        ),
-        shiny::tags$div(
-          role = "tabpanel", class = "tab-pane", id = "ui_document", 
-          fn_document()
-        )
-      )
-    )
-  )
-}

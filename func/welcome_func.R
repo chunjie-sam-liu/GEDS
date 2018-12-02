@@ -13,8 +13,8 @@ fn_welcome_msg <- function() {
       ),
       column(width = 9,
         shiny::tags$h1("GEDS: Gene Expression Display Server"),
-        shiny::tags$p("GEDS is an integrative gene expression platform for human cancer tissue, cancer cell line and normal tissue with mRNA level, protein level and miRNA."),
-        shiny::tags$p("On GEDS, users can input a set of names for genes, miRNAs and proteins, then click the search button, then it will show you their expressions in different cancer types, normal tissues and/or cell lines.")
+        shiny::tags$p("GEDS is an integrative gene expression platform for human cancer tissues, cancer cell lines and normal tissues with mRNA level, protein level and miRNA."),
+        shiny::tags$p("On GEDS, when users input a set of names for genes, miRNAs and proteins,it will show their expressions in different cancer types, normal tissues and/or cell lines.")
         )
     )
     
@@ -52,6 +52,7 @@ fn_analysis <-  function(){
 fn_showdata <- function(){
   column(
     width = 12,offset = 0,
+      shiny::tags$hr(style = "margin-top: 40px"),
       shiny::tags$img(
         src = "./img/combine.png",
         class = "center-block img-responsive" )
