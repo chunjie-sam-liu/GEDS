@@ -122,7 +122,6 @@ expr_buble_plot_protein <-  function(.expr,.type){
       
       axis.line = element_line(color = "black", size = 0.1),
       axis.title.x = element_blank(),
-      axis.text.x = element_text(colour = 'black', size = 18),
       axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
       axis.text.y = element_text(color = 'black', size = 14),
       
