@@ -43,7 +43,7 @@ status <- reactiveValues(
   "mRNA_trigger" = FALSE,
   "protein_trigger" = FALSE,
   "miRNA_trigger" = FALSE,
-  "progressbar" = FALSE
+  "plot" = TRUE
 )
 
 error <- reactiveValues(

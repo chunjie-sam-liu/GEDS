@@ -5,6 +5,7 @@
 ###add new
 observeEvent(c(input$input_protein_set),{
     status$protein_result <- FALSE
+    status$plot <- FALSE
     dataset_number$protein <- 30
     match$protein <- input$input_protein_set
     if(match$protein != ""){
@@ -46,7 +47,6 @@ observeEvent(c(input$input_protein_set),{
       },height = 400)
     }
     if(m == 1 || t == 1){
-      
       output$`protein-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
@@ -71,6 +71,7 @@ TCGA_protein_result <- function(){
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=tumor) -> expr_clean
   expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> TCGA_protein_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_protein_table_result
+  TCGA_protein_table_result %>% dplyr::left_join(protein_TCGA,by = "cancer_types") %>% dplyr::select(cancer_types = Disease_Type,symbol,protein,expr) -> TCGA_protein_table_result
   output$expr_dt_comparison_TCGA_protein <- DT::renderDataTable({expr_clean_datatable_protein(TCGA_protein_table_result,"Cancer Types (TCGA)")})
   return(TCGA_protein_plot_result)
   

@@ -89,4 +89,4 @@ output$plot_multiple_miRNA <- renderUI({
     }
   })
 
-output$show_data <- renderUI({fn_showdata()})
+output$show_data <- renderUI({if(status$plot){fn_showdata()}})

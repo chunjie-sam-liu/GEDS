@@ -75,6 +75,7 @@ observeEvent(input$input_miRNA_set_reset, {
   shinyjs::reset("input_miRNA_set")
   closeAlert(session = session, alertId = "guide-alert")
   status$miRNA_set <- FALSE
+  status$plot <- TRUE
   status$miRNA_result <- FALSE
   status$miRNA_valid <- TRUE
   status$miRNA_trigger <- FALSE
@@ -104,7 +105,9 @@ validate_input_miRNA_set <- eventReactive(
 
 ###add new
 observeEvent(c(reset$miRNA),{
+  status$protein_result <- FALSE
   if(status$miRNA_set){
+    status$plot <- FALSE
     dataset_number$miRNA <- 30
     TCGA_miRNA_result()
     plot_number$miRNA <- TCGA_miRNA_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name
@@ -125,13 +128,19 @@ TCGA_miRNA_result <- function(){
             tidyr::gather(key = barcode, value = expr, -c(gene,name)) %>% tidyr::unnest()
         }
       )
-    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() -> a
+  a %>% 
     dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
-    dplyr::select(cancer_types=tmp,site,gene,name,expr) ->> expr_clean
-  expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
-    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,site,gene,name,expr = tmp) ->> TCGA_miRNA_plot_result
-  expr_clean %>% dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
-    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,site,gene,name,expr = tmp) ->> TCGA_miRNA_table_result
+    dplyr::select(cancer_types=tmp,site,gene,name,expr) %>% 
+    dplyr::group_by(cancer_types,gene,name) %>% 
+    dplyr::slice(1:5) %>% tidyr::drop_na() %>% 
+    dplyr::ungroup() %>% dplyr::mutate(tmp = log2(expr+1)) %>% 
+    dplyr::select(cancer_types,site,gene,name,expr = tmp) ->> TCGA_miRNA_plot_result
+  a %>% dplyr::left_join(miRNA_TCGA, by = "cancer_types") %>% 
+   dplyr::select(cancer_types = Disease_Type, gene, name, barcode, expr) %>% dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
+    dplyr::select(cancer_types=tmp, gene, name, expr) %>% 
+  dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types, gene, name, expr = tmp) ->> TCGA_miRNA_table_result
   output$expr_dt_comparison_TCGA_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(TCGA_miRNA_table_result,"Cancer Types (TCGA)")})
   return(TCGA_miRNA_plot_result)
 }
