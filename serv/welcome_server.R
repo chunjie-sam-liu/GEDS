@@ -89,4 +89,6 @@ output$plot_multiple_miRNA <- renderUI({
     }
   })
 
-output$show_data <- renderUI({if(status$plot){fn_showdata()}})
+shinyjs::onclick(id = "detail", expr = shinyjs::js$openTab(id = "Document"))
+shinyjs::onclick(id = "detail2", expr = shinyjs::js$openTab(id = "Document"))
+shinyjs::onclick(id = "detail3", expr = shinyjs::js$openTab(id = "Document"))

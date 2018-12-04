@@ -13,8 +13,7 @@ fn_welcome_msg <- function() {
       ),
       column(width = 9,
         shiny::tags$h1("GEDS: Gene Expression Display Server"),
-        shiny::tags$p("GEDS is an integrative gene expression platform for human cancer tissues, cancer cell lines and normal tissues with mRNA level, protein level and miRNA."),
-        shiny::tags$p("On GEDS, when users input a set of names for genes, miRNAs and proteins,it will show their expressions in different cancer types, normal tissues and/or cell lines.")
+        shiny::tags$p("GEDS is an integrative platform to show human gene expressions in cancer types, normal tissues and cell lines for user input genes, miRNAs and proteins.")
         )
     )
     
@@ -25,9 +24,9 @@ fn_welcome_msg <- function() {
 
 fn_analysis <-  function(){
   column(
-    width = 10,offset =1,
+    width = 10,offset =1, style = "margin-top:20px",
     shinydashboard::tabBox(
-      title = "",id = "tabset1", width=12,
+      title = "",id = "tabset1", width=12, 
           tabPanel("mRNA", 
                   shiny::uiOutput(outputId = "ui_panel_mRNA"),
                   #shiny::uiOutput(outputId = "ui_mRNA_select"),
@@ -49,17 +48,6 @@ fn_analysis <-  function(){
 }
 
 # download gene set button ------------------------------------------------
-fn_showdata <- function(){
-  column(
-    width = 12,offset = 0,
-      shiny::tags$hr(style = "margin-top: 40px"),
-      shiny::tags$img(
-        src = "./img/combine.png",
-        class = "center-block img-responsive" )
-  )
-}
-
-
 fn_gs_download <- function(data,txt){
   downloadHandler(
     filename = function() {

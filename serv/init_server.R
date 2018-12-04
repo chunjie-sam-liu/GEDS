@@ -43,7 +43,9 @@ status <- reactiveValues(
   "mRNA_trigger" = FALSE,
   "protein_trigger" = FALSE,
   "miRNA_trigger" = FALSE,
-  "plot" = TRUE
+  "mRNA_plot" = TRUE,
+  "protein_plot" = TRUE,
+  "miRNA_plot" = TRUE
 )
 
 error <- reactiveValues(
@@ -117,6 +119,10 @@ dataset_number <- reactiveValues(
   mRNA = NULL,
   miRNA = NULL
 )
+alias <- reactiveValues(
+  mRNA = NULL,
+  miRNA = NULL
+)
 multiple <- reactiveValues(
   protein = FALSE,
   mRNA = FALSE,
@@ -140,12 +146,12 @@ TCGA_miRNA <- readr::read_rds(file.path(config$database, "miRNA","TCGA_miRNA_sum
 
 TCGA_color <- readr::read_rds(file.path(config$database, "TCGA_color.rds.gz"))
 # Load gene list ----------------------------------------------------------
-mRNA_TCGA <- readr::read_rds(file.path(config$database,"mRNA","TCGA_sort_cancertype.rds.gz"))
-mRNA_GTEX <- readr::read_rds(file.path(config$database,"mRNA","GTEX_new_tissues_without.rds.gz"))
-mRNA_CCLE <- readr::read_rds(file.path(config$database,"mRNA","CCLE_tissues_without.rds.gz"))
-protein_TCGA <- readr::read_rds(file.path(config$database,"protein","TCGA_protein_sort_cancertype.rds.gz"))
-protein_MCLP <- readr::read_rds(file.path(config$database,"protein","MCLP_tissues_filter_new.rds.gz"))
-miRNA_TCGA <- readr::read_rds(file.path(config$database,"miRNA","TCGA_sort_miRNA_cancertype.rds.gz"))
+mRNA_TCGA <- readr::read_rds(file.path(config$database,"mRNA","TCGA_mRNA_cancertype_summary.rds.gz"))
+mRNA_GTEX <- readr::read_rds(file.path(config$database,"mRNA","GTEX_mRNA_tissue_summary.rds.gz"))
+mRNA_CCLE <- readr::read_rds(file.path(config$database,"mRNA","CCLE_mRNA_cellline_summary.rds.gz"))
+protein_TCGA <- readr::read_rds(file.path(config$database,"protein","TCGA_protein_cancertype_summary.rds.gz"))
+protein_MCLP <- readr::read_rds(file.path(config$database,"protein","MCLP_protein_cellline_summary.rds.gz"))
+miRNA_TCGA <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_cancertype_summary.rds.gz"))
 total_mRNA_symbol <- readr::read_rds(file.path(config$database,"mRNA","mRNA_symbol_alias.rds.gz"))
 total_protein_symbol <- readr::read_rds(file.path(config$database,"protein","protein_symbol_alias.rds.gz"))
 total_miRNA_symbol <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_symbol_new.rds.gz"))

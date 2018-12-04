@@ -101,6 +101,13 @@ fn_document <- function() {
     shiny::tags$br(),
     shiny::tags$p("Quick search and visualization of specific gene expression in multiple cancer types or normal tissues can help researchers to focus on the certain cancer type, tissue or cell line. Then its protein level expression or phosphorylated protein expression can be examined in the cancer type or cell line. Besides, the miRNA expression can be explored to compare the tumor and normal expression. In a word, GEDS is an open access and intuitive web-based platform for searching, visualizing the mRNA, protein and miRNA expression in cancer tissue, cancer cell line and normal tissue. It is helpful for invetigator without bioinformatics skills."),
     shiny::tags$br(),
+    shiny::tags$h4(
+      shiny::icon(name = "angle-right", class = "fa-fw"),
+      "Cancer types (TCGA)"),
+    shiny::tags$img(
+      src = "./img/polar.png",
+      class = "center-block img-responsive" ),
+    shiny::tags$br(),
     shiny::tags$dl(
       class = "dl-vertical",
       shiny::tags$p("TCGA Sample Statistics"),
@@ -112,9 +119,22 @@ fn_document <- function() {
               withSpinner(color = "#2196f3",size = 0.5, proxy.height = "200px")
           )
         )
-      ),
-      shiny::tags$br(),
-      shiny::tags$p("GTEx, CCLE and MCLP Sample Statistics"),
+      )),
+    shiny::tags$h4(
+      shiny::icon(name = "angle-right", class = "fa-fw"),
+      "Normal Tissues data (GTEx)"),
+    shiny::tags$img(
+      src = "./img/humanbody.png",
+      class = "center-block img-responsive" ),
+    shiny::tags$br(),
+    shiny::tags$h4(
+      shiny::icon(name = "angle-right", class = "fa-fw"),
+      "Cell lines data (CCLE and MCLP)"),
+    shiny::tags$img(
+      src = "./img/cellline.png",
+      class = "center-block img-responsive" ),
+    shiny::tags$br(),
+    shiny::tags$dl(
       shiny::tags$dd(
         shiny::fluidRow(
           shiny::column(

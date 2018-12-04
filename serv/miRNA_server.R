@@ -75,7 +75,7 @@ observeEvent(input$input_miRNA_set_reset, {
   shinyjs::reset("input_miRNA_set")
   closeAlert(session = session, alertId = "guide-alert")
   status$miRNA_set <- FALSE
-  status$plot <- TRUE
+  status$miRNA_plot <- TRUE
   status$miRNA_result <- FALSE
   status$miRNA_valid <- TRUE
   status$miRNA_trigger <- FALSE
@@ -107,7 +107,7 @@ validate_input_miRNA_set <- eventReactive(
 observeEvent(c(reset$miRNA),{
   status$protein_result <- FALSE
   if(status$miRNA_set){
-    status$plot <- FALSE
+    status$miRNA_plot <- FALSE
     dataset_number$miRNA <- 30
     TCGA_miRNA_result()
     plot_number$miRNA <- TCGA_miRNA_plot_result %>% dplyr::select(name) %>% dplyr::distinct() %>% .$name
@@ -137,10 +137,12 @@ TCGA_miRNA_result <- function(){
     dplyr::ungroup() %>% dplyr::mutate(tmp = log2(expr+1)) %>% 
     dplyr::select(cancer_types,site,gene,name,expr = tmp) ->> TCGA_miRNA_plot_result
   a %>% dplyr::left_join(miRNA_TCGA, by = "cancer_types") %>% 
-   dplyr::select(cancer_types = Disease_Type, gene, name, barcode, expr) %>% dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
-    dplyr::select(cancer_types=tmp, gene, name, expr) %>% 
-  dplyr::group_by(cancer_types,gene,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
-    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types, gene, name, expr = tmp) ->> TCGA_miRNA_table_result
+   dplyr::mutate(tmp=ifelse(barcode == "tumor",cancer,normal)) %>%
+   dplyr::select(cancer_types = Disease_Type, name, barcode, expr, count=tmp) %>% 
+    dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
+    dplyr::select(cancer_types=tmp, name, count, expr) %>% 
+  dplyr::group_by(cancer_types,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types, name, count, expr = tmp) ->> TCGA_miRNA_table_result
   output$expr_dt_comparison_TCGA_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(TCGA_miRNA_table_result,"Cancer Types (TCGA)")})
   return(TCGA_miRNA_plot_result)
 }
@@ -176,6 +178,7 @@ expr_box_plot_mirna <-  function(.expr){
       axis.text.y = element_text(color = 'black', size = 14),
       
       strip.background = element_rect(fill = NA, color = "white"),
+      strip.text = element_text(size = 20),
       
       panel.background = element_rect(fill = "white", color = "black", size = 0.5),
       panel.grid.major.y = element_blank(),
@@ -199,7 +202,7 @@ expr_box_plot_mirna <-  function(.expr){
         
         # legend label
         label.position = "bottom",
-        label.theme = element_text(angle = 270, hjust = 0.5, vjust = 0.5),
+        label.theme = element_text(angle = 270, hjust = 0.5, vjust = 0.5, size = 20),
         nrow = 2,
         reverse = TRUE
       )
@@ -220,7 +223,7 @@ expr_clean_datatable_mirna <- function(.expr_clean,.title) {
       style = 'font-size: 20; color: black'
     ),
     rownames = FALSE,
-    colnames = c("Cancer Types", "Symbol","Name", "Mean Rppa expr."),
+    colnames = c("Cancer Types", "Symbol","Sample Statistics", "TPM expr."),
     filter = "top",
     extensions = "Buttons",
     style = "bootstrap",

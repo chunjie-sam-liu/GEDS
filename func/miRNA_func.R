@@ -113,7 +113,10 @@ fn_plot_multiple_miRNA <- function(choice){
     fluidRow(
     column(width=1,
            download_bt(NS("miRNA",id=NULL))
-    )),
+    ),
+    column(width = 9,
+           shiny::tags$p(shiny::tags$a("Click to view detail name of cancer types in document", id = "detail")))
+    ),
     fluidRow(
     column(width=12,
       plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")

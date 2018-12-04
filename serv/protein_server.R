@@ -5,10 +5,10 @@
 ###add new
 observeEvent(c(input$input_protein_set),{
     status$protein_result <- FALSE
-    status$plot <- FALSE
     dataset_number$protein <- 30
     match$protein <- input$input_protein_set
     if(match$protein != ""){
+    status$protein_plot <- FALSE
     TCGA_protein_result()
     MCLP_protein_result()
     TCGA_protein_plot_result -> TCGA_one_plot
@@ -71,7 +71,7 @@ TCGA_protein_result <- function(){
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr=tumor) -> expr_clean
   expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> TCGA_protein_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_protein_table_result
-  TCGA_protein_table_result %>% dplyr::left_join(protein_TCGA,by = "cancer_types") %>% dplyr::select(cancer_types = Disease_Type,symbol,protein,expr) -> TCGA_protein_table_result
+  TCGA_protein_table_result %>% dplyr::left_join(protein_TCGA,by = "cancer_types") %>% dplyr::select(cancer_types = Disease_Type,symbol,protein,cancer,expr) -> TCGA_protein_table_result
   output$expr_dt_comparison_TCGA_protein <- DT::renderDataTable({expr_clean_datatable_protein(TCGA_protein_table_result,"Cancer Types (TCGA)")})
   return(TCGA_protein_plot_result)
   
@@ -88,7 +88,7 @@ MCLP_protein_result <- function(){
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary) -> expr_clean
-  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> MCLP_protein_table_result
+  expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% dplyr::left_join(protein_MCLP,by="cancer_types") %>% dplyr::select(cancer_types,symbol,protein,cellline_num,expr) ->> MCLP_protein_table_result
   output$expr_dt_comparison_MCLP_protein <- DT::renderDataTable({expr_clean_datatable_protein(MCLP_protein_table_result,"Cell lines (MCLP)")})
   return(MCLP_protein_table_result)
 }
@@ -127,6 +127,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
       axis.text.y = element_text(color = 'black', size = 14),
       
       strip.background = element_rect(fill = NA, color = "white"),
+      strip.text = element_text(size = 20),
       
       panel.background = element_rect(fill = "white", color = "black", size = 0.5),
       panel.grid.major.y = element_blank(),
@@ -178,6 +179,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         axis.text.y = element_text(color = 'black', size = 14),
         
         strip.background = element_rect(fill = NA, color = "white"),
+        strip.text = element_text(size = 20),
         
         panel.background = element_rect(fill = "white", color = "black", size = 0.5),
         panel.grid.major.y = element_blank(),
@@ -221,7 +223,7 @@ expr_clean_datatable_protein <- function(.expr_clean,.title) {
       style = 'font-size: 20; color: black'
     ),
     rownames = FALSE,
-    colnames = c("Cancer Types/Tissues", "Symbol", "Protein", "Mean expr."),
+    colnames = c("Cancer Types/Tissues", "Symbol", "Protein", "Sample Statistics", "Mean expr."),
     filter = "top",
     extensions = "Buttons",
     style = "bootstrap",

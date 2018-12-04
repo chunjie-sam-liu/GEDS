@@ -72,7 +72,7 @@ shinyjs.switch = function(params){
 shinyjs.openTab = function(params){
   var defaultParams = {id: null};
   params = shinyjs.getParams(params, defaultParams);
-  $('a', $('.sidebar')).each(function(){
+  $('a', $('.navbar')).each(function(){
     if(this.getAttribute('data-value') == params.id){
       this.click();
       var help = 'div#help_' + params.id;

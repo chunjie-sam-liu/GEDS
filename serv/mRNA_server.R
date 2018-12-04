@@ -10,19 +10,28 @@ check_mRNA_set <- function(.s) {
 # Validate gene with TCGA gene symbol -------------------------------------
 
 validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_check) {
-  
+  alias$mRNA = NULL
   .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
-  tibble::tibble(symbol=.vvv) %>%
+  tibble::tibble(symbol = .vvv) %>%
     dplyr::mutate(
       expression = purrr::map(
         .x = symbol,
         .f = function(.x) {
           grep(pattern = (paste(",",.x,",") %>% 
-              stringr::str_replace_all(' ','')), .total_symbol$alias_match, value = TRUE ) ->a
-          .total_symbol %>% dplyr::filter(alias_match %in% a) %>% .$symbol->b
+              stringr::str_replace_all(' ','')), .total_symbol$alias_match, value = TRUE ) -> a
+          .total_symbol %>% dplyr::filter(alias_match %in% a) %>% .$symbol-> b
+          if(length(b)>0){
+            al <- paste(b," ","(",.x,")",sep="") %>% toString()
+            if(length(alias$mRNA) > 0){
+              alias$mRNA <- paste(alias$mRNA,","," ",al,sep = "")
+            }
+            else{
+              alias$mRNA <- al
+            }
+          }
           grep(pattern = (paste(",",.x,",") %>% 
-              stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) ->c
-          .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol->d
+              stringr::str_replace_all(' ','')), .total_symbol$symbol_match, value = TRUE ) -> c
+          .total_symbol %>% dplyr::filter(symbol_match %in% c) %>% .$symbol-> d
           e <- c(b,d)
           if(length(e)>0){e} else{"drop"}
         }
@@ -35,18 +44,28 @@ validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_
   input_mRNA_check$n_non_match <- length(input_mRNA_check$non_match)
   input_mRNA_check$n_match <- length(.vvv[!.inter])
   input_mRNA_check$n_total <- length(input_mRNA_check$non_match) + length(.vvv[!.inter])
-  if(input_mRNA_check$n_match > 0) {
+  if (input_mRNA_check$n_match > 0){
     status$mRNA_set <- TRUE
     status$mRNA_valid <- TRUE 
     match$mRNA <- .v_dedup %>% dplyr::filter(symbol %in% .vvv[!.inter]) %>% .$expression %>% unlist() %>% tibble::tibble(x = .) %>% dplyr::distinct() %>% .$x
-    if(length(input_mRNA_check$non_match) > 0){
+    if(length(input_mRNA_check$non_match) > 0 && length(alias$mRNA) > 0){
       status$mRNA_invalid <- TRUE
-      output$mRNA_invalid <- renderText({paste("The list below is invalid:", input_mRNA_check$non_match %>% toString())})
+      paste("The name(s) is invalid:", input_mRNA_check$non_match %>% toString()) -> inva
+      paste("The name(s) is changed to official symbol:", alias$mRNA) -> cha
+      output$mRNA_invalid <- renderText({paste(inva,cha,sep = "\n")})
+    }
+    else if(length(input_mRNA_check$non_match) > 0){
+      status$mRNA_invalid <- TRUE
+      output$mRNA_invalid <- renderText({paste("The name(s) is invalid:", input_mRNA_check$non_match %>% toString())})
+    }
+    else if(length(alias$mRNA) > 0){
+      status$mRNA_invalid <- TRUE
+      output$mRNA_invalid <- renderText({paste("The name(s) is changed to official symbol:", alias$mRNA)})
     }
     else{
       status$mRNA_invalid <- FALSE
     }
-    } 
+  }
   else {
     status$mRNA_set <- FALSE
     status$mRNA_result <- FALSE
@@ -70,9 +89,10 @@ observeEvent(input$input_mRNA_set_reset, {
   closeAlert(session = session, alertId = "guide-alert")
   status$mRNA_set <- FALSE
   status$mRNA_result <- FALSE
-  status$plot <- TRUE
+  status$mRNA_plot <- TRUE
   status$mRNA_valid <- TRUE
   status$mRNA_trigger <- FALSE
+  status$mRNA_invalid <- FALSE
   error$mRNA_set <- ""
 })
 
@@ -101,7 +121,7 @@ validate_input_mRNA_set <- eventReactive(
 observeEvent(c(reset$mRNA),{
   status$protein_result <- FALSE
   if(status$mRNA_set){
-  status$plot <- FALSE
+  status$mRNA_plot <- FALSE
   dataset_number$mRNA <- 30
   TCGA_mRNA_result()
   GTEX_mRNA_result()
@@ -138,13 +158,12 @@ TCGA_mRNA_result <- function(){
     dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,site,symbol,expr = tmp) ->> TCGA_mRNA_plot_result
   
   a %>% dplyr::left_join(mRNA_TCGA, by = "cancer_types") %>% 
-    dplyr::select(cancer_types = tmp, site, symbol, barcode, expr) %>% 
+    dplyr::mutate(tmp=ifelse(barcode == "tumor",cancer,normal)) %>% 
+    dplyr::select(cancer_types = Disease_Type, symbol, barcode, expr,count = tmp) %>% 
     dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
-    dplyr::select(cancer_types = tmp,site,symbol,expr) %>% 
-    dplyr::group_by(cancer_types,site,symbol) %>% 
-    dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
-    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,symbol,expr = tmp) %>%
-    dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> TCGA_mRNA_table_result
+    dplyr::select(cancer_types = tmp,symbol,count,expr) %>% 
+    dplyr::group_by(cancer_types,symbol) %>% 
+    dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_mRNA_table_result
     output$expr_dt_comparison_TCGA_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(TCGA_mRNA_table_result,"Cancer Types (TCGA)")})
     return(TCGA_mRNA_plot_result)
 }
@@ -163,7 +182,8 @@ GTEX_mRNA_result <- function(){
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean 
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> GTEX_mRNA_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
-    dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> GTEX_mRNA_table_result
+    dplyr::left_join(mRNA_GTEX,by = "cancer_types") %>% 
+    dplyr::select(cancer_types,symbol,tissue_num,expr) ->> GTEX_mRNA_table_result
   output$expr_dt_comparison_GTEX_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_mRNA_table_result,"Normal Tissues (GTEx)")})
   return(GTEX_mRNA_table_result)
 }
@@ -181,7 +201,7 @@ CCLE_mRNA_result <- function(){
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary) -> expr_clean
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> CCLE_mRNA_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
-    dplyr::left_join(.,total_mRNA_symbol,by = "symbol") %>% dplyr::select(cancer_types,symbol,alias,expr) ->> CCLE_mRNA_table_result
+    dplyr::left_join(mRNA_CCLE,by = "cancer_types") %>% dplyr::select(cancer_types,symbol,cellline_num,expr) ->> CCLE_mRNA_table_result
   output$expr_dt_comparison_CCLE_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(CCLE_mRNA_table_result,"Cell lines (CCLE)")})
   return(CCLE_mRNA_table_result)
 }
@@ -223,6 +243,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         axis.text.y = element_text(color = 'black', size = 14),
         
         strip.background = element_rect(fill = NA, color = "white"),
+        strip.text = element_text(size = 20),
         
         panel.background = element_rect(fill = "white", color = "black", size = 0.5),
         panel.grid.major.y = element_blank(),
@@ -246,7 +267,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
           
           # legend label
           label.position = "bottom",
-          label.theme = element_text(angle = 270, hjust = 0.5, vjust = 0.5),
+          label.theme = element_text(angle = 270, hjust = 0.5, vjust = 0.5, size = 20),
           nrow = 2,
           reverse = TRUE
         )
@@ -256,8 +277,8 @@ expr_box_plot_mRNA <-  function(.expr,.type){
   else{
     nu <- length(.expr$cancer_types)
     .expr %>% dplyr::rename(FPKM = expr) %>%
-      dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(FPKM)) %>% dplyr::ungroup() %>%
-      dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% dplyr::select(cancer_types = tmp, symbol, alias, FPKM)-> t
+      dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(FPKM)) %>% dplyr::ungroup() %>% 
+      dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% dplyr::select(cancer_types = tmp, symbol, FPKM)-> t
     t %>%  .$cancer_types -> order
     t %>%
       ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
@@ -275,6 +296,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         axis.text.y = element_text(color = 'black', size = 14),
         
         strip.background = element_rect(fill = NA, color = "white"),
+        strip.text = element_text(size = 20),
         
         panel.background = element_rect(fill = "white", color = "black", size = 0.5),
         panel.grid.major.y = element_blank(),
@@ -315,6 +337,12 @@ expr_box_plot_mRNA <-  function(.expr,.type){
   }
 }
 expr_clean_datatable_mRNA <- function(.expr_clean,.title) {
+  if(.title == "Cancer Types (TCGA)"){
+    name <- "Mean expr. (RSEM)"
+  }
+  else{
+    name <- "Mean expr. (FPKM)"
+  }
   DT::datatable(
     data = .expr_clean,
     options = list(
@@ -329,7 +357,7 @@ expr_clean_datatable_mRNA <- function(.expr_clean,.title) {
       style = 'font-size: 25px; color: black'
     ),
     rownames = FALSE,
-    colnames = c("Cancer types/tissues", "Symbol", "Alias", "Mean expr(log2)"),
+    colnames = c("Cancer types/tissues", "Symbol", "Sample Statistics", name),
     filter = "top",
     extensions = "Buttons",
     style = "bootstrap",
@@ -371,18 +399,60 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
     TCGA_mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_plot
     GTEX_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
     CCLE_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_plot
-    if(length(TCGA_one_plot$cancer_types)*length(GTEX_one_plot$cancer_types)*length(CCLE_one_plot$cancer_types) > 0 ){
+    if(length(TCGA_one_plot$cancer_types) + length(GTEX_one_plot$cancer_types) + length(CCLE_one_plot$cancer_types) > 0 ){
       choice$mRNA <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
-      TCGA_plot <- expr_box_plot_mRNA(TCGA_one_plot,"TCGA")
-      GTEX_plot <- expr_box_plot_mRNA(GTEX_one_plot,"GTEX")
-      CCLE_plot <- expr_box_plot_mRNA(CCLE_one_plot,"CCLE")
-      ggpubr::ggarrange(
-        TCGA_plot,GTEX_plot,CCLE_plot,
-        ncol = 1,nrow = 3, heights = c(1.3,1,1.3)
-      ) -> plot_result
-      output[[choice$mRNA]] <- renderPlot({
-        plot_result
-      }, height = 1200 )
+      t <- 0
+      g <- 0
+      c <- 0
+      if(length(TCGA_one_plot$cancer_types) > 0){
+        TCGA_plot <- expr_box_plot_mRNA(TCGA_one_plot,"TCGA")
+        t = 1
+      }
+      if(length(GTEX_one_plot$cancer_types) > 0){
+        GTEX_plot <- expr_box_plot_mRNA(GTEX_one_plot,"GTEX")
+        g = 1
+      }
+      if(length(CCLE_one_plot$cancer_types) > 0){
+        CCLE_plot <- expr_box_plot_mRNA(CCLE_one_plot,"CCLE")
+        c = 1
+      }
+      if (t == 1 && g == 1 && c == 1){
+        ggpubr::ggarrange(
+          TCGA_plot,GTEX_plot,CCLE_plot,
+          ncol = 1,nrow = 3, heights = c(1.3,1,1.3)
+        ) -> plot_result
+        output[[choice$mRNA]] <- renderPlot({plot_result}, height = 1200 )
+      }
+      else if (t == 1 && g == 1){
+        ggpubr::ggarrange(
+          TCGA_plot,GTEX_plot,
+          ncol = 1,nrow = 2, heights = c(1.3,1)
+        ) -> plot_result
+        output[[choice$mRNA]] <- renderPlot({plot_result}, height = 850 )
+      }
+      else if(g == 1 && c == 1){
+        ggpubr::ggarrange(
+          GTEX_plot,CCLE_plot,
+          ncol = 1,nrow = 2, heights = c(1,1.3)
+        ) -> plot_result
+        output[[choice$mRNA]] <- renderPlot({plot_result}, height = 850 )
+      }
+      else if(t == 1 && c == 1){
+        ggpubr::ggarrange(
+          TCGA_plot,CCLE_plot,
+          ncol = 1,nrow = 2, heights = c(1.3,1.3)
+        ) -> plot_result
+        output[[choice$mRNA]] <- renderPlot({plot_result}, height = 900 )
+      }
+      else if(t == 1){
+        output[[choice$mRNA]] <- renderPlot({TCGA_plot}, height = 450 )
+      }
+      else if(g == 1){
+        output[[choice$mRNA]] <- renderPlot({GTEX_plot}, height = 400 )
+      }
+      else if(c == 1){
+        output[[choice$mRNA]] <- renderPlot({CCLE_plot}, height = 450 )
+      }
       output$`mRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
