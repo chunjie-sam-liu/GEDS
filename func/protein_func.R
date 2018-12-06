@@ -103,8 +103,8 @@ fn_protein_multi_result <- function(list){
           tagList(
             column(
               width = 12,
-              style = 'margin-top: 20px',
-              shiny::tags$p(shiny::tags$a("Tips: 1. Click the download button to download data in CSV format. 2. Type letters behind search to filter table. 3. Click the arrow in table header to sort the table.", id = ""))
+              style = 'margin-top: 20px;color: #2196f3',
+              shiny::tags$p("Tips: 1. Click the download button to download data in CSV format. 2. Type letters behind search to filter table. 3. Click the arrow in table header to sort the table.")
             ),
             shiny::uiOutput(outputId = "protein_TCGA"),
             shiny::uiOutput(outputId = "protein_MCLP"),

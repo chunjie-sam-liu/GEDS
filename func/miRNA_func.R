@@ -86,7 +86,8 @@ fn_mirna_multi_result <- function(list){
     tagList(
       column(
         width = 12, offset = 0,
-        shiny::tags$p(shiny::tags$a("Tips: Click button to view result of other miRNAs.", id = ""))
+        style = 'color: #2196f3',
+        shiny::tags$p("Tips: Click button to view result of other miRNAs.")
       ),
       column(
         width = 12, offset = 0,
@@ -142,8 +143,8 @@ fn_table_multiple_miRNA <- function(table,download){
   fluidRow(
     column(
       width = 12,
-      style = 'margin-top: 20px',
-      shiny::tags$p(shiny::tags$a("Tips: 1. Click the download button to download data in CSV format. 2. Type letters behind search to filter table. 3. Click the arrow in table header to sort the table.", id = ""))
+      style = 'margin-top: 20px; color: #2196f3',
+      shiny::tags$p("Tips: 1. Click the download button to download data in CSV format. 2. Type letters behind search to filter table. 3. Click the arrow in table header to sort the table.")
     ),
     column(
       width = 12,
