@@ -164,8 +164,8 @@ TCGA_mRNA_result <- function(){
     dplyr::select(cancer_types = tmp,symbol,count,expr) %>% 
     dplyr::group_by(cancer_types,symbol) %>% 
     dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_mRNA_table_result
-    output$expr_dt_comparison_TCGA_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(TCGA_mRNA_table_result,"Cancer Types (TCGA)")})
     return(TCGA_mRNA_plot_result)
+    return(TCGA_mRNA_table_result)
 }
 
 GTEX_mRNA_result <- function(){
@@ -184,7 +184,6 @@ GTEX_mRNA_result <- function(){
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
     dplyr::left_join(mRNA_GTEX,by = "cancer_types") %>% 
     dplyr::select(cancer_types,symbol,tissue_num,expr) ->> GTEX_mRNA_table_result
-  output$expr_dt_comparison_GTEX_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_mRNA_table_result,"Normal Tissues (GTEx)")})
   return(GTEX_mRNA_table_result)
 }
 
@@ -202,7 +201,6 @@ CCLE_mRNA_result <- function(){
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> CCLE_mRNA_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
     dplyr::left_join(mRNA_CCLE,by = "cancer_types") %>% dplyr::select(cancer_types,symbol,cellline_num,expr) ->> CCLE_mRNA_table_result
-  output$expr_dt_comparison_CCLE_mRNA <- DT::renderDataTable({expr_clean_datatable_mRNA(CCLE_mRNA_table_result,"Cell lines (CCLE)")})
   return(CCLE_mRNA_table_result)
 }
 #####add new
@@ -310,14 +308,14 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       p +   
         labs(
           title = "Normal Tissues (GTEx)",
-          x = 'Cancer Types',
+          x = 'Normal Tissues',
           y = 'FPKM'
         ) -> q} 
     else{
       p +   
         labs(
           title = "Cell lines (CCLE)",
-          x = 'Cancer Types',
+          x = 'Cell lines',
           y = 'FPKM'
         ) -> q}
     q +
@@ -339,31 +337,35 @@ expr_box_plot_mRNA <-  function(.expr,.type){
 expr_clean_datatable_mRNA <- function(.expr_clean,.title) {
   if(.title == "Cancer Types (TCGA)"){
     name <- "Mean expr. (RSEM)"
+    site <- "Cancer Type"
+  }
+  else if(.title == "Normal Tissues (GTEx)"){
+    name <- "Mean expr. (FPKM)"
+    site <- "Tissue"
   }
   else{
     name <- "Mean expr. (FPKM)"
+    site <- "Cell line Lineage"
   }
   DT::datatable(
     data = .expr_clean,
     options = list(
       pageLength = 10,
-      searching = FALSE,
+      searching = TRUE,
       autoWidth = TRUE,
       dom = "Bfrtip",
-      buttons = c("copy", "csv", "print")
+      columnDefs = list(list(className = 'dt-center',targets="_all"))
     ),
     caption = shiny::tags$caption(
       .title,
       style = 'font-size: 25px; color: black'
     ),
     rownames = FALSE,
-    colnames = c("Cancer types/tissues", "Symbol", "Sample Statistics", name),
-    filter = "top",
-    extensions = "Buttons",
+    colnames = c(site, "Symbol", "Sample Statistics", name),
     style = "bootstrap",
     class = "table-bordered table-condensed"
   ) %>% 
-    DT::formatSignif(columns = c("expr"), digits = 2) %>%
+    #DT::formatSignif(columns = c("expr"), digits = 2) %>%
     DT::formatRound(columns = c("expr"), 2)
 }
 
@@ -397,23 +399,81 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
   if(length(input$select_mRNA_result)>0 && status$mRNA_set){
     ###add new
     TCGA_mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_plot
+    TCGA_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_table
     GTEX_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
     CCLE_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_plot
     if(length(TCGA_one_plot$cancer_types) + length(GTEX_one_plot$cancer_types) + length(CCLE_one_plot$cancer_types) > 0 ){
       choice$mRNA <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
+      mRNA$TCGA_table <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"TCGA_table",sep = "")
+      mRNA$TCGA_download <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"TCGA_download",sep = "")
+      mRNA$GTEX_table <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"GTEX_table",sep = "")
+      mRNA$GTEX_download <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"GTEX_download",sep = "")
+      mRNA$CCLE_table <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"CCLE_table",sep = "")
+      mRNA$CCLE_download <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"CCLE_download",sep = "")
       t <- 0
       g <- 0
       c <- 0
       if(length(TCGA_one_plot$cancer_types) > 0){
         TCGA_plot <- expr_box_plot_mRNA(TCGA_one_plot,"TCGA")
+        output[[mRNA$TCGA_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(TCGA_one_table,"Cancer Types (TCGA)")})
+        output[[mRNA$TCGA_download]] <- downloadHandler(
+          filename = function() {
+            paste(Sys.Date(),"TCGA_single_mRNA.csv",sep = "_")
+          },
+          content = function(file) {
+            write.csv(TCGA_one_table, file, row.names = TRUE)
+          }
+        )
+        output$expr_dt_comparison_TCGA_mRNA <- downloadHandler(
+          filename = function() {
+            paste(Sys.Date(),"TCGA_all_input_mRNA.csv",sep = "_")
+          },
+          content = function(file) {
+            write.csv(TCGA_mRNA_table_result, file, row.names = TRUE)
+          }
+        )
         t = 1
       }
       if(length(GTEX_one_plot$cancer_types) > 0){
         GTEX_plot <- expr_box_plot_mRNA(GTEX_one_plot,"GTEX")
+        output[[mRNA$GTEX_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_one_plot,"Normal Tissues (GTEx)")})
+        output[[mRNA$GTEX_download]] <- downloadHandler(
+          filename = function() {
+            paste(Sys.Date(),"GTEx_single_mRNA.csv",sep = "_")
+          },
+          content = function(file) {
+            write.csv(GTEX_one_plot, file, row.names = TRUE)
+          }
+        )
+        output$expr_dt_comparison_GTEX_mRNA <- downloadHandler(
+          filename = function() {
+            paste(Sys.Date(),"GTEx_all_input_mRNA.csv",sep = "_")
+          },
+          content = function(file) {
+            write.csv(GTEX_mRNA_table_result, file, row.names = TRUE)
+          }
+        )
         g = 1
       }
       if(length(CCLE_one_plot$cancer_types) > 0){
         CCLE_plot <- expr_box_plot_mRNA(CCLE_one_plot,"CCLE")
+        output[[mRNA$CCLE_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_one_plot,"Cell lines (CCLE)")})
+        output[[mRNA$CCLE_download]] <- downloadHandler(
+          filename = function() {
+            paste(Sys.Date(),"CCLE_single_mRNA.csv",sep = "_")
+          },
+          content = function(file) {
+            write.csv(CCLE_one_plot, file, row.names = TRUE)
+          }
+        )
+        output$expr_dt_comparison_CCLE_mRNA <- downloadHandler(
+          filename = function() {
+            paste(Sys.Date(),"CCLE_all_input_mRNA.csv",sep = "_")
+          },
+          content = function(file) {
+            write.csv(CCLE_mRNA_table_result, file, row.names = TRUE)
+          }
+        )
         c = 1
       }
       if (t == 1 && g == 1 && c == 1){

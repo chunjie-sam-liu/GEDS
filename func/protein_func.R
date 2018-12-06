@@ -8,13 +8,13 @@ fn_panel_protein <- function(.choice){
   column(
     width = 12, offset = 0,
     pickerInput(
-      inputId = "input_protein_set", choices = .choice$protein, width = "1000px", options = list( `live-search` = TRUE, size = 5, title = "Select interested protein symbol")
+      inputId = "input_protein_set", choices = .choice$protein, width = "1000px", options = list( `live-search` = TRUE, size = 5, title = "Select interested antibody name")
     )
   ),
   column(
     width = 10,offset = 1,
     shiny::tags$p(
-      style = "font-size: 9pt; color: red",
+      style = "font-size: 15px; color: red",
       "Protein level expression is quantified by reverse phase protein array (RPPA). It includes the cancer related ~200 protein and corresponding phosphorylated status."
     )
   ))
@@ -46,6 +46,45 @@ fn_protein_single_result <- function(){
   ))
 }
 
+fn_protein_TCGA <- function(){
+  tagList(
+    column(
+      width = 12, offset = 0,
+      downloadButton("expr_dt_download_TCGA_protein", "Download TCGA data of selected protein (CSV)", style = 'font-size: 20px')
+    ),
+    column(
+      width = 12, offset = 0,
+      DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    )
+  )
+}
+
+fn_protein_MCLP <- function(){
+  tagList(
+    column(
+      width = 12, offset = 0,
+      downloadButton("expr_dt_download_MCLP_protein", "Download MCLP data of selected protein (CSV)", style = 'font-size: 20px')
+    ),
+    column(
+      width = 12, offset = 0,
+      DT::dataTableOutput(outputId = "expr_dt_comparison_MCLP_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    )
+  )
+}
+
+fn_protein_CCLE <- function(){
+  tagList(
+    column(
+      width = 12, offset = 0,
+      downloadButton("expr_dt_download_CCLE_protein", "Download CCLE data of selected protein (CSV)", style = 'font-size: 20px')
+    ),
+    column(
+      width = 12, offset = 0,
+      DT::dataTableOutput(outputId = "expr_dt_comparison_CCLE_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    )
+  )
+}
+
 fn_protein_multi_result <- function(list){
     column(
       width = 12, offset = 0,
@@ -62,15 +101,17 @@ fn_protein_multi_result <- function(list){
         tabPanel(
           title = "Table of expression",
           tagList(
-          column(
-          width = 12, offset = 0,
-          DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-          ),
-          column(
-            width = 12, offset = 0,
-            DT::dataTableOutput(outputId = "expr_dt_comparison_MCLP_protein") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+            column(
+              width = 12,
+              style = 'margin-top: 20px',
+              shiny::tags$p(shiny::tags$a("Tips: 1. Click the download button to download data in CSV format. 2. Type letters behind search to filter table. 3. Click the arrow in table header to sort the table.", id = ""))
+            ),
+            shiny::uiOutput(outputId = "protein_TCGA"),
+            shiny::uiOutput(outputId = "protein_MCLP"),
+            shiny::uiOutput(outputId = "protein_CCLE")
           )
-        )))
+        )
+      )
     )
 }
 
@@ -80,11 +121,11 @@ fn_plot_multiple_protein <- function(choice){
     column(width=1,
            download_bt(NS("protein",id=NULL))
     ),
-    column(width = 9,
-           shiny::tags$p(shiny::tags$a("Click to view detail name of cancer types in document", id = "detail3")))
+    column(width = 10,
+           shiny::tags$p(shiny::tags$a("Tips: Click this tip to view detail name of cancer types in document.", id = "detail3")))
     ),
     fluidRow(
-    column(width=12,
+    column(width = 12,
       plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
     ))
   )

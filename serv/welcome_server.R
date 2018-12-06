@@ -52,6 +52,12 @@ output$plot_multiple_mRNA <- renderUI({
       #}
   }})
 
+output$table_multiple_mRNA <- renderUI({
+  if(status$mRNA_result){
+    fn_table_multiple_mRNA(mRNA$TCGA_table,mRNA$GTEX_table,mRNA$CCLE_table,mRNA$TCGA_download,mRNA$GTEX_download,mRNA$CCLE_download)
+  }
+})
+
 output$ui_protein_result <- renderUI({
   if(status$protein_result) {
     #if(multiple$protein){
@@ -83,11 +89,19 @@ output$ui_miRNA_result <- renderUI({
   })
 output$plot_multiple_miRNA <- renderUI({
   if(status$miRNA_result){
-    #if(multiple$miRNA){
       fn_plot_multiple_miRNA(choice$miRNA)
-      #}
     }
   })
+
+output$table_multiple_miRNA <- renderUI({
+  if(status$miRNA_result){
+    fn_table_multiple_miRNA(miRNA$TCGA_table,miRNA$TCGA_download)
+  }
+})
+
+output$protein_TCGA <- renderUI({if (protein$TCGA) { fn_protein_TCGA() }})
+output$protein_MCLP <- renderUI({if(protein$MCLP){fn_protein_MCLP()}})
+output$protein_CCLE <- renderUI({if(protein$CCLE){fn_protein_CCLE()}})
 
 shinyjs::onclick(id = "detail", expr = shinyjs::js$openTab(id = "Document"))
 shinyjs::onclick(id = "detail2", expr = shinyjs::js$openTab(id = "Document"))

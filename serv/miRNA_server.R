@@ -138,13 +138,13 @@ TCGA_miRNA_result <- function(){
     dplyr::select(cancer_types,site,gene,name,expr = tmp) ->> TCGA_miRNA_plot_result
   a %>% dplyr::left_join(miRNA_TCGA, by = "cancer_types") %>% 
    dplyr::mutate(tmp=ifelse(barcode == "tumor",cancer,normal)) %>%
-   dplyr::select(cancer_types = Disease_Type, name, barcode, expr, count=tmp) %>% 
+   dplyr::select(cancer_types = Disease_Type, name, gene, barcode, expr, count=tmp) %>% 
     dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
-    dplyr::select(cancer_types=tmp, name, count, expr) %>% 
+    dplyr::select(cancer_types=tmp, name, gene, count, expr) %>% 
   dplyr::group_by(cancer_types,name) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
-    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types, name, count, expr = tmp) ->> TCGA_miRNA_table_result
-  output$expr_dt_comparison_TCGA_mirna <- DT::renderDataTable({expr_clean_datatable_mirna(TCGA_miRNA_table_result,"Cancer Types (TCGA)")})
+    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types, name, gene, count, expr = tmp) ->> TCGA_miRNA_table_result
   return(TCGA_miRNA_plot_result)
+  return(TCGA_miRNA_table_result)
 }
 ###add new
 
@@ -214,22 +214,20 @@ expr_clean_datatable_mirna <- function(.expr_clean,.title) {
     options = list(
       pageLength = 10,
       autoWidth = TRUE,
-      searching = FALSE,
+      searching = TRUE,
       dom = "Bfrtip",
-      buttons = c("copy", "csv", "print")
+      columnDefs = list(list(className = 'dt-center',targets="_all"))
     ),
     caption = shiny::tags$caption(
       .title,
       style = 'font-size: 20; color: black'
     ),
     rownames = FALSE,
-    colnames = c("Cancer Types", "Symbol","Sample Statistics", "TPM expr."),
-    filter = "top",
-    extensions = "Buttons",
+    colnames = c("Cancer Type", "Symbol","Sample Statistics", "TPM (log2) expr."),
     style = "bootstrap",
     class = "table-bordered table-condensed"
   ) %>% 
-    DT::formatSignif(columns = c("expr"), digits = 2) %>%
+    #DT::formatSignif(columns = c("expr"), digits = 2) %>%
     DT::formatRound(columns = c("expr"), 2)
 }
 
@@ -261,9 +259,30 @@ observe(validate_input_miRNA_set())
 observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
   if(length(input$select_miRNA_result) > 0 && status$miRNA_valid){
     choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
+    miRNA$TCGA_table <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene %>% paste(.,"table",sep = "")
+    miRNA$TCGA_download <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene %>% paste(.,"download",sep = "")
+    TCGA_miRNA_table_result %>%　dplyr::select(-gene) -> all_table
     TCGA_miRNA_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> TCGA_one_plot
+    TCGA_miRNA_table_result %>% dplyr::filter(gene %in% choice$miRNA) %>% dplyr::select(-gene) -> TCGA_one_table
     if(length(TCGA_one_plot$cancer_types) ){
       output[[choice$miRNA]] <- renderPlot({TCGA_one_plot %>% expr_box_plot_mirna()}, height = 500)
+      output[[miRNA$TCGA_table]] <- DT::renderDataTable({expr_clean_datatable_mirna(TCGA_one_table,"Cancer Types (TCGA)")})
+      output[[miRNA$TCGA_download]] <- downloadHandler(
+        filename = function() {
+          paste(Sys.Date(),"TCGA_single_miRNA.csv",sep = "_")
+        },
+        content = function(file) {
+          write.csv(TCGA_one_table, file, row.names = TRUE)
+        }
+      )
+      output$expr_dt_comparison_TCGA_mirna <- downloadHandler(
+        filename = function() {
+          paste(Sys.Date(),"TCGA_all_input_miRNA.csv",sep = "_")
+        },
+        content = function(file) {
+          write.csv(all_table, file, row.names = TRUE)
+        }
+      )
       output$`miRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")

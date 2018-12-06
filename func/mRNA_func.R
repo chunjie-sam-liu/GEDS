@@ -69,56 +69,93 @@ fn_mRNA_single_result <- function(){
 }
 
 fn_mRNA_multi_result <- function(list){
-    column(
-      width = 12, offset = 0,
-      shinydashboard::tabBox(
-        id = "mutiple_mRNA_plot_result", title = "", width = 12,
-        tabPanel(
-          title = "Figure of expression",
-          tagList(
+    tagList(
+      column(
+        width = 12, offset = 0,
+        shiny::tags$p(shiny::tags$a("Tips: Click button to view result of other mRNAs.", id = ""))
+      ),
+      column(
+        width = 12, offset = 0,
+        style = 'margin-top: -35px',
+        radioGroupButtons(
+          inputId = "select_mRNA_result", label = "", status = "primary", size = "lg",
+          individual = TRUE, choices = list
+        )
+      ),
+      column(
+        width = 12, offset = 0,
+        shinydashboard::tabBox(
+          id = "mutiple_mRNA_plot_result", title = "", width = 12,
+          tabPanel(
+            title = "Figure of expression",
+              column(
+                width = 12, offset = 0,
+                shiny::uiOutput(outputId = "plot_multiple_mRNA")
+              )
+          ),
+          tabPanel(
+            title = "Table of expression",
             column(
               width = 12, offset = 0,
-              radioGroupButtons(
-                inputId = "select_mRNA_result", label = "", status = "primary", size = "lg",
-                individual = TRUE, choices = list
-              )),
-            column(
-              width = 12, offset = 0,
-              shiny::uiOutput(outputId = "plot_multiple_mRNA")
-            ))
-        ),
-        tabPanel(
-          title = "Table of expression",
-          tagList(
-          column(
-            width = 12, offset = 0,
-            DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-          ),
-          column(
-            width = 12, offset = 0,
-            DT::dataTableOutput(outputId = "expr_dt_comparison_GTEX_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-          ),
-          column(
-            width = 12, offset = 0,
-            DT::dataTableOutput(outputId = "expr_dt_comparison_CCLE_mRNA") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+              shiny::uiOutput(outputId = "table_multiple_mRNA")
+            )
           )
-          )
-        ))
+        )  
+      )
     )
 }
 
 fn_plot_multiple_mRNA <- function(choice){
   tagList(
     fluidRow(
+    style = 'margin-top: 20px',
     column(width = 1,
            download_bt(NS("mRNA",id=NULL))
     ),
-    column(width = 9,
-           shiny::tags$p(shiny::tags$a("Click to view detail name of cancer types in document", id = "detail2")))
+    column(width = 10,
+           shiny::tags$p(shiny::tags$a("Tips: Click this tip to view detail name of cancer types in document.", id = "detail2"))
+           )
     ),
     fluidRow(
     column(width=12,
            plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
     ))
+  )
+}
+
+fn_table_multiple_mRNA <- function(tcga,gtex,ccle,download_tcga,download_gtex,download_ccle){
+  fluidRow(
+    column(
+      width = 12,
+      style = 'margin-top: 20px',
+      shiny::tags$p(shiny::tags$a("Tips: 1. Click the download button to download data in CSV format. 2. Type letters behind search to filter table. 3. Click the arrow in table header to sort the table.", id = ""))
+    ),
+    column(
+      width = 12,
+      downloadButton(download_tcga, "Download TCGA data of this gene (CSV)", style = 'font-size: 20px'),
+      downloadButton("expr_dt_comparison_TCGA_mRNA", "Download TCGA data of all mRNA input (CSV)", style = 'font-size: 20px')
+    ),
+    column(
+      width = 12,
+      DT::dataTableOutput(outputId = tcga) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    ),
+    column(
+      width = 12,
+      downloadButton(download_gtex, "Download GTEx data of this gene (CSV)", style = 'font-size: 20px'),
+      downloadButton("expr_dt_comparison_GTEX_mRNA", "Download GTEx data of all mRNA input (CSV)", style = 'font-size: 20px')
+    ),
+    column(
+      width = 12,
+      DT::dataTableOutput(outputId = gtex) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    ),
+    column(
+      width = 12,
+      downloadButton(download_ccle, "Download CCLE data of this gene (CSV)", style = 'font-size: 20px'),
+      downloadButton("expr_dt_comparison_CCLE_mRNA", "Download CCLE data of all mRNA input (CSV)", style = 'font-size: 20px')
+    ),
+    column(
+      width = 12,
+      DT::dataTableOutput(outputId = ccle) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    )
   )
 }

@@ -83,42 +83,76 @@ fn_mirna_single_result <- function(){
 }
 
 fn_mirna_multi_result <- function(list){
-    column(
-      width = 12, offset = 0,
-      shinydashboard::tabBox(
-        id = "mutiple_miRNA_plot_result", title = "", width = 12,
-        tabPanel(
-          title = "Figure of expression",
-          tagList(
+    tagList(
+      column(
+        width = 12, offset = 0,
+        shiny::tags$p(shiny::tags$a("Tips: Click button to view result of other miRNAs.", id = ""))
+      ),
+      column(
+        width = 12, offset = 0,
+        style = 'margin-top: -35px',
+        radioGroupButtons(
+          inputId = "select_miRNA_result", label = "", status = "primary", size = "lg",
+          individual = TRUE, choices = list
+        )
+      ),
+      column(
+        width = 12, offset = 0,
+        shinydashboard::tabBox(
+          id = "mutiple_miRNA_plot_result", title = "", width = 12,
+          tabPanel(
+            title = "Figure of expression",
+              column(
+                width = 12, offset = 0,
+                shiny::uiOutput(outputId = "plot_multiple_miRNA")
+              )
+          ),
+          tabPanel(
+            title = "Table of expression",
             column(
               width = 12, offset = 0,
-              radioGroupButtons(
-                inputId = "select_miRNA_result", label = "", status = "primary", size = "lg",
-                individual = TRUE, choices = list
-              )),
-            column(
-              width = 12, offset = 0,
-              shiny::uiOutput(outputId = "plot_multiple_miRNA")
-            ))
-        ),
-        tabPanel(
-          title = "Table of expression",
-          DT::dataTableOutput(outputId = "expr_dt_comparison_TCGA_mirna") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-        ))
+              shiny::uiOutput(outputId = "table_multiple_miRNA")
+            )
+          )
+        )
       )
+    )
 }
 
 fn_plot_multiple_miRNA <- function(choice){
   tagList(
     fluidRow(
-    column(width=1,
+      style = 'margin-top: 20px',
+      column(width=1,
            download_bt(NS("miRNA",id=NULL))
-    ),
-    column(width = 9,
-           shiny::tags$p(shiny::tags$a("Click to view detail name of cancer types in document", id = "detail")))
+      ),
+      column(width = 10,
+           shiny::tags$p(shiny::tags$a("Tips: Click this tip to view detail name of cancer types in document.", id = "detail"))
+      )
     ),
     fluidRow(
-    column(width=12,
-      plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-    )))
+      column(width=12,
+        plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+      )
+    )
+  )
+}
+
+fn_table_multiple_miRNA <- function(table,download){
+  fluidRow(
+    column(
+      width = 12,
+      style = 'margin-top: 20px',
+      shiny::tags$p(shiny::tags$a("Tips: 1. Click the download button to download data in CSV format. 2. Type letters behind search to filter table. 3. Click the arrow in table header to sort the table.", id = ""))
+    ),
+    column(
+      width = 12,
+      downloadButton(download, "Download TCGA data of this miRNA (CSV)", style = 'font-size: 20px'),
+      downloadButton("expr_dt_comparison_TCGA_mirna", "Download TCGA data of all miRNA input (CSV)", style = 'font-size: 20px')
+    ),
+    column(
+      width = 12,
+      DT::dataTableOutput(outputId = table) %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
+    )
+  )
 }

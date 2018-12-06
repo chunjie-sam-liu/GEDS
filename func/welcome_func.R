@@ -23,27 +23,33 @@ fn_welcome_msg <- function() {
 # analysis ----------------------------------------------------------------
 
 fn_analysis <-  function(){
-  column(
-    width = 10,offset =1, style = "margin-top:20px",
-    shinydashboard::tabBox(
-      title = "",id = "tabset1", width=12, 
-          tabPanel("mRNA", 
+  tagList(
+    column(
+      width = 10, offset = 1, style = "margin-top: 30px; text-align: left",
+      shiny::tags$p(shiny::tags$a("Tips: Click mRNA, miRNA, protein to switch panel.", id = "detail2"))
+    ),
+    column(
+      width = 10, offset = 1, style = "margin-top: -20px",
+      shinydashboard::tabBox(
+        title = "",id = "tabset1", width=12, 
+            tabPanel("mRNA", 
                   shiny::uiOutput(outputId = "ui_panel_mRNA"),
                   #shiny::uiOutput(outputId = "ui_mRNA_select"),
                   shiny::uiOutput(outputId = "ui_mRNA_result")
-                  ),
-          tabPanel("miRNA", 
+            ),
+            tabPanel("miRNA", 
                  shiny::uiOutput(outputId = "ui_panel_miRNA"),
                  #shiny::uiOutput(outputId = "ui_miRNA_select"),
                  shiny::uiOutput(outputId = "ui_miRNA_result")
-          ),
-          tabPanel("protein", 
+            ),
+            tabPanel("protein", 
                  shiny::uiOutput(outputId = "ui_panel_protein"),
                  #shiny::uiOutput(outputId = "ui_protein_start"),
                  #shiny::uiOutput(outputId = "ui_protein_stat"),
                  shiny::uiOutput(outputId = "ui_protein_result")
-          )
-        )
+            )
+      )
+    )
   )
 }
 
