@@ -122,7 +122,7 @@ fn_plot_multiple_protein <- function(choice){
            download_bt(NS("protein",id=NULL))
     ),
     column(width = 10,
-           shiny::tags$p(shiny::tags$a("Tips: Click this tip to view detail name of cancer types in document.", id = "detail3")))
+           shiny::tags$p(shiny::tags$a("Tips: Click this tip to view full name of cancer types in document.", id = "detail3")))
     ),
     fluidRow(
     column(width = 12,
