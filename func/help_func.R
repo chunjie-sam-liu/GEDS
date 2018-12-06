@@ -65,7 +65,8 @@ help_data_table <- function(source) {
     'tcga_sample_stat' = '',
     'gtex_mrna_stat' = 'GTEx mRNA Stat.',
     'ccle_mrna_stat' = 'CCLE mRNA Stat.',
-    'mclp_protein_stat' = 'MCLP Protein Stat.'
+    'mclp_protein_stat' = 'MCLP Protein Stat.',
+    'ccle_protein_stat' = 'CCLE Protein Stat.'
   )
   DT::datatable(
     data = d,
@@ -105,7 +106,7 @@ fn_document <- function() {
       shiny::icon(name = "angle-right", class = "fa-fw"),
       "Cancer types (TCGA)"),
     shiny::tags$img(
-      src = "./img/polar.png",
+      src = "./img/polar_low.png",
       class = "center-block img-responsive" ),
     shiny::tags$br(),
     shiny::tags$dl(
@@ -124,34 +125,41 @@ fn_document <- function() {
       shiny::icon(name = "angle-right", class = "fa-fw"),
       "Normal Tissues data (GTEx)"),
     shiny::tags$img(
-      src = "./img/humanbody.png",
+      src = "./img/humanbody_low.png",
       class = "center-block img-responsive" ),
     shiny::tags$br(),
     shiny::tags$h4(
       shiny::icon(name = "angle-right", class = "fa-fw"),
       "Cell lines data (CCLE and MCLP)"),
     shiny::tags$img(
-      src = "./img/cellline.png",
+      src = "./img/cellline_low.png",
       class = "center-block img-responsive" ),
     shiny::tags$br(),
     shiny::tags$dl(
       shiny::tags$dd(
         shiny::fluidRow(
           shiny::column(
-            width = 4, offset = 0,
+            width = 6, offset = 0,
             DT::dataTableOutput(outputId = 'gtex_data_table') %>% 
               withSpinner(color = "#2196f3",size = 0.5, proxy.height = "200px")
           ),
           shiny::column(
-            width = 4, offset = 0,
+            width = 6, offset = 0,
             DT::dataTableOutput(outputId = 'ccle_data_table') %>% 
+              withSpinner(color = "#2196f3",size = 0.5, proxy.height = "200px")
+          )
+          ),
+        shiny::fluidRow(
+        shiny::column(
+            width = 6, offset = 0,
+            DT::dataTableOutput(outputId = 'mclp_data_table') %>% 
               withSpinner(color = "#2196f3",size = 0.5, proxy.height = "200px")
           ),
         shiny::column(
-            width = 4, offset = 0,
-            DT::dataTableOutput(outputId = 'mclp_data_table') %>% 
-              withSpinner(color = "#2196f3",size = 0.5, proxy.height = "200px")
-          )
+          width = 6, offset = 0,
+          DT::dataTableOutput(outputId = 'ccle_protein_data_table') %>% 
+            withSpinner(color = "#2196f3",size = 0.5, proxy.height = "200px")
+        )
         )
       )
     )

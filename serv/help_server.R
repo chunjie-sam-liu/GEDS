@@ -17,3 +17,4 @@ output$tcga_data_table <- DT::renderDataTable({help_data_table(source = 'tcga_sa
 output$gtex_data_table <- DT::renderDataTable({help_data_table(source = 'gtex_mrna_stat')})
 output$ccle_data_table <- DT::renderDataTable({help_data_table(source = 'ccle_mrna_stat')})
 output$mclp_data_table <- DT::renderDataTable({help_data_table(source = 'mclp_protein_stat')})
+output$ccle_protein_data_table <- DT::renderDataTable({help_data_table(source = 'ccle_protein_stat')})
