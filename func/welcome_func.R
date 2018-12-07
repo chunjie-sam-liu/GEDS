@@ -25,7 +25,7 @@ fn_welcome_msg <- function() {
 fn_analysis <-  function(){
   tagList(
     column(
-      width = 10, offset = 1, style = "margin-top: 30px; text-align: left",
+      width = 10, offset = 1, style = "margin-top: 30px; text-align: left; color: #2196f3",
       shiny::tags$p("Tips: Click mRNA, miRNA, protein to switch panel.")
     ),
     column(
