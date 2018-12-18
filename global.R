@@ -14,9 +14,9 @@ config$version <- "0.0.1"
 # in development mode, change the config$wd to your working directory
 
 
-#config$wd <- "/data/xiamx/github/GEDS"
+config$wd <- "/home/xiamx/github/GEDS"
 #config$wd <- "/data/liucj/github/GEDS"
-config$wd <- "/home/liucj/github/GEDS"
+#config$wd <- "/home/liucj/github/GEDS"
 
 # Databases ---------------------------------------------------------------
 #config$database <- "/data/shiny-data/GEDS"
