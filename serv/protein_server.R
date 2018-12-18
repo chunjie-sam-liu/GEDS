@@ -6,7 +6,9 @@
 observeEvent(c(input$input_protein_set),{
     status$protein_result <- FALSE
     dataset_number$protein <- 30
-    match$protein <- input$input_protein_set
+    input$input_protein_set %>% tibble::tibble(protein=.) %>% 
+      dplyr::mutate(protein= stringr::str_replace_all(protein,pattern = " ",replacement = "") %>% toupper()) %>%
+      .$protein ->match$protein
     if(match$protein != ""){
     status$protein_plot <- FALSE
     TCGA_protein_result()
@@ -103,10 +105,17 @@ TCGA_protein_result <- function(){
         .x = summary,
         .f = function(.x) {
           .x %>% dplyr::mutate(protein = stringr::str_replace_all(pattern = "_",replacement = "",protein) %>% toupper()) %>%
-            dplyr::filter(protein %in% match$protein)  %>% tidyr::unnest()
+          dplyr::filter(protein %in% match$protein) -> a
+          if(length(a$protein) > 0){
+            a %>% tidyr::unnest() 
+          }
+          else{
+            a <- "drop"
+            a %>% tibble::tibble(symbol=.)
+          }
         }
       )
-    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr = tumor) -> expr_clean
+    )  %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr = tumor) -> expr_clean
   if(length(expr_clean$cancer_types) > 0){
     expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> TCGA_protein_plot_result
     expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_protein_table_result
@@ -134,7 +143,14 @@ MCLP_protein_result <- function(){
         .x = summary,
         .f = function(.x) {
           .x %>% dplyr::mutate(protein = stringr::str_replace_all(pattern = "_",replacement = "",protein) %>% toupper()) %>%
-            dplyr::filter(protein %in% match$protein) %>% tidyr::unnest()
+            dplyr::filter(protein %in% match$protein) -> a
+          if(length(a$protein) > 0){
+            a %>% tidyr::unnest() 
+          }
+          else{
+            a <- "drop"
+            a %>% tibble::tibble(symbol=.)
+          }
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary) -> expr_clean
@@ -162,7 +178,15 @@ CCLE_protein_result <- function(){
       expr = purrr::map(
         .x = summary,
         .f = function(.x) {
-          .x %>% dplyr::mutate(protein = stringr::str_replace_all(pattern = "_",replacement = "",protein) %>% toupper()) %>% dplyr::filter(protein %in% match$protein) %>% tidyr::unnest()
+          .x %>% dplyr::mutate(protein = stringr::str_replace_all(pattern = "_",replacement = "",protein) %>% toupper()) %>% 
+            dplyr::filter(protein %in% match$protein) -> a
+          if(length(a$protein) > 0){
+            a %>% tidyr::unnest() 
+          }
+          else{
+            a <- "drop"
+            a %>% tibble::tibble(symbol=.)
+          }
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue) -> expr_clean
