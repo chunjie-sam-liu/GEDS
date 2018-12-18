@@ -42,7 +42,7 @@ observeEvent(c(input$input_protein_set),{
     if(t == 1 && m == 1 && c == 1){
       ggpubr::ggarrange(
         TCGA_plot,MCLP_plot,CCLE_plot,
-        ncol = 1,nrow = 3, heights = c(1.3,1,1.4)
+        ncol = 1,nrow = 3, heights = c(1.4,1.2,1.5)
       ) -> plot_result
       output[[match$protein]] <- renderPlot({plot_result},height = 1200)
     }
