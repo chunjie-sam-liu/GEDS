@@ -280,8 +280,16 @@ expr_box_plot_mRNA <-  function(.expr,.type){
     t %>%  .$cancer_types -> order
     t %>%
       ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
-      scale_x_discrete(limits = order) +
-      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#2cdbf9") +
+      scale_x_discrete(limits = order) -> m
+    if(.type == "GTEX"){
+      m +
+      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#cbb255") -> n
+      }
+    else{
+      m +
+      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#ffc0cb") -> n
+    }
+    n +
       facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
       # facet_wrap(~symbol, ncol = 1, scales = "free") +
       

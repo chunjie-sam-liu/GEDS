@@ -230,7 +230,8 @@ expr_buble_plot_protein <-  function(.expr,.type){
     ggplot(mapping = aes(x = cancer_types, middle = median,
                          ymin = lower.whisker, ymax = upper.whisker,
                          lower = lower.hinge, upper = upper.hinge, color = cancer_types)) -> p
-    TCGA_color %>% head(n = nu) %>% dplyr::select(color) %>% dplyr::pull(color) -> .color
+    TCGA_color %>% head(n = 1) %>% dplyr::select(color) %>% .$color -> s
+    rep(s,nu) -> .color
     p +
     scale_color_manual(values = .color) +
     scale_x_discrete(limits= order) +
@@ -284,8 +285,16 @@ expr_buble_plot_protein <-  function(.expr,.type){
     t %>%  .$cancer_types -> order
     t %>%
       ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
-      scale_x_discrete(limits = order) +
-      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#2cdbf9") +
+      scale_x_discrete(limits = order) -> n
+    if(.type == "MCLP"){
+      n +
+      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#2cdbf9") -> m
+    }
+    else{
+      n +
+        geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#75a3e7") -> m
+    }
+    m +
       facet_wrap(~protein, ncol = 1, scales = "free", strip.position = 'right') +
       # facet_wrap(~symbol, ncol = 1, scales = "free") +
       
