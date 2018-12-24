@@ -120,11 +120,12 @@ fn_protein_multi_result <- function(list){
 fn_plot_multiple_protein <- function(choice){
   tagList(
     fluidRow(
+    column(width = 10,
+           shiny::tags$p(shiny::tags$a("Tips: Click this tip to view full name of cancer types in document.", id = "detail3"))
+           ),
     column(width=1,
            download_bt(NS("protein",id=NULL))
-    ),
-    column(width = 10,
-           shiny::tags$p(shiny::tags$a("Tips: Click this tip to view full name of cancer types in document.", id = "detail3")))
+    )
     ),
     fluidRow(
     column(width = 12,

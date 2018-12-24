@@ -110,12 +110,12 @@ fn_plot_multiple_mRNA <- function(choice){
   tagList(
     fluidRow(
     style = 'margin-top: 20px',
-    column(width = 1,
-           download_bt(NS("mRNA",id=NULL))
-    ),
     column(width = 10,
            shiny::tags$p(shiny::tags$a("Tips: Click this tip to view full name of cancer types in document.", id = "detail2"))
-           )
+           ),
+    column(width = 1,
+           download_bt(NS("mRNA",id=NULL))
+    )
     ),
     fluidRow(
     column(width=12,
