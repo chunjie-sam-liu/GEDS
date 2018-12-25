@@ -115,10 +115,12 @@ TCGA_protein_result <- function(){
           }
         }
       )
-    )  %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(expr = tumor) -> expr_clean
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::filter(symbol != "drop")  -> expr_clean
   if(length(expr_clean$cancer_types) > 0){
-    expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> TCGA_protein_plot_result
-    expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_protein_table_result
+    expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% 
+      tidyr::drop_na() %>% dplyr::ungroup() %>% dplyr::rename(expr = tumor)  ->> TCGA_protein_plot_result
+    expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% 
+      tidyr::drop_na() %>% dplyr::ungroup() %>% dplyr::rename(expr = tumor) ->> TCGA_protein_table_result
     TCGA_protein_table_result %>% dplyr::left_join(protein_TCGA,by = "cancer_types") %>% dplyr::select(cancer_types = Disease_Type,symbol,protein,cancer,expr) -> TCGA_protein_table_result
     output$expr_dt_comparison_TCGA_protein <- DT::renderDataTable({expr_clean_datatable_protein(TCGA_protein_table_result,"Cancer Types (TCGA)")})
     output$expr_dt_download_TCGA_protein <- downloadHandler(
@@ -149,13 +151,16 @@ MCLP_protein_result <- function(){
           }
           else{
             a <- "drop"
-            a %>% tibble::tibble(symbol=.)
+            a %>% tibble::tibble(symbol = .)
           }
         }
       )
-    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>%　dplyr::rename(cancer_types = tis,expr=summary) -> expr_clean
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::filter(symbol != "drop") %>%
+    dplyr::rename(cancer_types = tis)  -> expr_clean
   if(length(expr_clean$cancer_types) > 0){
-    expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% dplyr::left_join(protein_MCLP,by="cancer_types") %>% dplyr::select(cancer_types,symbol,protein,cellline_num,expr) ->> MCLP_protein_table_result
+    expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% 
+      tidyr::drop_na() %>% dplyr::ungroup() %>% dplyr::left_join(protein_MCLP,by="cancer_types") %>% 
+      dplyr::select(cancer_types,symbol,protein,cellline_num,expr=summary) ->> MCLP_protein_table_result
     output$expr_dt_comparison_MCLP_protein <- DT::renderDataTable({expr_clean_datatable_protein(MCLP_protein_table_result,"Cell lines (MCLP)")})
     output$expr_dt_download_MCLP_protein <- downloadHandler(
       filename = function() {
@@ -185,11 +190,12 @@ CCLE_protein_result <- function(){
           }
           else{
             a <- "drop"
-            a %>% tibble::tibble(symbol=.)
+            a %>% tibble::tibble(symbol = .)
           }
         }
       )
-    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue) -> expr_clean
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::filter(symbol != "drop" ) %>%
+    dplyr::rename(cancer_types = tissue)  -> expr_clean
   if(length(expr_clean$cancer_types)>0){
     expr_clean %>% 
       dplyr::mutate(cancer_types = stringr::str_replace_all(pattern = "_",replacement = " ",cancer_types)) %>% 
