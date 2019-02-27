@@ -12,7 +12,6 @@ check_mRNA_set <- function(.s) {
 validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_check) {
   alias$mRNA = NULL
   .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
-  print(.vvv)
   tibble::tibble(symbol = .vvv) %>%
     dplyr::mutate(
       expression = purrr::map(
@@ -131,7 +130,7 @@ observeEvent(c(reset$mRNA),{
   a <- TCGA_mRNA_plot_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
   b <- GTEX_mRNA_table_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
   c <- CCLE_mRNA_table_result %>% dplyr::select(symbol) %>% dplyr::distinct() %>% .$symbol
-  plot_number$mRNA <- c(a,b,c) %>% tibble::tibble(x = .) %>% dplyr::distinct() %>% .$x
+  c(a,b,c) %>% tibble::tibble(symbol = .) %>% dplyr::distinct() %>% .$symbol -> plot_number$mRNA
   status$mRNA_result <- TRUE
   if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
   return(TCGA_mRNA_plot_result)
@@ -157,15 +156,20 @@ TCGA_mRNA_result <- function(){
     dplyr::select(cancer_types = tmp,site,symbol,expr) %>% 
     dplyr::group_by(cancer_types,site,symbol) %>% 
     dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() %>% 
-    dplyr::mutate(tmp = log2(expr+1)) %>% dplyr::select(cancer_types,site,symbol,expr = tmp) ->> TCGA_mRNA_plot_result
-  
+    dplyr::mutate(tmp = log2(expr+1)) %>% 
+    dplyr::select(cancer_types,site,symbol,expr = tmp) %>% 
+    dplyr::left_join(total_mRNA_symbol,by="symbol") %>%
+    dplyr::select(cancer_types,site,symbol=Symbol,expr) ->> TCGA_mRNA_plot_result
   a %>% dplyr::left_join(mRNA_TCGA, by = "cancer_types") %>% 
     dplyr::mutate(tmp=ifelse(barcode == "tumor",cancer,normal)) %>% 
     dplyr::select(cancer_types = Disease_Type, symbol, barcode, expr,count = tmp) %>% 
     dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
     dplyr::select(cancer_types = tmp,symbol,count,expr) %>% 
     dplyr::group_by(cancer_types,symbol) %>% 
-    dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> TCGA_mRNA_table_result
+    dplyr::slice(6) %>% tidyr::drop_na() %>% 
+    dplyr::ungroup() %>% 
+    dplyr::left_join(total_mRNA_symbol,by="symbol") %>%
+    dplyr::select(cancer_types,symbol=Symbol,count,expr) ->> TCGA_mRNA_table_result
     return(TCGA_mRNA_plot_result)
     return(TCGA_mRNA_table_result)
 }
@@ -181,13 +185,16 @@ GTEX_mRNA_result <- function(){
             tidyr::unnest()
         }
       )
-    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean 
-  print(expr_clean)
-  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> GTEX_mRNA_plot_result
-  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
+    dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean 
+  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% 
+    dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> GTEX_mRNA_plot_result
+  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% 
+    dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
     dplyr::left_join(mRNA_GTEX,by = "cancer_types") %>% 
-    dplyr::select(cancer_types,symbol,tissue_num,expr) ->> GTEX_mRNA_table_result
-  print(GTEX_mRNA_table_result)
+    dplyr::select(cancer_types,symbol,tissue_num,expr) %>% 
+    dplyr::left_join(total_mRNA_symbol,by="symbol") %>%
+    dplyr::select(cancer_types,symbol=Symbol,tissue_num,expr) ->> GTEX_mRNA_table_result
   return(GTEX_mRNA_table_result)
 }
 
@@ -202,9 +209,15 @@ CCLE_mRNA_result <- function(){
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = tissue,expr=summary) -> expr_clean
-  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup()  ->> CCLE_mRNA_plot_result
-  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
-    dplyr::left_join(mRNA_CCLE,by = "cancer_types") %>% dplyr::select(cancer_types,symbol,cellline_num,expr) ->> CCLE_mRNA_table_result
+  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% 
+    dplyr::slice(1:5) %>% tidyr::drop_na() %>% 
+    dplyr::ungroup()  ->> CCLE_mRNA_plot_result
+  expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% 
+    dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
+    dplyr::left_join(mRNA_CCLE,by = "cancer_types") %>% 
+    dplyr::select(cancer_types,symbol,cellline_num,expr) %>%
+    dplyr::left_join(total_mRNA_symbol,by="symbol") %>%
+    dplyr::select(cancer_types,symbol=Symbol,cellline_num,expr) ->> CCLE_mRNA_table_result
   return(CCLE_mRNA_table_result)
 }
 #####add new
@@ -410,10 +423,14 @@ observe(validate_input_mRNA_set())
 observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
   if(length(input$select_mRNA_result)>0 && status$mRNA_set){
     ###add new
-    TCGA_mRNA_plot_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_plot
-    TCGA_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_table
-    GTEX_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
-    CCLE_mRNA_table_result %>% dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_plot
+    TCGA_mRNA_plot_result %>% 
+      dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_plot
+    TCGA_mRNA_table_result %>% 
+      dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_table
+    GTEX_mRNA_table_result %>% 
+      dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
+    CCLE_mRNA_table_result %>% 
+      dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_plot
     if(length(TCGA_one_plot$cancer_types) + length(GTEX_one_plot$cancer_types) + length(CCLE_one_plot$cancer_types) > 0 ){
       choice$mRNA <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
       mRNA$TCGA_table <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"TCGA_table",sep = "")
