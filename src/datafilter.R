@@ -185,7 +185,7 @@ cluster <- multidplyr::create_cluster(33)
 TCGA %>% multidplyr::partition(cluster = cluster) %>%
     multidplyr::cluster_library("magrittr") %>%
     dplyr::mutate(
-      mean = purrr::map2(
+      mean = purrr::map(
         .x = mirna,
         .f = function(.x){
             .x %>% names %>% .[c(-1,-313)] %>% tibble::tibble(barcode = .) %>% 
@@ -202,7 +202,7 @@ TCGA %>% multidplyr::partition(cluster = cluster) %>%
                 ) %>% dplyr::rename(tumor = .out) %>% 
                 purrrlyr::by_row(
                     ..f = function(.y) {
-                        .y %>% dplyr::select(gene,name,tumor,tumor_barcode) %>% tidyr::gather(key = barcode, value = expr, -c(gene,name,tumor)) %>% tidyr::drop_na() %>% .$expr -> .xv
+                        .y %>% dplyr::select(gene,name,tumor,normal_barcode) %>% tidyr::gather(key = barcode, value = expr, -c(gene,name,tumor)) %>% tidyr::drop_na() %>% .$expr -> .xv
                         c(quantile(.xv),mean(.xv)) %>% unname()
                     }
                 ) %>% dplyr::rename(normal = .out) %>%
@@ -215,3 +215,17 @@ TCGA %>% multidplyr::partition(cluster = cluster) %>%
     dplyr::ungroup() %>%
     dplyr::select(-PARTITION_ID) ->TCGA_summary
     parallel::stopCluster(cluster)
+
+dplyr::mutate(
+      mirna = purrr::map(
+        .x = summary,
+        .f = function(.x) {
+          .x %>%
+            dplyr::filter(name %in% c("hsa-miR-1290","hsa-miR-519d-3p")) %>% 
+            tidyr::gather(key = barcode, value = expr, -c(gene,name)) %>% tidyr::unnest()
+        }
+      )
+    ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% 
+    dplyr::mutate(tmp = paste(cancer_types,barcode)) %>% 
+    dplyr::select(cancer_types=tmp,name,expr=mirna) %>%
+    dplyr::rename(expr=summary)

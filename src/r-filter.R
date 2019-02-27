@@ -1,16 +1,43 @@
-TCGA_protein %>% 
-  dplyr::filter(cancer_types %in% c("ESCA", "LIHC","CESC","COAD")) %>%
+TCGA %>% 
   dplyr::mutate(
       expr = purrr::map(
-          .x = expr,
+          .x = summary,
           .f = function(.x) {
               .x %>%
-                dplyr::filter(symbol %in% c("AKT", "SCD1"))
+                dplyr::mutate(protein=ifelse(protein=="X1433BETA","1433BETA",protein)) %>%
+                dplyr::mutate(protein=ifelse(protein=="X1433EPSILON","1433EPSILON",protein)) %>%
+                dplyr::mutate(protein=ifelse(protein=="X1433ZETA","1433ZETA",protein)) %>%
+                dplyr::mutate(protein=ifelse(protein=="X4EBP1","4EBP1",protein)) %>%
+                dplyr::mutate(protein=ifelse(protein=="X4EBP1_pS65","4EBP1_pS65",protein)) %>%
+                dplyr::mutate(protein=ifelse(protein=="X4EBP1_pT37T46","4EBP1_pT37T46",protein)) %>%
+                dplyr::mutate(protein=ifelse(protein=="X4EBP1_pT70","4EBP1_pT70",protein)) %>%
+                dplyr::mutate(protein=ifelse(protein=="X53BP1","53BP1",protein)) %>%
+                dplyr::mutate(symbol=ifelse(symbol=="X1433BETA","1433BETA",symbol)) %>%
+                dplyr::mutate(symbol=ifelse(symbol=="X1433EPSILON","1433EPSILON",symbol)) %>%
+                dplyr::mutate(symbol=ifelse(symbol=="X1433ZETA","1433ZETA",symbol)) %>%
+                dplyr::mutate(symbol=ifelse(symbol=="X4EBP1","4EBP1",symbol)) %>%
+                dplyr::mutate(symbol=ifelse(symbol=="X53BP1","53BP1",symbol))
           }
       )
   ) ->e
   
+grep(pattern = "PS[0-9]", symbol$protein, value = TRUE ) ->ps
+grep(pattern = "PT[0-9]", symbol$protein, value = TRUE ) ->pt
+grep(pattern = "PY[0-9]", symbol$protein, value = TRUE ) ->py
 
+symbol %>% 
+dplyr::mutate(protein = ifelse(protein %in% ps,stringr::str_replace(pattern="PS",replacement=" pS",protein),protein)) %>%
+dplyr::mutate(protein = ifelse(protein %in% pt,stringr::str_replace(pattern="PT",replacement=" pT",protein),protein)) %>% 
+dplyr::mutate(protein = ifelse(protein %in% py,stringr::str_replace(pattern="PY",replacement=" pY",protein),protein)) -> a
+
+grep(pattern = "pS[0-9]", symbol$protein, value = TRUE ) ->ps
+grep(pattern = "pT[0-9]", symbol$protein, value = TRUE ) ->pt
+grep(pattern = "pY[0-9]", symbol$protein, value = TRUE ) ->py
+
+symbol %>% 
+dplyr::mutate(tmp = ifelse(protein %in% ps,"pS = phospho Serine",NA)) %>%
+dplyr::mutate(tmp = ifelse(protein %in% pt,"pT = phospho Threonine",tmp)) %>% 
+dplyr::mutate(tmp = ifelse(protein %in% py,"pY = phospho TYrosine",tmp)) -> a
 
 #mean
 e %>%
@@ -84,3 +111,10 @@ observeEvent(input$select_protein_TCGA,{
   output$expr_dt_comparison <- DT::renderDataTable({expr_clean_datatable(table_result)})
   #output$expr_bubble_plot <- renderPlot({plot_result %>% expr_buble_plot()})
 })
+
+
+a %>% dplyr::select(protein,anno = tmp) %>%
+  dplyr::mutate(tmp = ifelse(protein=="1433BETA","14-3-3-BETA",protein)) %>%
+  dplyr::mutate(tmp = ifelse(protein=="1433EPSILON","14-3-3-EPSILON",tmp)) %>%
+  dplyr::mutate(tmp = ifelse(protein=="1433SIGMA","14-3-3-SIGMA",tmp)) %>%
+  dplyr::mutate(tmp = ifelse(protein=="1433ZETA","14-3-3-ZETA",tmp)) -> b
