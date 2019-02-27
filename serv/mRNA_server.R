@@ -12,6 +12,7 @@ check_mRNA_set <- function(.s) {
 validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_check) {
   alias$mRNA = NULL
   .vvv <- .v[.v != ""] %>% unique() %>% sapply(FUN = toupper, USE.NAMES = FALSE)
+  print(.vvv)
   tibble::tibble(symbol = .vvv) %>%
     dplyr::mutate(
       expression = purrr::map(
@@ -20,8 +21,9 @@ validate_mRNA_set <- function(.v,  .total_symbol, input_mRNA_check = input_mRNA_
           grep(pattern = (paste(",",.x,",") %>% 
               stringr::str_replace_all(' ','')), .total_symbol$alias_match, value = TRUE ) -> a
           .total_symbol %>% dplyr::filter(alias_match %in% a) %>% .$symbol-> b
-          if(length(b)>0){
-            al <- paste(b," ","(",.x,")",sep="") %>% toString()
+          .total_symbol %>% dplyr::filter(alias_match %in% a) %>% .$Symbol ->f
+          if(length(f)>0){
+            al <- paste(f," ","(",.x,")",sep="") %>% toString()
             if(length(alias$mRNA) > 0){
               alias$mRNA <- paste(alias$mRNA,","," ",al,sep = "")
             }
@@ -180,10 +182,12 @@ GTEX_mRNA_result <- function(){
         }
       )
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::rename(cancer_types = SMTS,expr=summary) -> expr_clean 
+  print(expr_clean)
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% dplyr::ungroup() ->> GTEX_mRNA_plot_result
   expr_clean %>% dplyr::group_by(cancer_types,symbol) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% dplyr::ungroup() %>%
     dplyr::left_join(mRNA_GTEX,by = "cancer_types") %>% 
     dplyr::select(cancer_types,symbol,tissue_num,expr) ->> GTEX_mRNA_table_result
+  print(GTEX_mRNA_table_result)
   return(GTEX_mRNA_table_result)
 }
 
