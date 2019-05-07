@@ -7,7 +7,7 @@ observeEvent(c(input$input_protein_set),{
     status$protein_result <- FALSE
     dataset_number$protein <- 30
     input$input_protein_set %>% tibble::tibble(protein=.) %>% 
-      dplyr::mutate(protein= stringr::str_replace_all(protein,pattern = " ",replacement = "") %>% toupper()) %>%
+      dplyr::mutate(protein= stringr::str_replace_all(protein,pattern = " |-",replacement = "") %>% toupper()) %>%
       .$protein ->match$protein
     if(match$protein != ""){
     status$protein_plot <- FALSE

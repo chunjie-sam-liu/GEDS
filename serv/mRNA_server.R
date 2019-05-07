@@ -232,130 +232,65 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>%
       dplyr::mutate(tmp = paste(site,"(",cancer_types,")")) %>%
       dplyr::select(cancer_types=tmp,types,symbol,FPKM) %>%
-      dplyr::mutate(types = stringr::str_to_title(types)) %>% 
-      dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>% 
-    ###add new
-    tidyr::spread(key = name, value = FPKM) %>% 
-    dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(median)) %>% dplyr::ungroup() -> t
-    t %>% dplyr::filter(types %in% "Tumor") %>% .$cancer_types -> order
-    t %>%
-      ggplot(mapping = aes(x = cancer_types, middle = median,
-                         ymin = lower.whisker, ymax = upper.whisker,
-                         lower = lower.hinge, upper = upper.hinge, color = types)) +
-      scale_x_discrete(limits= order) +
-      scale_color_manual(values = c("midnightblue", "red3")) +
-      geom_errorbar(width = 0.3, position = position_dodge(0.75, preserve = 'single')) +
-      geom_boxplot(stat = 'identity', width = 0.6, position = position_dodge(0.75, preserve = 'single')) +
-      facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
-      # facet_wrap(~symbol, ncol = 1, scales = "free") +
-      
-      theme(
-        text = element_text(colour = 'black', size = 18),
-        
-        axis.line = element_line(color = "black", size = 0.1),
-        axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
-        axis.text.y = element_text(color = 'black', size = 14),
-        
-        strip.background = element_rect(fill = NA, color = "white"),
-        strip.text = element_text(size = 20),
-        
-        panel.background = element_rect(fill = "white", color = "black", size = 0.5),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        
-        legend.position = 'right',
-        legend.box = "vertical",
-        legend.key = element_rect(fill = 'white'),
-        plot.title = element_text(hjust = 0.5,size = 30)
-      ) +
-      labs(
+      dplyr::mutate(types = stringr::str_to_title(types))  -> t1
+    t1 %>% dplyr::filter(types %in% "Tumor") %>% dplyr::group_by(cancer_types) %>% 
+      dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
+    plot_ly(
+      data = t1,
+      x = ~ cancer_types,
+      y = ~ FPKM,
+      type = "box",
+      split = ~ types,
+      color = ~ types, colors = c("midnightblue", "red3"),
+      source = "main"
+    ) %>% layout(
+      title = example$symbol[1],
+      boxmode = "group",
+      xaxis = list(
         title = "Cancer Types (TCGA)",
-        x = 'Cancer Types',
-        y = 'RSEM(log2)'
-      ) +
-      guides(
-        color = guide_legend(
-          # legend title
-          title = "",
-          title.position = "left",
-          
-          # legend label
-          label.position = "bottom",
-          label.theme = element_text(angle = 270, hjust = 0.5, vjust = 0.5, size = 20),
-          nrow = 2,
-          reverse = TRUE
-        )
-      )
+        showticklabels = TRUE,
+        tickangle = 295, tickfont = list(size = 12),
+        showline = TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "RSEM(log2)" ,showline = TRUE),
+      legend = list(orientation = 'h',x = 0.7, y = 1.05))
     ###add new
   }
   else{
-    nu <- length(.expr$cancer_types)
     .expr %>% dplyr::rename(FPKM = expr) %>%
-      dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(FPKM)) %>% dplyr::ungroup() %>% 
-      dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% dplyr::select(cancer_types = tmp, symbol, FPKM)-> t
-    t %>%  .$cancer_types -> order
-    t %>%
-      ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
-      scale_x_discrete(limits = order) -> m
+      dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(FPKM)) %>% 
+      dplyr::ungroup() %>% dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% 
+      dplyr::select(cancer_types = tmp, symbol, FPKM)-> t2
     if(.type == "GTEX"){
-      m +
-      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#cbb255") -> n
+      plot_ly(
+        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
+        color = ~ symbol, colors = "#cbb255",source = "main", tickfont = list(size = 12),
+        showlegend = FALSE
+      ) %>% layout(
+        title = example$symbol[1],
+        xaxis = list(
+          title = "Normal Tissues (GTEx)", showticklabels = TRUE,
+          tickangle = 295, showline = TRUE, categoryorder = "array", 
+          categoryarray = t2$cancer_types
+        ),
+        yaxis = list(title = "FPKM" ,showline = TRUE))
       }
     else{
-      m +
-      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#ffc0cb") -> n
+      plot_ly(
+        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
+        color = ~ symbol, colors = "#ffc0cb",source = "main", tickfont = list(size = 12),
+        showlegend = FALSE
+      ) %>% layout(
+        title = example$symbol[1],
+        xaxis = list(
+          title = "Cell lines (CCLE)", showticklabels = TRUE,
+          tickangle = 295, showline = TRUE, categoryorder = "array", 
+          categoryarray = t2$cancer_types
+        ),
+        yaxis = list(title = "FPKM" ,showline = TRUE))
     }
-    n +
-      facet_wrap(~symbol, ncol = 1, scales = "free", strip.position = 'right') +
-      # facet_wrap(~symbol, ncol = 1, scales = "free") +
-      
-      theme(
-        text = element_text(colour = 'black', size = 18),
-        
-        axis.line = element_line(color = "black", size = 0.1),
-        axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
-        axis.text.y = element_text(color = 'black', size = 14),
-        
-        strip.background = element_rect(fill = NA, color = "white"),
-        strip.text = element_text(size = 20),
-        
-        panel.background = element_rect(fill = "white", color = "black", size = 0.5),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        
-        legend.position = 'none',
-        legend.key = element_rect(fill = 'white'),
-        plot.title = element_text(hjust = 0.5,size = 30)
-      ) -> p 
-    if(.type == "GTEX"){
-      p +   
-        labs(
-          title = "Normal Tissues (GTEx)",
-          x = 'Normal Tissues',
-          y = 'FPKM'
-        ) -> q} 
-    else{
-      p +   
-        labs(
-          title = "Cell lines (CCLE)",
-          x = 'Cell lines',
-          y = 'FPKM'
-        ) -> q}
-    q +
-      guides(
-        color = guide_legend(
-          # legend title
-          title = "Cancer Types",
-          title.position = "left",
-          
-          # legend label
-          label.position = "right",
-          # label.theme = element_text(size = 14),
-          reverse = TRUE
-        )
-      )
     ###add new
   }
 }
@@ -431,6 +366,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
     CCLE_mRNA_table_result %>% 
       dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_plot
+    CCLE_one_plot %>% readr::write_rds("/home/xiamx/file_for_GEDS_test/CCLE_example.rds.gz",compress = "gz")
     if(length(TCGA_one_plot$cancer_types) + length(GTEX_one_plot$cancer_types) + length(CCLE_one_plot$cancer_types) > 0 ){
       choice$mRNA <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
       mRNA$TCGA_table <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"TCGA_table",sep = "")
@@ -505,49 +441,52 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
         )
         c = 1
       }
+      p3 <- plotly_empty(source = "main")
       if (t == 1 && g == 1 && c == 1){
-        ggpubr::ggarrange(
-          TCGA_plot,GTEX_plot,CCLE_plot,
-          ncol = 1,nrow = 3, heights = c(1.3,1,1.3)
+        subplot(
+          TCGA_plot, p3,
+          GTEX_plot, p3,
+          CCLE_plot,
+          nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
         ) -> plot_result
-        output[[choice$mRNA]] <- renderPlot({plot_result}, height = 1200 )
+        output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if (t == 1 && g == 1){
-        ggpubr::ggarrange(
-          TCGA_plot,GTEX_plot,
-          ncol = 1,nrow = 2, heights = c(1.3,1)
+        subplot(
+          TCGA_plot,p3,GTEX_plot,
+          nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
-        output[[choice$mRNA]] <- renderPlot({plot_result}, height = 850 )
+        output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(g == 1 && c == 1){
-        ggpubr::ggarrange(
-          GTEX_plot,CCLE_plot,
-          ncol = 1,nrow = 2, heights = c(1,1.3)
+        subplot(
+          GTEX_plot,p3,CCLE_plot,
+          nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
-        output[[choice$mRNA]] <- renderPlot({plot_result}, height = 850 )
+        output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(t == 1 && c == 1){
-        ggpubr::ggarrange(
+        subplot(
           TCGA_plot,CCLE_plot,
-          ncol = 1,nrow = 2, heights = c(1.3,1.3)
+          nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
-        output[[choice$mRNA]] <- renderPlot({plot_result}, height = 900 )
+        output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(t == 1){
-        output[[choice$mRNA]] <- renderPlot({TCGA_plot}, height = 450 )
+        output[[choice$mRNA]] <- renderPlotly({TCGA_plot})
       }
       else if(g == 1){
-        output[[choice$mRNA]] <- renderPlot({GTEX_plot}, height = 400 )
+        output[[choice$mRNA]] <- renderPlotly({GTEX_plot})
       }
       else if(c == 1){
-        output[[choice$mRNA]] <- renderPlot({CCLE_plot}, height = 450 )
+        output[[choice$mRNA]] <- renderPlotly({CCLE_plot})
       }
       output$`mRNA-picdownload` <- downloadHandler(
         filename = function() {
           paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
         },
-        content = function(file){
-          ggsave(file,plot_result,device = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
+        content = function(out_file){
+          plotly_IMAGE(out_file = out_file,x = plot_result,format = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
       )
       ###add new
     }

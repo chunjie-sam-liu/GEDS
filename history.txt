@@ -1,0 +1,512 @@
+y = c(rnorm(10), rnorm(10, 3, 1)))
+ui <- fluidPage(
+column(6, plotlyOutput('scatter')),
+bsModal(id = '', title = '', trigger = 'boxPopUp', plotlyOutput('box'))
+)
+server <- function(input, output,session) {
+output$scatter <- renderPlotly({
+plot_ly(df1, x = df1$x, y = df1$y,source = "scatter")
+})
+observeEvent(event_data("plotly_click", source = "scatter"), {
+toggleModal(session, "boxPopUp", toggle = "toggle")
+print("1")
+})
+output$box <- renderPlotly({
+plot_ly(df2, x = df2$x, y = df2$y, type = 'box')
+})
+}
+shinyApp(ui = ui, server = server)
+library(shiny)
+library(plotly)
+df1 <- data.frame(x = 1:10, y = 1:10)
+df2 <- data.frame(x = c(rep('a', 10), rep('b', 10)),
+y = c(rnorm(10), rnorm(10, 3, 1)))
+ui <- fluidPage(
+column(6, plotlyOutput('scatter')),
+bsModal(id = '', title = '', trigger = '', plotlyOutput('box'))
+)
+server <- function(input, output,session) {
+output$scatter <- renderPlotly({
+plot_ly(df1, x = df1$x, y = df1$y,source = "scatter")
+})
+observeEvent(event_data("plotly_click", source = "scatter"), {
+toggleModal(session, "boxPopUp", toggle = "toggle")
+print("1")
+})
+output$box <- renderPlotly({
+plot_ly(df2, x = df2$x, y = df2$y, type = 'box')
+})
+}
+shinyApp(ui = ui, server = server)
+?bsModal
+library(shiny)
+library(plotly)
+df1 <- data.frame(x = 1:10, y = 1:10)
+df2 <- data.frame(x = c(rep('a', 10), rep('b', 10)),
+y = c(rnorm(10), rnorm(10, 3, 1)))
+ui <- fluidPage(
+column(6, plotlyOutput('scatter')),
+bsModal(id = 'boxPopUp', title = '', trigger = '', plotlyOutput('box'))
+)
+server <- function(input, output,session) {
+output$scatter <- renderPlotly({
+plot_ly(df1, x = df1$x, y = df1$y,source = "scatter")
+})
+observeEvent(event_data("plotly_click", source = "scatter"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+print("1")
+})
+output$box <- renderPlotly({
+plot_ly(df2, x = df2$x, y = df2$y, type = 'box')
+})
+}
+shinyApp(ui = ui, server = server)
+library(shiny)
+library(plotly)
+df1 <- data.frame(x = 1:10, y = 1:10)
+df2 <- data.frame(x = c(rep('a', 10), rep('b', 10)),
+y = c(rnorm(10), rnorm(10, 3, 1)))
+ui <- fluidPage(
+column(6, plotlyOutput('scatter')),
+bsModal(id = 'boxPopUp', title = '', trigger = '', plotlyOutput('box'))
+)
+server <- function(input, output,session) {
+output$scatter <- renderPlotly({
+plot_ly(df1, x = df1$x, y = df1$y,source = "scatter")
+})
+observeEvent(event_data("plotly_click", source = "scatter"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+print(eventdat <- event_data('plotly_click', source="main"))
+})
+output$box <- renderPlotly({
+plot_ly(df2, x = df2$x, y = df2$y, type = 'box')
+})
+}
+shinyApp(ui = ui, server = server)
+library(shiny)
+library(plotly)
+df1 <- data.frame(x = 1:10, y = 1:10)
+df2 <- data.frame(x = c(rep('a', 10), rep('b', 10)),
+y = c(rnorm(10), rnorm(10, 3, 1)))
+ui <- fluidPage(
+column(6, plotlyOutput('scatter')),
+bsModal(id = 'boxPopUp', title = '', trigger = '', plotlyOutput('box'))
+)
+server <- function(input, output,session) {
+output$scatter <- renderPlotly({
+plot_ly(df1, x = df1$x, y = df1$y,source = "scatter")
+})
+observeEvent(event_data("plotly_click", source = "scatter"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+print(event_data('plotly_click', source="main"))
+})
+output$box <- renderPlotly({
+plot_ly(df2, x = df2$x, y = df2$y, type = 'box')
+})
+}
+shinyApp(ui = ui, server = server)
+library(shiny)
+library(plotly)
+df1 <- data.frame(x = 1:10, y = 1:10)
+df2 <- data.frame(x = c(rep('a', 10), rep('b', 10)),
+y = c(rnorm(10), rnorm(10, 3, 1)))
+ui <- fluidPage(
+column(6, plotlyOutput('scatter')),
+bsModal(id = 'boxPopUp', title = '', trigger = '', plotlyOutput('box'))
+)
+server <- function(input, output,session) {
+output$scatter <- renderPlotly({
+plot_ly(df1, x = df1$x, y = df1$y,source = "scatter")
+})
+observeEvent(event_data("plotly_click", source = "scatter"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+print(event_data('plotly_click', source="scatter"))
+})
+output$box <- renderPlotly({
+plot_ly(df2, x = df2$x, y = df2$y, type = 'box')
+})
+}
+shinyApp(ui = ui, server = server)
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p2 <- ggplotly(p2,source="sub")
+p <- subplot(p1, p2)
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+#p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+#p2 <- ggplotly(p2,source="sub")
+#p <- subplot(p1, p2)
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+?subplot
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p2 <- ggplotly(p2,source="sub")
+p <- subplot(p1, p2)
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p2 <- ggplotly(p2,source="sub")
+p <- subplot(p1, p2,nrows = 2)
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+asd
+?plot_ly
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p2 <- ggplotly(p2,source="sub")
+p <- subplot(p1, p2,nrows = 2,shareX = TRUE)
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p2 <- ggplotly(p2,source="sub")
+p <- subplot(p1, p2,nrows = 2,which_layout = "merge")
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p2 <- ggplotly(p2,source="main")
+p <- subplot(p1, p2,nrows = 2,which_layout = "merge")
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p2 <- ggplotly(p2,source="main")
+p <- subplot(p1, p2,nrows = 2)
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+?enrichKEGG
+??enrichKEGG
+?clusterProfiler
+??clusterProfiler
+library(shiny)
+library(plotly)
+ui <- fluidPage(
+column(6, plotlyOutput("mainplot")),
+bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+)
+server <- function(input, output,session) {
+output$mainplot <- renderPlotly({
+# https://plot.ly/r/
+set.seed(1234)
+dat1 <- data.frame(cond = factor(rep(c("A","B"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+dat2 <- data.frame(cond = factor(rep(c("C","D"), each=200)), rating = c(rnorm(200),rnorm(200, mean=.8)))
+p1 <- ggplot(dat1, aes(x=cond, y=rating)) + geom_boxplot()
+p1 <- ggplotly(p1,source="main")
+p2 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p2 <- ggplotly(p2,source="main")
+p3 <- ggplot(dat2, aes(x=cond, y=rating)) + geom_boxplot()
+p3 <- ggplotly(p3,source="main")
+p <- subplot(p1, p2,p3,nrows = 3)
+})
+observeEvent(event_data("plotly_click", source = "main"), {
+toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
+output$hover <- renderPlotly({
+eventdat <- event_data('plotly_click', source="main") # get event data from source main
+if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+print(eventdat)
+# draw plot according to the point number on hover
+dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+})
+}
+shinyApp(ui, server)
+asda
+?subplot
+shiny::runApp()
+shiny::runApp()
+shiny::runApp()
+?renderPlotly
+shiny::runApp()
+shiny::runApp()
+shiny::runApp()
+shiny::runApp()
+ggsave
+?ggsave
+shiny::runApp()
+?ggplotly
+?plotly_IMAGE
+?ggsave
+shiny::runApp()
+shiny::runApp()
+shiny::runApp()
+?dplyr::filter
+q()
+?plot_ly
+?ggplot_ly
+??plot_ly
+shiny::runApp()
+shiny::runApp()
+shiny::runApp()
+shiny::runApp()
+savehistory("~/github/GEDS/history.txt")

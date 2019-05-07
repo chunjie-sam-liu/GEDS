@@ -288,7 +288,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
           paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
         },
         content = function(file){
-          ggsave(file,expr_box_plot_mirna(one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
+          ggsave(file,expr_box_plot_mirna(TCGA_one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
       )
     }
   }
