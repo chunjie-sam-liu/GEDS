@@ -120,7 +120,9 @@ fn_plot_multiple_mRNA <- function(choice){
     fluidRow(
     column(width=12,
            plotlyOutput(outputId = choice, height = "1200px",inline=TRUE) #%>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-    ))
+    ),
+    bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+    )
   )
 }
 

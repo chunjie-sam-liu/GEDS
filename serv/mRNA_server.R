@@ -355,6 +355,9 @@ observeEvent(status$mRNA_valid, {
 
 # observe -----------------------------------------------------------------
 observe(validate_input_mRNA_set())
+observeEvent(event_data("plotly_click", source = "main"), {
+  toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
 observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
   if(length(input$select_mRNA_result)>0 && status$mRNA_set){
     ###add new
@@ -488,6 +491,15 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
         content = function(out_file){
           plotly_IMAGE(out_file = out_file,x = plot_result,format = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
       )
+      output$hover <- renderPlotly({
+        eventdat <- event_data('plotly_click', source="main") # get event data from source main
+        if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+        point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
+        print(eventdat)
+        # draw plot according to the point number on hover
+        dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
+        ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+      })
       ###add new
     }
   }
