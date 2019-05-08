@@ -124,17 +124,15 @@ fn_plot_multiple_miRNA <- function(choice){
   tagList(
     fluidRow(
       style = 'margin-top: 20px',
-      column(width = 10,
+      column(width = 12,
            shiny::tags$p(shiny::tags$a("Tips: Click this tip to view full name of cancer types in document.", id = "detail"))
-      ),
-      column(width=1,
-             download_bt(NS("miRNA",id=NULL))
       )
     ),
     fluidRow(
       column(width=12,
-        plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-      )
+             plotlyOutput(outputId = choice, height = "400px",inline=TRUE)
+      ),
+      bsModal('boxPopUp', '', '', plotlyOutput("hover"))
     )
   )
 }

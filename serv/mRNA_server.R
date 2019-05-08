@@ -224,7 +224,6 @@ CCLE_mRNA_result <- function(){
 
 # mRNA table_print -------------------------------------------------------------
 expr_box_plot_mRNA <-  function(.expr,.type){
-  quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
   ###add new
   if(.type == "TCGA"){
   ### add new
@@ -333,7 +332,7 @@ click_plot_TCGA_tumor <- function(.expr_clean) {
   .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
     .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
     .[,1] -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/xiamx/file_for_GEDS_test/split_file/mRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% names %>% .[c(-1,-2)] %>% tibble::tibble(barcode = .) %>% 
     dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
@@ -361,7 +360,7 @@ click_plot_TCGA_normal <- function(.expr_clean) {
   .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
     .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
     .[,1] -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/xiamx/file_for_GEDS_test/split_file/mRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% names %>% .[c(-1,-2)] %>% tibble::tibble(barcode = .) %>% 
     dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
@@ -387,7 +386,7 @@ click_plot_TCGA_normal <- function(.expr_clean) {
 
 click_plot_GTEX <- function(.expr_clean){
   .expr_clean %>% stringr::str_replace_all(pattern = " ",replacement = "") -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/GTEX/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/xiamx/file_for_GEDS_test/split_file/mRNA/GTEX/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
     dplyr::select(-ensembl_gene_id) %>%
@@ -408,7 +407,7 @@ click_plot_GTEX <- function(.expr_clean){
 
 click_plot_CCLE <- function(.expr_clean){
   .expr_clean %>% stringr::str_replace_all(pattern = " ",replacement = "") -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/CCLE/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/xiamx/file_for_GEDS_test/split_file/mRNA/CCLE/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
     tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file

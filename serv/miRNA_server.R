@@ -150,63 +150,34 @@ TCGA_miRNA_result <- function(){
 
 # miRNA table print -------------------------------------------------------
 expr_box_plot_mirna <-  function(.expr){
-  quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
   .expr %>% dplyr::rename(TPM = expr,symbol = name) %>%
-    tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>% 
+    tidyr::separate(col = cancer_types, into = c("cancer_types", "types")) %>%
     dplyr::mutate(tmp = paste(site,"(",cancer_types,")")) %>%
-    dplyr::select(cancer_types=tmp,types,gene,symbol,TPM) %>%
-    dplyr::mutate(types = stringr::str_to_title(types)) %>% 
-    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>% 
-    tidyr::spread(key = name, value = TPM) %>% 
-    dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(median)) %>% dplyr::ungroup() -> t
-    t %>% dplyr::filter(types %in% "Tumor") %>% .$cancer_types -> order
-    t %>%
-    ggplot(mapping = aes(x = cancer_types, middle = median,
-                         ymin = lower.whisker, ymax = upper.whisker,
-                         lower = lower.hinge, upper = upper.hinge, color = types)) +
-    scale_x_discrete(limits= order) +
-    scale_color_manual(values = c("midnightblue", "red3")) +
-    geom_errorbar(width = 0.3, position = position_dodge(0.75, preserve = 'single')) +
-    geom_boxplot(stat = 'identity', width = 0.6, position = position_dodge(0.75, preserve = 'single')) +
-    facet_wrap(~symbol, ncol = 1,scales = "free_y", strip.position = 'right') +
-    theme(
-      text = element_text(colour = 'black', size = 18),
-      
-      axis.line = element_line(color = "black", size = 0.1),
-      axis.title.x = element_blank(),
-      axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
-      axis.text.y = element_text(color = 'black', size = 14),
-      
-      strip.background = element_rect(fill = NA, color = "white"),
-      strip.text = element_text(size = 20),
-      
-      panel.background = element_rect(fill = "white", color = "black", size = 0.5),
-      panel.grid.major.y = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      
-      legend.position = 'right',
-      legend.box = "vertical",
-      legend.key = element_rect(fill = 'white'),
-      plot.title = element_text(hjust = 0.5,size = 30)
-    ) +
-    labs(
+    dplyr::select(cancer_types=tmp,types,symbol,TPM) %>%
+    dplyr::mutate(types = stringr::str_to_title(types))  -> t1
+  t1 %>% dplyr::filter(types %in% "Tumor") %>% dplyr::group_by(cancer_types) %>% 
+    dplyr::slice(3) %>% dplyr::arrange(desc(TPM)) %>% .$cancer_types -> order
+  plot_ly(
+    data = t1,
+    x = ~ cancer_types,
+    y = ~ TPM,
+    type = "box",
+    split = ~ types,
+    color = ~ types, colors = c("midnightblue", "red3"),
+    source = "miRNA"
+  ) %>% layout(
+    title = t1$symbol[1],
+    boxmode = "group",
+    xaxis = list(
       title = "Cancer Types (TCGA)",
-      x = 'Cancer Types',
-      y = 'TPM(log2)'
-    ) +
-    guides(
-      color = guide_legend(
-        # legend title
-        title = "",
-        title.position = "left",
-        
-        # legend label
-        label.position = "bottom",
-        label.theme = element_text(angle = 270, hjust = 0.5, vjust = 0.5, size = 20),
-        nrow = 2,
-        reverse = TRUE
-      )
-    )
+      showticklabels = TRUE,
+      tickangle = 295, tickfont = list(size = 12),
+      showline = TRUE,
+      categoryorder = "array", 
+      categoryarray = order
+    ),
+    yaxis = list(title = "RSEM(log2)" ,showline = TRUE),
+    legend = list(orientation = 'h',x = 0.7, y = 1.2))
 }
 expr_clean_datatable_mirna <- function(.expr_clean,.title) {
   DT::datatable(
@@ -231,6 +202,61 @@ expr_clean_datatable_mirna <- function(.expr_clean,.title) {
     DT::formatRound(columns = c("expr"), 2)
 }
 
+click_plot_miRNA_TCGA_tumor <- function(.expr_clean) {
+  .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
+    .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
+    .[,1] -> cancertypes
+  paste("/home/xiamx/file_for_GEDS_test/split_file/miRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% dplyr::select(-gene,-name) %>% names %>% tibble::tibble(barcode = .) %>% 
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
+    dplyr::mutate(type = ifelse(type == "11", "Normal", "Tumor")) ->cancertype
+  cancertype %>% dplyr::filter(type %in% "Tumor") %>% .$barcode->tumor_barcode
+  file %>% dplyr::filter(name %in% input$select_miRNA_result) %>%
+    dplyr::select(name,tumor_barcode) %>% 
+    tidyr::gather(key=barcode,value=expr,-c(name)) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(cancertypes,"Tumor","n=",length(order)),
+      xaxis = list(
+        title = "Patient",
+        showticklabels = FALSE,
+        showline= TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "TPM(log2)" ,showline = TRUE)
+    )
+}
+
+click_plot_miRNA_TCGA_normal <- function(.expr_clean) {
+  .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
+    .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
+    .[,1] -> cancertypes
+  paste("/home/xiamx/file_for_GEDS_test/split_file/miRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% dplyr::select(-gene,-name) %>% names %>% tibble::tibble(barcode = .) %>% 
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
+    dplyr::mutate(type = ifelse(type == "11", "Normal", "Tumor")) ->cancertype
+  cancertype %>% dplyr::filter(type %in% "Normal") %>% .$barcode->tumor_barcode
+  file %>% dplyr::filter(name %in% input$select_miRNA_result) %>%
+    dplyr::select(name,tumor_barcode) %>% 
+    tidyr::gather(key=barcode,value=expr,-c(name)) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(cancertypes,"Normal","n=",length(order)),
+      xaxis = list(
+        title = "Patient",
+        showticklabels = FALSE,
+        showline= TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "TPM(log2)" ,showline = TRUE)
+    )
+}
 
 # ObserveEvent ------------------------------------------------------------
 observeEvent(status$miRNA_trigger, {
@@ -256,6 +282,9 @@ observeEvent(status$miRNA_valid, {
 })
 # observe -----------------------------------------------------------------
 observe(validate_input_miRNA_set())
+observeEvent(event_data("plotly_click", source = "miRNA"), {
+  toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+})
 observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
   if(length(input$select_miRNA_result) > 0 && status$miRNA_valid){
     choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
@@ -265,7 +294,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
     TCGA_miRNA_plot_result %>% dplyr::filter(gene %in% choice$miRNA) -> TCGA_one_plot
     TCGA_miRNA_table_result %>% dplyr::filter(gene %in% choice$miRNA) %>% dplyr::select(-gene) -> TCGA_one_table
     if(length(TCGA_one_plot$cancer_types) ){
-      output[[choice$miRNA]] <- renderPlot({TCGA_one_plot %>% expr_box_plot_mirna()}, height = 500)
+      output[[choice$miRNA]] <- renderPlotly({TCGA_one_plot %>% expr_box_plot_mirna()})
       output[[miRNA$TCGA_table]] <- DT::renderDataTable({expr_clean_datatable_mirna(TCGA_one_table,"Cancer Types (TCGA)")})
       output[[miRNA$TCGA_download]] <- downloadHandler(
         filename = function() {
@@ -283,13 +312,16 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
           write.csv(all_table, file, row.names = TRUE)
         }
       )
-      output$`miRNA-picdownload` <- downloadHandler(
-        filename = function() {
-          paste("Differential_Expression", ".", input$`miRNA-pictype`, sep = "")
-        },
-        content = function(file){
-          ggsave(file,expr_box_plot_mirna(TCGA_one_plot),device = input$`miRNA-pictype`,width = input$`miRNA-d_width`,height = input$`miRNA-d_height`  )}
-      )
+      output$hover <- renderPlotly({
+        eventdat <- event_data('plotly_click', source="miRNA") # get event data from source main
+        if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+          if(eventdat$curveNumber[1] == 1){
+            click_plot_miRNA_TCGA_tumor(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 0){
+            click_plot_miRNA_TCGA_normal(eventdat$x[1])
+          }
+      })
     }
   }
 })
