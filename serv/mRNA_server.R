@@ -244,7 +244,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       color = ~ types, colors = c("midnightblue", "red3"),
       source = "main"
     ) %>% layout(
-      title = example$symbol[1],
+      title = t1$symbol[1],
       boxmode = "group",
       xaxis = list(
         title = "Cancer Types (TCGA)",
@@ -269,7 +269,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         color = ~ symbol, colors = "#cbb255",source = "main", tickfont = list(size = 12),
         showlegend = FALSE
       ) %>% layout(
-        title = example$symbol[1],
+        title = t2$symbol[1],
         xaxis = list(
           title = "Normal Tissues (GTEx)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 
@@ -283,7 +283,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         color = ~ symbol, colors = "#ffc0cb",source = "main", tickfont = list(size = 12),
         showlegend = FALSE
       ) %>% layout(
-        title = example$symbol[1],
+        title = t2$symbol[1],
         xaxis = list(
           title = "Cell lines (CCLE)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 
@@ -329,7 +329,102 @@ expr_clean_datatable_mRNA <- function(.expr_clean,.title) {
     DT::formatRound(columns = c("expr"), 2)
 }
 
+click_plot_TCGA_tumor <- function(.expr_clean) {
+  .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
+    .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
+    .[,1] -> cancertypes
+  paste("/home/xiamx/file_for_GEDS_test/split_file/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% names %>% .[c(-1,-2)] %>% tibble::tibble(barcode = .) %>% 
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
+    dplyr::mutate(type = ifelse(type == "11", "Normal", "Tumor")) ->cancertype
+  cancertype %>% dplyr::filter(type %in% "Tumor") %>% .$barcode->tumor_barcode
+  file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
+    dplyr::select(symbol,tumor_barcode) %>% 
+    tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(cancertypes,"Tumor","n=",length(order)),
+      xaxis = list(
+        title = "Patient",
+        showticklabels = FALSE,
+        showline= TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "RSEM(log2)" ,showline = TRUE)
+    )
+}
 
+click_plot_TCGA_normal <- function(.expr_clean) {
+  .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
+    .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
+    .[,1] -> cancertypes
+  paste("/home/xiamx/file_for_GEDS_test/split_file/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% names %>% .[c(-1,-2)] %>% tibble::tibble(barcode = .) %>% 
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
+    dplyr::mutate(type = ifelse(type == "11", "Normal", "Tumor")) ->cancertype
+  cancertype %>% dplyr::filter(type %in% "Normal") %>% .$barcode->tumor_barcode
+  file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
+    dplyr::select(symbol,tumor_barcode) %>% 
+    tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(cancertypes,"Normal","n=",length(order)),
+      xaxis = list(
+        title = "Patient",
+        showticklabels = FALSE,
+        showline= TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "RSEM(log2)" ,showline = TRUE)
+    )
+}
+
+click_plot_GTEX <- function(.expr_clean){
+  .expr_clean %>% stringr::str_replace_all(pattern = " ",replacement = "") -> cancertypes
+  paste("/home/xiamx/file_for_GEDS_test/split_file/GTEX/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
+    dplyr::select(-ensembl_gene_id) %>%
+    tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ expr,type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(.expr_clean,"n=",length(order)),
+      xaxis = list(
+        title = "Tissues",
+        showticklabels = FALSE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "FPKM" ,showline = TRUE)
+    )
+}
+
+click_plot_CCLE <- function(.expr_clean){
+  .expr_clean %>% stringr::str_replace_all(pattern = " ",replacement = "") -> cancertypes
+  paste("/home/xiamx/file_for_GEDS_test/split_file/CCLE/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
+    tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ expr,type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(.expr_clean,"n=",length(order)),
+      xaxis = list(
+        title = "Cell lines",
+        showticklabels = FALSE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "FPKM" ,showline = TRUE)
+    )
+}
 # ObserveEvent ------------------------------------------------------------
 observeEvent(status$mRNA_trigger, {
   if (error$mRNA_set != "" && !is.null(error$mRNA_set)) {
@@ -452,6 +547,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           CCLE_plot,
           nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
         ) -> plot_result
+        plotmode <-  1
         output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if (t == 1 && g == 1){
@@ -459,6 +555,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           TCGA_plot,p3,GTEX_plot,
           nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
+        plotmode <-  2
         output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(g == 1 && c == 1){
@@ -466,6 +563,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           GTEX_plot,p3,CCLE_plot,
           nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
+        plotmode <-  3
         output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(t == 1 && c == 1){
@@ -473,32 +571,82 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           TCGA_plot,CCLE_plot,
           nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
+        plotmode <-  4
         output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(t == 1){
+        plotmode <-  5
         output[[choice$mRNA]] <- renderPlotly({TCGA_plot})
       }
       else if(g == 1){
+        plotmode <-  6
         output[[choice$mRNA]] <- renderPlotly({GTEX_plot})
       }
       else if(c == 1){
+        plotmode <-  7
         output[[choice$mRNA]] <- renderPlotly({CCLE_plot})
       }
-      output$`mRNA-picdownload` <- downloadHandler(
-        filename = function() {
-          paste("Differential_Expression", ".", input$`mRNA-pictype`, sep = "")
-        },
-        content = function(out_file){
-          plotly_IMAGE(out_file = out_file,x = plot_result,format = input$`mRNA-pictype`,width = input$`mRNA-d_width`,height = input$`mRNA-d_height`  )}
-      )
       output$hover <- renderPlotly({
         eventdat <- event_data('plotly_click', source="main") # get event data from source main
         if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
-        point <- as.numeric(eventdat[['pointNumber']]) # Index of the data point being charted
-        print(eventdat)
-        # draw plot according to the point number on hover
-        dat2 <- data.frame(cond = factor(rep("A", each=200)), rating = rnorm(200))
-        ggplot(dat2, aes(x=cond, y=rating)) + geom_point()
+        if(plotmode == 1){
+          if(eventdat$curveNumber[1] == 1){
+            click_plot_TCGA_tumor(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 0){
+            click_plot_TCGA_normal(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 3){
+            click_plot_GTEX(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 5){
+            click_plot_CCLE(eventdat$x[1])
+          }
+        }
+        else if(plotmode == 2){
+          if(eventdat$curveNumber[1] == 1){
+            click_plot_TCGA_tumor(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 0){
+            click_plot_TCGA_normal(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 3){
+            click_plot_GTEX(eventdat$x[1])
+          }
+        }
+        else if(plotmode == 3){
+          if(eventdat$curveNumber[1] == 0){
+            click_plot_GTEX(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 2){
+            click_plot_CCLE(eventdat$x[1])
+          }
+        }
+        else if(plotmode == 4){
+          if(eventdat$curveNumber[1] == 1){
+            click_plot_TCGA_tumor(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 0){
+            click_plot_TCGA_normal(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 2){
+            click_plot_CCLE(eventdat$x[1])
+          }
+        }
+        else if(plotmode == 5){
+          if(eventdat$curveNumber[1] == 1){
+            click_plot_TCGA_tumor(eventdat$x[1])
+          }
+          else if(eventdat$curveNumber[1] == 0){
+            click_plot_TCGA_normal(eventdat$x[1])
+          }
+        }
+        else if(plotmode == 6){
+          click_plot_GTEX(eventdat$x[1])
+        }
+        else if(plotmode == 7){
+          click_plot_CCLE(eventdat$x[1])
+        }
       })
       ###add new
     }

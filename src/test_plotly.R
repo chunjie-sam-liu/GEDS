@@ -76,13 +76,8 @@ server <- function(input, output,session) {
       yaxis = list(title = "FPKM" ,showline = TRUE))
     p4 <- plotly_empty(source = "main")
     
-    p <- 
-subplot(p1,p4, p2 ,#p4,p3,
-        nrows = 3, titleX = TRUE, titleY = TRUE, 
-        heights = c(0.2,0.2,0.2,0.2,0.2)) %>%  layout(
-          legend = list(orientation = 'h',x = 0.7, y = 1.1)
-        )
-    
+    p <- p3
+
   })
   observeEvent(event_data("plotly_click", source = "main"), {
     toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
