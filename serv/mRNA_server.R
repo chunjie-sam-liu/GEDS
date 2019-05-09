@@ -463,7 +463,6 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
     CCLE_mRNA_table_result %>% 
       dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_plot
-    CCLE_one_plot %>% readr::write_rds("/home/xiamx/file_for_GEDS_test/CCLE_example.rds.gz",compress = "gz")
     if(length(TCGA_one_plot$cancer_types) + length(GTEX_one_plot$cancer_types) + length(CCLE_one_plot$cancer_types) > 0 ){
       choice$mRNA <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
       mRNA$TCGA_table <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"TCGA_table",sep = "")

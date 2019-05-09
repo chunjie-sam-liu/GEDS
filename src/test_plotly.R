@@ -64,7 +64,8 @@ server <- function(input, output,session) {
       dplyr::select(cancer_types = tmp, symbol, FPKM)-> t3
     p3 <- plot_ly(
       data = t3, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
-      color = ~ symbol, colors = "#cbb255",source = "main", showlegend = FALSE
+      color = ~ symbol, colors = "#cbb255",source = "main",
+      error_y = ~list(array = sd,color = '#000000'), showlegend = FALSE
     ) %>% layout(
       title = example$symbol[1],
       scene = "scene2",
