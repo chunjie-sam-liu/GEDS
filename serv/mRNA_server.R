@@ -266,7 +266,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
         color = ~ symbol, colors = "#cbb255",source = "main", tickfont = list(size = 12),
-        showlegend = FALSE
+        name = "GTEX",showlegend = FALSE
       ) %>% layout(
         title = t2$symbol[1],
         xaxis = list(
@@ -280,7 +280,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
         color = ~ symbol, colors = "#ffc0cb",source = "main", tickfont = list(size = 12),
-        showlegend = FALSE
+        name = "CCLE",showlegend = FALSE
       ) %>% layout(
         title = t2$symbol[1],
         xaxis = list(

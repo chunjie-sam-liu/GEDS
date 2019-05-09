@@ -373,7 +373,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
         color = ~ symbol, colors = "#2cdbf9",source = "protein", tickfont = list(size = 12),
-        showlegend = FALSE
+        name = "MCLP",showlegend = FALSE
       ) %>% layout(
         title = paste(t2$symbol[1],"(",t2$protein[1],")"),
         xaxis = list(
@@ -387,7 +387,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
         color = ~ symbol, colors = "#75a3e7",source = "protein", tickfont = list(size = 12),
-        showlegend = FALSE
+        name = "CCLE",showlegend = FALSE
       ) %>% layout(
         xaxis = list(
           title = "Cell lines (CCLE)", showticklabels = TRUE,
