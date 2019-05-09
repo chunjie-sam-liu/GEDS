@@ -126,7 +126,9 @@ fn_plot_multiple_protein <- function(choice){
     ),
     fluidRow(
     column(width = 12,
-      plotOutput(outputId = choice, height = "100%") %>% withSpinner(color = "#0dc5c1",size = 0.5, proxy.height = "200px")
-    ))
+           plotlyOutput(outputId = choice, height = "1200px",inline=TRUE)
+    ),
+    bsModal('protein_boxPopUp', '', '', plotlyOutput("protein_hover"))
+    )
   )
 }

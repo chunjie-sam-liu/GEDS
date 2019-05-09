@@ -118,7 +118,7 @@ fn_plot_multiple_mRNA <- function(choice){
     column(width=12,
            plotlyOutput(outputId = choice, height = "1200px",inline=TRUE)
     ),
-    bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+    bsModal('mRNA_boxPopUp', '', '', plotlyOutput("mRNA_hover"))
     )
   )
 }

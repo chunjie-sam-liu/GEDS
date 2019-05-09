@@ -206,7 +206,7 @@ click_plot_miRNA_TCGA_tumor <- function(.expr_clean) {
   .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
     .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
     .[,1] -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/miRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/liucj/shiny-data/GEDS/split_file/miRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% dplyr::select(-gene,-name) %>% names %>% tibble::tibble(barcode = .) %>% 
     dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
@@ -234,7 +234,7 @@ click_plot_miRNA_TCGA_normal <- function(.expr_clean) {
   .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
     .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
     .[,1] -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/miRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/liucj/shiny-data/GEDS/split_file/miRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% dplyr::select(-gene,-name) %>% names %>% tibble::tibble(barcode = .) %>% 
     dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
@@ -283,7 +283,7 @@ observeEvent(status$miRNA_valid, {
 # observe -----------------------------------------------------------------
 observe(validate_input_miRNA_set())
 observeEvent(event_data("plotly_click", source = "miRNA"), {
-  toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+  toggleModal(session, modalId = "miRNA_boxPopUp", toggle = "toggle")
 })
 observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
   if(length(input$select_miRNA_result) > 0 && status$miRNA_valid){
@@ -312,7 +312,7 @@ observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
           write.csv(all_table, file, row.names = TRUE)
         }
       )
-      output$hover <- renderPlotly({
+      output$miRNA_hover <- renderPlotly({
         eventdat <- event_data('plotly_click', source="miRNA") # get event data from source main
         if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
           if(eventdat$curveNumber[1] == 1){

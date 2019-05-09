@@ -3,6 +3,9 @@
 
 # Clear input -------------------------------------------------------------
 ###add new
+observeEvent(event_data("plotly_click", source = "protein"), {
+  toggleModal(session, modalId = "protein_boxPopUp", toggle = "toggle")
+})
 observeEvent(c(input$input_protein_set),{
     status$protein_result <- FALSE
     dataset_number$protein <- 30
@@ -41,60 +44,100 @@ observeEvent(c(input$input_protein_set),{
       c <- 1
       status$protein_result <- TRUE
     }
+    p3 <- plotly_empty(source = "protein")
     if(t == 1 && m == 1 && c == 1){
-      ggpubr::ggarrange(
-        TCGA_plot,MCLP_plot,CCLE_plot,
-        ncol = 1,nrow = 3, heights = c(1.4,1.2,1.5)
+      subplot(
+        TCGA_plot, p3,
+        MCLP_plot, p3,
+        CCLE_plot,
+        nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
       ) -> plot_result
-      output[[match$protein]] <- renderPlot({plot_result},height = 1200)
+      plotmode <-  1
+      output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(t == 1 && m == 1){
-      ggpubr::ggarrange(
-        TCGA_plot,MCLP_plot,
-        ncol = 1,nrow = 2, heights = c(1.3,1)
+      subplot(
+        TCGA_plot,p3,MCLP_plot,
+        nrow = 3, heights = c(0.4,0.2,0.4)
       ) -> plot_result
-      output[[match$protein]] <- renderPlot({plot_result},height = 850)
+      plotmode <-  2
+      output[[match$protein]] <- renderPlotly({plot_result})
     }else if(t == 1 && c == 1){
-      ggpubr::ggarrange(
-        TCGA_plot,CCLE_plot,
-        ncol = 1,nrow = 2, heights = c(1.3,1)
+      subplot(
+        TCGA_plot,p3,CCLE_plot,
+        nrow = 3, heights = c(0.4,0.2,0.4)
       ) -> plot_result
-      output[[match$protein]] <- renderPlot({plot_result},height = 900)
+      plotmode <-  3
+      output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(m == 1 && c == 1){
-      ggpubr::ggarrange(
-        MCLP_plot,CCLE_plot,
-        ncol = 1,nrow = 2, heights = c(1,1.3)
+      subplot(
+        MCLP_plot,p3,CCLE_plot,
+        nrow = 3, heights = c(0.4,0.2,0.4)
       ) -> plot_result
-      output[[match$protein]] <- renderPlot({plot_result},height = 850)
+      plotmode <-  4
+      output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(t == 1){
-      plot_result <- TCGA_plot
-      output[[match$protein]] <- renderPlot({
-        plot_result
-      },height = 440)
+      pplotmode <-  5
+      output[[match$protein]] <- renderPlotly({TCGA_plot})
     }
     else if(m == 1){
-      plot_result <- MCLP_plot
-      output[[match$protein]] <- renderPlot({
-        plot_result
-      },height = 400)
+      plotmode <-  6
+      output[[match$protein]] <- renderPlotly({MCLP_plot})
     }
     else if(c == 1){
-      plot_result <- CCLE_plot
-      output[[match$protein]] <- renderPlot({
-        plot_result
-      },height = 440)
+      plotmode <-  7
+      output[[match$protein]] <- renderPlotly({CCLE_plot})
     }
-    if(m == 1 || t == 1 || c == 1){
-      output$`protein-picdownload` <- downloadHandler(
-        filename = function() {
-          paste("Differential_Expression", ".", input$`protein-pictype`, sep = "")
-         },
-         content = function(file){
-           ggsave(file,plot_result,device = input$`protein-pictype`,width = input$`protein-d_width`,height = input$`protein-d_height`  )}
-      )
-    }
+    output$protein_hover <- renderPlotly({
+      eventdat <- event_data('plotly_click', source="protein")
+      if(is.null(eventdat) == T) return(NULL)        
+      if(plotmode == 1){
+        if(eventdat$curveNumber[1] == 0){
+          click_plot_protein_TCGA(eventdat$x[1])
+        }
+        else if(eventdat$curveNumber[1] == 2){
+          click_plot_protein_MCLP(eventdat$x[1])
+        }
+        else if(eventdat$curveNumber[1] == 4){
+          click_plot_protein_CCLE(eventdat$x[1])
+        }
+      }
+      else if(plotmode == 2){
+        if(eventdat$curveNumber[1] == 0){
+          click_plot_protein_TCGA(eventdat$x[1])
+        }
+        else if(eventdat$curveNumber[1] == 2){
+          click_plot_protein_MCLP(eventdat$x[1])
+        }
+      }
+      else if(plotmode == 3){
+        if(eventdat$curveNumber[1] == 0){
+          click_plot_protein_TCGA(eventdat$x[1])
+        }
+        else if(eventdat$curveNumber[1] == 2){
+          click_plot_protein_CCLE(eventdat$x[1])
+        }
+      }
+      else if(plotmode == 4){
+        if(eventdat$curveNumber[1] == 0){
+          click_plot_protein_MCLP(eventdat$x[1])
+        }
+        else if(eventdat$curveNumber[1] == 2){
+          click_plot_protein_CCLE(eventdat$x[1])
+        }
+      }
+      else if(plotmode == 5){
+        click_plot_protein_TCGA(eventdat$x[1])
+      }
+      else if(plotmode == 6){
+        click_plot_protein_MCLP(eventdat$x[1])
+      }
+      else if(plotmode == 7){
+        click_plot_protein_CCLE(eventdat$x[1])
+      }
+    })
   }}
 )
 
@@ -218,138 +261,141 @@ CCLE_protein_result <- function(){
   return(CCLE_protein_table_result)
 }
 
+click_plot_protein_TCGA <- function(.expr_clean) {
+  .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
+    .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
+    .[,1] -> cancertypes
+  paste("/home/liucj/shiny-data/GEDS/split_file/protein/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% names %>% .[c(-1,-2)] %>% tibble::tibble(barcode = .) %>% 
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
+    dplyr::mutate(type = ifelse(type == "11", "Normal", "Tumor")) ->cancertype
+  cancertype %>% dplyr::filter(type %in% "Tumor") %>% .$barcode->tumor_barcode
+  file %>% dplyr::filter(protein %in% match$protein) %>%
+    dplyr::select(protein,tumor_barcode) %>% 
+    tidyr::gather(key=barcode,value=expr,-c(protein)) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ expr,type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(cancertypes,"Tumor","n=",length(order)),
+      xaxis = list(
+        title = "Patient",
+        showticklabels = FALSE,
+        showline= TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "Protein expression" ,showline = TRUE)
+    )
+}
+
+click_plot_protein_MCLP <- function(.expr_clean) {
+  .expr_clean %>% stringr::str_replace_all(pattern = " ",replacement = "") -> cancertypes
+  paste("/home/liucj/shiny-data/GEDS/split_file/protein/MCLP/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% dplyr::filter(protein %in% match$protein) %>%
+    tidyr::gather(key=barcode,value=expr,-c(symbol,protein)) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ expr,type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(.expr_clean,"n=",length(order)),
+      xaxis = list(
+        title = "Cell lines",
+        showticklabels = FALSE,
+        showline= TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "Protein expression" ,showline = TRUE)
+    )
+}
+
+click_plot_protein_CCLE <- function(.expr_clean) {
+  .expr_clean %>% stringr::str_replace_all(pattern = " ",replacement = "") -> cancertypes
+  paste("/home/liucj/shiny-data/GEDS/split_file/protein/CCLE/",cancertypes,".rds.gz",sep = "") -> file_name
+  file <- readr::read_rds(file_name)
+  file %>% dplyr::filter(protein %in% match$protein) ->rebuild_file
+  rebuild_file %>% dplyr::arrange(expr) %>% .$Cell_line -> order
+  rebuild_file %>% plot_ly(x = ~Cell_line, y = ~ expr,type = "scatter",mode = "markers") %>%
+    layout(
+      title = paste(.expr_clean,"n=",length(order)),
+      xaxis = list(
+        title = "Cell lines",
+        showticklabels = FALSE,
+        showline= TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "Protein expression" ,showline = TRUE)
+    )
+}
 ###add new
 
 # protein table_print -------------------------------------------------------------
 expr_buble_plot_protein <-  function(.expr,.type){
-  quantile_names <- c("lower.whisker", "lower.hinge", "median", "upper.hinge", "upper.whisker")
   if(.type == "TCGA"){
-  nu <- .expr$cancer_types %>% length()
   .expr %>% dplyr::rename(FPKM = expr) %>%
     dplyr::mutate(tmp = paste(site,"(",cancer_types,")")) %>%
-    dplyr::select(cancer_types = tmp,symbol,protein,FPKM) %>%
-    dplyr::mutate(name = purrr::rep_along(cancer_types, quantile_names)) %>%
-    tidyr::spread(key = name, value = FPKM) %>% 
-      dplyr::group_by(protein) %>% dplyr::arrange(symbol,desc(median)) %>% dplyr::ungroup() -> t
-    t %>% .$cancer_types -> order
-    t %>%
-    ggplot(mapping = aes(x = cancer_types, middle = median,
-                         ymin = lower.whisker, ymax = upper.whisker,
-                         lower = lower.hinge, upper = upper.hinge, color = cancer_types)) -> p
-    TCGA_color %>% head(n = 1) %>% dplyr::select(color) %>% .$color -> s
-    rep(s,nu) -> .color
-    p +
-    scale_color_manual(values = .color) +
-    scale_x_discrete(limits= order) +
-    geom_errorbar(width = 0.3, position = position_dodge(0.75)) +
-    geom_boxplot(stat = 'identity', width = 0.6, position = position_dodge(0.75)) +
-    facet_wrap(~protein, ncol = 1,scales = "free_y", strip.position = 'right') +
-    theme(
-      text = element_text(colour = 'black', size = 18),
-      
-      axis.line = element_line(color = "black", size = 0.1),
-      axis.title.x = element_blank(),
-      axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
-      axis.text.y = element_text(color = 'black', size = 14),
-      
-      strip.background = element_rect(fill = NA, color = "white"),
-      strip.text = element_text(size = 20),
-      
-      panel.background = element_rect(fill = "white", color = "black", size = 0.5),
-      panel.grid.major.y = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      
-      legend.position = 'none',
-      legend.key = element_rect(fill = 'white'),
-      plot.title = element_text(hjust = 0.5,size = 30)
-    ) +
-    labs(
-      title = 'Cancer Types (TCGA)',
-      x = 'Cancer Types',
-      y = 'Protein expression'
-    ) +
-    guides(
-      color = guide_legend(
-        # legend title
-        title = "Cancer Types",
-        title.position = "left",
-        
-        # legend label
-        label.position = "right",
-        # label.theme = element_text(size = 14),
-        nrow = 2,
-        reverse = TRUE
+    dplyr::select(cancer_types = tmp,symbol,protein,FPKM) -> t1
+    t1 %>% dplyr::group_by(cancer_types) %>% 
+      dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
+    plot_ly(
+      data = t1,
+      x = ~ cancer_types,
+      y = ~ FPKM,
+      type = "box",
+      split = ~ symbol,
+      color = ~ symbol, colors = "red3",
+      source = "protein",showlegend = FALSE
+    ) %>% layout(
+      boxmode = "group",
+      xaxis = list(
+        title = "Cancer Types (TCGA)",
+        showticklabels = TRUE,
+        tickangle = 295, tickfont = list(size = 12),
+        showline = TRUE,
+        categoryorder = "array", 
+        categoryarray = order
+      ),
+      yaxis = list(title = "Protein expression" ,showline = TRUE)#,
+      #legend = list(orientation = 'h',x = 0.7, y = 1.05)
       )
-    )
   }
   else{
     .expr %>% dplyr::rename(FPKM = expr) %>%
       dplyr::group_by(protein) %>% 
       dplyr::arrange(symbol,desc(FPKM)) %>% 
       dplyr::ungroup() %>%
-      dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% dplyr::select(cancer_types=tmp,symbol,protein,FPKM) -> t
-    t %>%  .$cancer_types -> order
-    t %>%
-      ggplot(mapping = aes(x = cancer_types, y = FPKM , color = cancer_types)) +
-      scale_x_discrete(limits = order) -> n
+      dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% 
+      dplyr::select(cancer_types=tmp,symbol,protein,FPKM) -> t2
+    print(t2)
     if(.type == "MCLP"){
-      n +
-      geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#2cdbf9") -> m
+      plot_ly(
+        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
+        color = ~ symbol, colors = "#2cdbf9",source = "protein", tickfont = list(size = 12),
+        showlegend = FALSE
+      ) %>% layout(
+        title = paste(t2$symbol[1],"(",t2$protein[1],")"),
+        xaxis = list(
+          title = "Cell lines (MCLP)", showticklabels = TRUE,
+          tickangle = 295, showline = TRUE, categoryorder = "array", 
+          categoryarray = t2$cancer_types
+        ),
+        yaxis = list(title = "Protein expression" ,showline = TRUE))
     }
     else{
-      n +
-        geom_bar(stat = "identity",colour = "black",width = 0.6, fill = "#75a3e7") -> m
+      plot_ly(
+        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
+        color = ~ symbol, colors = "#75a3e7",source = "protein", tickfont = list(size = 12),
+        showlegend = FALSE
+      ) %>% layout(
+        xaxis = list(
+          title = "Cell lines (CCLE)", showticklabels = TRUE,
+          tickangle = 295, showline = TRUE, categoryorder = "array", 
+          categoryarray = t2$cancer_types
+        ),
+        yaxis = list(title = "Protein expression" ,showline = TRUE))
     }
-    m +
-      facet_wrap(~protein, ncol = 1, scales = "free", strip.position = 'right') +
-      # facet_wrap(~symbol, ncol = 1, scales = "free") +
-      
-      theme(
-        text = element_text(colour = 'black', size = 18),
-        
-        axis.line = element_line(color = "black", size = 0.1),
-        axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 75, vjust = 1, hjust = 1, colour = 'black'),
-        axis.text.y = element_text(color = 'black', size = 14),
-        
-        strip.background = element_rect(fill = NA, color = "white"),
-        strip.text = element_text(size = 20),
-        
-        panel.background = element_rect(fill = "white", color = "black", size = 0.5),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        
-        legend.position = 'none',
-        legend.key = element_rect(fill = 'white'),
-        plot.title = element_text(hjust = 0.5,size = 30)
-      ) -> p
-    if(.type == "MCLP"){
-      p +   
-        labs(
-          title = "Cell lines (MCLP)",
-          x = 'Cell lines',
-          y = 'Protein expression'
-        ) -> q} 
-    else{
-      p +   
-        labs(
-          title = "Cell lines (CCLE)",
-          x = 'Cell lines',
-          y = 'Protein expression'
-        ) -> q}
-    q +
-      guides(
-        color = guide_legend(
-          # legend title
-          title = "Cancer Types",
-          title.position = "left",
-          
-          # legend label
-          label.position = "right",
-          # label.theme = element_text(size = 14),
-          reverse = TRUE
-        )
-      )
   }
 }
 expr_clean_datatable_protein <- function(.expr_clean,.title) {

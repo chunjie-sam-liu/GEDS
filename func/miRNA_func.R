@@ -132,7 +132,7 @@ fn_plot_multiple_miRNA <- function(choice){
       column(width=12,
              plotlyOutput(outputId = choice, height = "400px",inline=TRUE)
       ),
-      bsModal('boxPopUp', '', '', plotlyOutput("hover"))
+      bsModal('miRNA_boxPopUp', '', '', plotlyOutput("miRNA_hover"))
     )
   )
 }

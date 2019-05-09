@@ -64,7 +64,7 @@ server <- function(input, output,session) {
       dplyr::select(cancer_types = tmp, symbol, FPKM)-> t3
     p3 <- plot_ly(
       data = t3, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
-      color = ~ symbol, colors = "#cbb255",source = "main"
+      color = ~ symbol, colors = "#cbb255",source = "main", showlegend = FALSE
     ) %>% layout(
       title = example$symbol[1],
       scene = "scene2",
@@ -76,7 +76,7 @@ server <- function(input, output,session) {
       yaxis = list(title = "FPKM" ,showline = TRUE))
     p4 <- plotly_empty(source = "main")
     
-    p <- p3
+    p <- p1
 
   })
   observeEvent(event_data("plotly_click", source = "main"), {

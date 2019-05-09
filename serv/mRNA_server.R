@@ -332,7 +332,7 @@ click_plot_TCGA_tumor <- function(.expr_clean) {
   .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
     .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
     .[,1] -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/mRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/liucj/shiny-data/GEDS/split_file/mRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% names %>% .[c(-1,-2)] %>% tibble::tibble(barcode = .) %>% 
     dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
@@ -360,7 +360,7 @@ click_plot_TCGA_normal <- function(.expr_clean) {
   .expr_clean %>% stringr::str_split_fixed(pattern = "\\( ",n=2) %>% 
     .[,2] %>% stringr::str_split_fixed(pattern = " \\)",n=2) %>% 
     .[,1] -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/mRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/liucj/shiny-data/GEDS/split_file/mRNA/TCGA/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% names %>% .[c(-1,-2)] %>% tibble::tibble(barcode = .) %>% 
     dplyr::mutate(type = stringr::str_sub(string = barcode, start = 14, end = 15)) %>% 
@@ -386,7 +386,7 @@ click_plot_TCGA_normal <- function(.expr_clean) {
 
 click_plot_GTEX <- function(.expr_clean){
   .expr_clean %>% stringr::str_replace_all(pattern = " ",replacement = "") -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/mRNA/GTEX/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/liucj/shiny-data/GEDS/split_file/mRNA/GTEX/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
     dplyr::select(-ensembl_gene_id) %>%
@@ -396,7 +396,7 @@ click_plot_GTEX <- function(.expr_clean){
     layout(
       title = paste(.expr_clean,"n=",length(order)),
       xaxis = list(
-        title = "Tissues",
+        title = "Normal Tissues",
         showticklabels = FALSE,
         categoryorder = "array", 
         categoryarray = order
@@ -407,7 +407,7 @@ click_plot_GTEX <- function(.expr_clean){
 
 click_plot_CCLE <- function(.expr_clean){
   .expr_clean %>% stringr::str_replace_all(pattern = " ",replacement = "") -> cancertypes
-  paste("/home/xiamx/file_for_GEDS_test/split_file/mRNA/CCLE/",cancertypes,".rds.gz",sep = "") -> file_name
+  paste("/home/liucj/shiny-data/GEDS/split_file/mRNA/CCLE/",cancertypes,".rds.gz",sep = "") -> file_name
   file <- readr::read_rds(file_name)
   file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
     tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
@@ -450,7 +450,7 @@ observeEvent(status$mRNA_valid, {
 # observe -----------------------------------------------------------------
 observe(validate_input_mRNA_set())
 observeEvent(event_data("plotly_click", source = "main"), {
-  toggleModal(session, modalId = "boxPopUp", toggle = "toggle")
+  toggleModal(session, modalId = "mRNA_boxPopUp", toggle = "toggle")
 })
 observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
   if(length(input$select_mRNA_result)>0 && status$mRNA_set){
@@ -567,7 +567,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       }
       else if(t == 1 && c == 1){
         subplot(
-          TCGA_plot,CCLE_plot,
+          TCGA_plot,p3,CCLE_plot,
           nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
         plotmode <-  4
@@ -585,7 +585,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
         plotmode <-  7
         output[[choice$mRNA]] <- renderPlotly({CCLE_plot})
       }
-      output$hover <- renderPlotly({
+      output$mRNA_hover <- renderPlotly({
         eventdat <- event_data('plotly_click', source="main") # get event data from source main
         if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
         if(plotmode == 1){
@@ -628,7 +628,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           else if(eventdat$curveNumber[1] == 0){
             click_plot_TCGA_normal(eventdat$x[1])
           }
-          else if(eventdat$curveNumber[1] == 2){
+          else if(eventdat$curveNumber[1] == 3){
             click_plot_CCLE(eventdat$x[1])
           }
         }
