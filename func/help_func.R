@@ -35,7 +35,7 @@ fn_tutorial <- function() {
     shiny::tags$img(
       src = "./img/figure-mRNA.jpg",
       class = "center-block img-responsive" ),
-    shiny::tags$p("This figure displayed the expression of the mRNA in the TCGA, GTEx and CCLES datasets. The boxplot showed the expression in tumor and normal cancer types from TCGA. The barplot showed the expression in normal tissues or cell lines from GTEx and CCLE."),
+    shiny::tags$p("This figure displayed the expression of the mRNA in the TCGA, GTEx and CCLE datasets. The boxplot showed the expression in tumor and normal cancer types from TCGA and the expression in normal tissues or cell lines from GTEx and CCLE."),
     
     shiny::tags$h4("miRNA figure result", style = 'text-align: left'),
     shiny::tags$img(
@@ -47,13 +47,19 @@ fn_tutorial <- function() {
     shiny::tags$img(
       src = "./img/figure-protein.jpg",
       class = "center-block img-responsive" ),
-    shiny::tags$p("This figure displayed the expression of the protein in the TCGA and MCLP datasets. The boxplot showed the expression in tumor and normal cancer types from TCGA. The barplot showed the expression in cell lines from MCLP."),
+    shiny::tags$p("This figure displayed the expression of the protein in the TCGA, MCLP and CCLE datasets. The boxplot showed the expression in tumor cancer types from TCGA and the expression in cell lines from MCLP and CCLE."),
+    
+    shiny::tags$h4("Sample detail figure result", style = 'text-align: left'),
+    shiny::tags$img(
+      src = "./img/click_plot.jpg",
+      class = "center-block img-responsive" ),
+    shiny::tags$p("This figure displayed the detail expression of dataset in cancer type/tissue/cell line. User could hover over the dot to view the detail expression of each sample."),
     
     shiny::tags$h4("Table result", style = 'text-align: left'),
     shiny::tags$img(
       src = "./img/table.jpg",
       class = "center-block img-responsive" ),
-    shiny::tags$p("This table cantained the detail information and the average expression about the input list. User could click the arrow besides column names to change the rank or input on the line to filter. ")
+    shiny::tags$p("This table cantained the detail information and the mean expression about the input list. User could click the arrow besides column names to change the rank or input on the line to filter and click the download button to download mean expression data of one or all genes. ")
   )
 }
 

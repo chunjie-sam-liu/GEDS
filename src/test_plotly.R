@@ -55,7 +55,7 @@ server <- function(input, output,session) {
         tickangle = 295, showline = TRUE, categoryorder = "array", 
         categoryarray = t2$cancer_types,tickfont = list(size = 10)
       ),
-      yaxis = list(title = "FPKM" ,showline = TRUE))
+      yaxis = list(title = "FPKM(log2)" ,showline = TRUE))
     CCLE_example %>% dplyr::rename(FPKM = expr) %>%
       dplyr::group_by(symbol) %>% dplyr::arrange(symbol,desc(FPKM)) %>% 
       dplyr::ungroup() %>% dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% 
@@ -75,7 +75,7 @@ server <- function(input, output,session) {
         tickangle = 295, categoryorder = "array",showline = TRUE,
         categoryarray = t3$cancer_types,tickfont = list(size = 10)
       ),
-      yaxis = list(title = "FPKM" ,showline = TRUE))
+      yaxis = list(title = "FPKM(log2)" ,showline = TRUE))
     p4 <- plotly_empty(source = "main")
     
     p <- subplot(p1,p1,nrows = 2)

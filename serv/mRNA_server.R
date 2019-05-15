@@ -280,7 +280,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = t2$cancer_types
         ),
-        yaxis = list(title = "FPKM" ,showline = TRUE,
+        yaxis = list(title = "FPKM(log2)" ,showline = TRUE,
                      zeroline = FALSE,hoverformat = '.2f'))
       }
     else{
@@ -300,7 +300,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = t2$cancer_types
         ),
-        yaxis = list(title = "FPKM" ,showline = TRUE,
+        yaxis = list(title = "FPKM(log2)" ,showline = TRUE,
                      zeroline = FALSE,hoverformat = '.2f'))
     }
     ###add new
@@ -409,7 +409,7 @@ click_plot_GTEX <- function(.expr_clean){
     dplyr::select(-ensembl_gene_id) %>%
     tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
   rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
-  rebuild_file %>% plot_ly(x = ~barcode, y = ~ expr,type = "scatter",mode = "markers") %>%
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
     layout(
       title = paste(.expr_clean,"n=",length(order)),
       xaxis = list(
@@ -418,7 +418,7 @@ click_plot_GTEX <- function(.expr_clean){
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "FPKM" ,showline = TRUE,hoverformat = '.2f')
+      yaxis = list(title = "FPKM(log2)" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -429,7 +429,7 @@ click_plot_CCLE <- function(.expr_clean){
   file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
     tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
   rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
-  rebuild_file %>% plot_ly(x = ~barcode, y = ~ expr,type = "scatter",mode = "markers") %>%
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
     layout(
       title = paste(.expr_clean,"n=",length(order)),
       xaxis = list(
@@ -438,7 +438,7 @@ click_plot_CCLE <- function(.expr_clean){
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "FPKM" ,showline = TRUE,hoverformat = '.2f')
+      yaxis = list(title = "FPKM(log2)" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 # ObserveEvent ------------------------------------------------------------

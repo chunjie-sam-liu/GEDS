@@ -386,7 +386,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         dplyr::rename(cancer_types = tis) -> protein_MCLP_sd2
       t2 %>% dplyr::left_join(protein_MCLP_sd2,by="cancer_types") -> t2
       plot_ly(
-        data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
+        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#2cdbf9",source = "protein", tickfont = list(size = 12),
         name = "MCLP",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
       ) %>% layout(
@@ -405,7 +405,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         dplyr::rename(cancer_types = tissue) -> protein_CCLE_sd2
       t2 %>% dplyr::left_join(protein_CCLE_sd2,by="cancer_types") -> t2
       plot_ly(
-        data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
+        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#75a3e7",source = "protein", tickfont = list(size = 12),
         name = "CCLE",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
       ) %>% layout(
