@@ -145,9 +145,15 @@ mRNA_TCGA <- readr::read_rds(file.path(config$database,"mRNA","TCGA_mRNA_cancert
 mRNA_GTEX <- readr::read_rds(file.path(config$database,"mRNA","GTEX_mRNA_tissue_summary.rds.gz"))
 mRNA_CCLE <- readr::read_rds(file.path(config$database,"mRNA","CCLE_mRNA_cellline_summary.rds.gz"))
 
+mRNA_GTEX_sd <- readr::read_rds(file.path(config$database,"mRNA","GTEX_sd.rds.gz"))
+mRNA_CCLE_sd <- readr::read_rds(file.path(config$database,"mRNA","CCLE_sd.rds.gz"))
+
 protein_TCGA <- readr::read_rds(file.path(config$database,"protein","TCGA_protein_cancertype_summary.rds.gz"))
 protein_MCLP <- readr::read_rds(file.path(config$database,"protein","MCLP_protein_cellline_summary.rds.gz"))
 protein_CCLE <- readr::read_rds(file.path(config$database,"protein","CCLE_protein_cellline_summary.rds.gz"))
+
+protein_MCLP_sd <- readr::read_rds(file.path(config$database,"protein","MCLP_sd.rds.gz"))
+protein_CCLE_sd <- readr::read_rds(file.path(config$database,"protein","CCLE_protein_sd.rds.gz"))
 
 miRNA_TCGA <- readr::read_rds(file.path(config$database,"miRNA","TCGA_miRNA_cancertype_summary.rds.gz"))
 total_mRNA_symbol <- readr::read_rds(file.path(config$database,"mRNA","mRNA_symbol_alias.rds.gz"))

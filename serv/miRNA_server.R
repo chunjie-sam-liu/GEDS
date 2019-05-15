@@ -176,7 +176,7 @@ expr_box_plot_mirna <-  function(.expr){
       categoryorder = "array", 
       categoryarray = order
     ),
-    yaxis = list(title = "RSEM(log2)" ,showline = TRUE),
+    yaxis = list(title = "RSEM(log2)" ,showline = TRUE,hoverformat = '.2f'),
     legend = list(orientation = 'h',x = 0.7, y = 1.2))
 }
 expr_clean_datatable_mirna <- function(.expr_clean,.title) {
@@ -214,7 +214,9 @@ click_plot_miRNA_TCGA_tumor <- function(.expr_clean) {
   cancertype %>% dplyr::filter(type %in% "Tumor") %>% .$barcode->tumor_barcode
   file %>% dplyr::filter(name %in% input$select_miRNA_result) %>%
     dplyr::select(name,tumor_barcode) %>% 
-    tidyr::gather(key=barcode,value=expr,-c(name)) ->rebuild_file
+    tidyr::gather(key=barcode,value=expr,-c(name)) %>%
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 1, end = 16)) %>%
+    dplyr::select(name,barcode=type,expr) ->rebuild_file
   rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
   rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
     layout(
@@ -226,7 +228,7 @@ click_plot_miRNA_TCGA_tumor <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "TPM(log2)" ,showline = TRUE)
+      yaxis = list(title = "TPM(log2)" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -242,7 +244,9 @@ click_plot_miRNA_TCGA_normal <- function(.expr_clean) {
   cancertype %>% dplyr::filter(type %in% "Normal") %>% .$barcode->tumor_barcode
   file %>% dplyr::filter(name %in% input$select_miRNA_result) %>%
     dplyr::select(name,tumor_barcode) %>% 
-    tidyr::gather(key=barcode,value=expr,-c(name)) ->rebuild_file
+    tidyr::gather(key=barcode,value=expr,-c(name)) %>%
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 1, end = 16)) %>%
+    dplyr::select(name,barcode=type,expr) ->rebuild_file
   rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
   rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
     layout(
@@ -254,7 +258,7 @@ click_plot_miRNA_TCGA_normal <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "TPM(log2)" ,showline = TRUE)
+      yaxis = list(title = "TPM(log2)" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 

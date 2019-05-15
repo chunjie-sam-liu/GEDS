@@ -30,15 +30,15 @@ observeEvent(c(input$input_protein_set),{
       t <- 1
       status$protein_result <- TRUE
     }
-    if(length(MCLP_protein_table_result) > 1){
-      MCLP_protein_table_result -> MCLP_one_plot
+    if(length(MCLP_protein_plot_result) > 1){
+      MCLP_protein_plot_result -> MCLP_one_plot
       MCLP_plot <- expr_buble_plot_protein(MCLP_one_plot,"MCLP")
       protein$MCLP <- TRUE
       m <- 1
       status$protein_result <- TRUE
     }
-    if(length(CCLE_protein_table_result) > 1){
-      CCLE_protein_table_result -> CCLE_one_plot
+    if(length(CCLE_protein_plot_result) > 1){
+      CCLE_protein_plot_result -> CCLE_one_plot
       CCLE_plot <- expr_buble_plot_protein(CCLE_one_plot,"CCLE")
       protein$CCLE <- TRUE
       c <- 1
@@ -201,6 +201,9 @@ MCLP_protein_result <- function(){
     ) %>% dplyr::select(-summary) %>% tidyr::unnest() %>% dplyr::filter(symbol != "drop") %>%
     dplyr::rename(cancer_types = tis)  -> expr_clean
   if(length(expr_clean$cancer_types) > 0){
+    expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% 
+      tidyr::drop_na() %>% dplyr::ungroup() %>% dplyr::left_join(protein_MCLP,by="cancer_types") %>% 
+      dplyr::select(cancer_types,symbol,protein,cellline_num,expr=summary) ->> MCLP_protein_plot_result
     expr_clean %>% dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% 
       tidyr::drop_na() %>% dplyr::ungroup() %>% dplyr::left_join(protein_MCLP,by="cancer_types") %>% 
       dplyr::select(cancer_types,symbol,protein,cellline_num,expr=summary) ->> MCLP_protein_table_result
@@ -217,7 +220,7 @@ MCLP_protein_result <- function(){
   else{
     MCLP_protein_table_result <<- "blank"
   }
-  return(MCLP_protein_table_result)
+  return(MCLP_protein_plot_result)
 }
 
 CCLE_protein_result <- function(){
@@ -242,6 +245,11 @@ CCLE_protein_result <- function(){
   if(length(expr_clean$cancer_types)>0){
     expr_clean %>% 
       dplyr::mutate(cancer_types = stringr::str_replace_all(pattern = "_",replacement = " ",cancer_types)) %>% 
+      dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(1:5) %>% tidyr::drop_na() %>% 
+      dplyr::ungroup() %>% dplyr::left_join(protein_CCLE,by="cancer_types") %>% 
+      dplyr::select(cancer_types,symbol,protein,cellline_num,expr) ->> CCLE_protein_plot_result
+    expr_clean %>% 
+      dplyr::mutate(cancer_types = stringr::str_replace_all(pattern = "_",replacement = " ",cancer_types)) %>% 
       dplyr::group_by(cancer_types,symbol,protein) %>% dplyr::slice(6) %>% tidyr::drop_na() %>% 
       dplyr::ungroup() %>% dplyr::left_join(protein_CCLE,by="cancer_types") %>% 
       dplyr::select(cancer_types,symbol,protein,cellline_num,expr) ->> CCLE_protein_table_result
@@ -258,7 +266,7 @@ CCLE_protein_result <- function(){
   else{
     CCLE_protein_table_result <<- "blank"
   }
-  return(CCLE_protein_table_result)
+  return(CCLE_protein_plot_result)
 }
 
 click_plot_protein_TCGA <- function(.expr_clean) {
@@ -273,9 +281,11 @@ click_plot_protein_TCGA <- function(.expr_clean) {
   cancertype %>% dplyr::filter(type %in% "Tumor") %>% .$barcode->tumor_barcode
   file %>% dplyr::filter(protein %in% match$protein) %>%
     dplyr::select(protein,tumor_barcode) %>% 
-    tidyr::gather(key=barcode,value=expr,-c(protein)) ->rebuild_file
+    tidyr::gather(key=barcode,value=expr,-c(protein)) %>%
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 1, end = 16)) %>%
+    dplyr::select(protein,barcode=type,expr) ->rebuild_file
   rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
-  rebuild_file %>% plot_ly(x = ~barcode, y = ~ expr,type = "scatter",mode = "markers") %>%
+  rebuild_file %>% plot_ly(x = ~barcode, y = ~ expr, type = "scatter",mode = "markers") %>%
     layout(
       title = paste(cancertypes,"Tumor","n=",length(order)),
       xaxis = list(
@@ -285,7 +295,7 @@ click_plot_protein_TCGA <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "Protein expression" ,showline = TRUE)
+      yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -306,7 +316,7 @@ click_plot_protein_MCLP <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "Protein expression" ,showline = TRUE)
+      yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -326,7 +336,7 @@ click_plot_protein_CCLE <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "Protein expression" ,showline = TRUE)
+      yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 ###add new
@@ -348,6 +358,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
       color = ~ symbol, colors = "red3",
       source = "protein",showlegend = FALSE
     ) %>% layout(
+      boxgap = 0,#boxgroupgap=0,
       boxmode = "group",
       xaxis = list(
         title = "Cancer Types (TCGA)",
@@ -357,7 +368,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "Protein expression" ,showline = TRUE)#,
+      yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f')#,
       #legend = list(orientation = 'h',x = 0.7, y = 1.05)
       )
   }
@@ -368,12 +379,16 @@ expr_buble_plot_protein <-  function(.expr,.type){
       dplyr::ungroup() %>%
       dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% 
       dplyr::select(cancer_types=tmp,symbol,protein,FPKM) -> t2
-    print(t2)
     if(.type == "MCLP"){
+      protein_MCLP_sd %>% dplyr::filter(protein %in% t2$protein[1]) %>% 
+        dplyr::mutate(tmp = stringr::str_replace_all(tis,pattern="_",replacement=" ") %>% stringr::str_to_title()) %>% 
+        dplyr::select(tis=tmp,sd) %>% 
+        dplyr::rename(cancer_types = tis) -> protein_MCLP_sd2
+      t2 %>% dplyr::left_join(protein_MCLP_sd2,by="cancer_types") -> t2
       plot_ly(
-        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
+        data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#2cdbf9",source = "protein", tickfont = list(size = 12),
-        name = "MCLP",showlegend = FALSE
+        name = "MCLP",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
       ) %>% layout(
         title = paste(t2$symbol[1],"(",t2$protein[1],")"),
         xaxis = list(
@@ -381,20 +396,25 @@ expr_buble_plot_protein <-  function(.expr,.type){
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = t2$cancer_types
         ),
-        yaxis = list(title = "Protein expression" ,showline = TRUE))
+        yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f'))
     }
     else{
+      protein_CCLE_sd %>% dplyr::filter(protein %in% t2$protein[1]) %>% 
+        dplyr::mutate(tmp = stringr::str_replace_all(tissue,pattern="_",replacement=" ") %>% stringr::str_to_title()) %>% 
+        dplyr::select(tissue=tmp,sd=expr) %>% 
+        dplyr::rename(cancer_types = tissue) -> protein_CCLE_sd2
+      t2 %>% dplyr::left_join(protein_CCLE_sd2,by="cancer_types") -> t2
       plot_ly(
-        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
+        data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#75a3e7",source = "protein", tickfont = list(size = 12),
-        name = "CCLE",showlegend = FALSE
+        name = "CCLE",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
       ) %>% layout(
         xaxis = list(
           title = "Cell lines (CCLE)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = t2$cancer_types
         ),
-        yaxis = list(title = "Protein expression" ,showline = TRUE))
+        yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f'))
     }
   }
 }

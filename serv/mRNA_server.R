@@ -133,9 +133,6 @@ observeEvent(c(reset$mRNA),{
   c(a,b,c) %>% tibble::tibble(symbol = .) %>% dplyr::distinct() %>% .$symbol -> plot_number$mRNA
   status$mRNA_result <- TRUE
   if(status$mRNA_trigger){status$mRNA_trigger <- FALSE} else{status$mRNA_trigger <- TRUE}
-  return(TCGA_mRNA_plot_result)
-  return(GTEX_mRNA_table_result)
-  return(CCLE_mRNA_table_result)
 }}
 )
 
@@ -195,6 +192,7 @@ GTEX_mRNA_result <- function(){
     dplyr::select(cancer_types,symbol,tissue_num,expr) %>% 
     dplyr::left_join(total_mRNA_symbol,by="symbol") %>%
     dplyr::select(cancer_types,symbol=Symbol,tissue_num,expr) ->> GTEX_mRNA_table_result
+  return(GTEX_mRNA_plot_result)
   return(GTEX_mRNA_table_result)
 }
 
@@ -218,6 +216,7 @@ CCLE_mRNA_result <- function(){
     dplyr::select(cancer_types,symbol,cellline_num,expr) %>%
     dplyr::left_join(total_mRNA_symbol,by="symbol") %>%
     dplyr::select(cancer_types,symbol=Symbol,cellline_num,expr) ->> CCLE_mRNA_table_result
+  return(CCLE_mRNA_plot_result)
   return(CCLE_mRNA_table_result)
 }
 #####add new
@@ -253,7 +252,8 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "RSEM(log2)" ,showline = TRUE),
+      yaxis = list(title = "RSEM(log2)" ,showline = TRUE,
+                   zeroline = FALSE,hoverformat = '.2f'),
       legend = list(orientation = 'h',x = 0.7, y = 1.05))
     ###add new
   }
@@ -263,24 +263,36 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       dplyr::ungroup() %>% dplyr::mutate(tmp = stringr::str_to_title(cancer_types)) %>% 
       dplyr::select(cancer_types = tmp, symbol, FPKM)-> t2
     if(.type == "GTEX"){
+      mRNA_GTEX_sd %>% dplyr::filter(symbol %in% t2$symbol[1]) %>% 
+        dplyr::mutate(tmp = stringr::str_replace_all(SMTS,pattern="_",replacement=" ") %>% stringr::str_to_title()) %>% 
+        dplyr::select(SMTS=tmp,sd) %>% 
+        dplyr::rename(cancer_types = SMTS) -> mRNA_GTEX_sd2
+      t2 %>% dplyr::left_join(mRNA_GTEX_sd2,by="cancer_types") -> t2
       plot_ly(
-        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
+        data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#cbb255",source = "main", tickfont = list(size = 12),
         name = "GTEX",showlegend = FALSE
       ) %>% layout(
+        boxgap = 0,#boxgroupgap=0,
         title = t2$symbol[1],
         xaxis = list(
           title = "Normal Tissues (GTEx)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = t2$cancer_types
         ),
-        yaxis = list(title = "FPKM" ,showline = TRUE))
+        yaxis = list(title = "FPKM" ,showline = TRUE,
+                     zeroline = FALSE,hoverformat = '.2f'))
       }
     else{
+      mRNA_CCLE_sd %>% dplyr::filter(symbol %in% t2$symbol[1]) %>% 
+        dplyr::mutate(tmp = stringr::str_replace_all(tissue,pattern="_",replacement=" ") %>% stringr::str_to_title()) %>% 
+        dplyr::select(tissue=tmp,sd) %>% 
+        dplyr::rename(cancer_types = tissue) -> mRNA_GTEX_sd2
+      t2 %>% dplyr::left_join(mRNA_GTEX_sd2,by="cancer_types") -> t2
       plot_ly(
-        data = t2, x = ~ cancer_types, y = ~ FPKM, type = "bar", split = ~ symbol, 
+        data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#ffc0cb",source = "main", tickfont = list(size = 12),
-        name = "CCLE",showlegend = FALSE
+        name = "CCLE",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
       ) %>% layout(
         title = t2$symbol[1],
         xaxis = list(
@@ -288,7 +300,8 @@ expr_box_plot_mRNA <-  function(.expr,.type){
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = t2$cancer_types
         ),
-        yaxis = list(title = "FPKM" ,showline = TRUE))
+        yaxis = list(title = "FPKM" ,showline = TRUE,
+                     zeroline = FALSE,hoverformat = '.2f'))
     }
     ###add new
   }
@@ -340,7 +353,9 @@ click_plot_TCGA_tumor <- function(.expr_clean) {
   cancertype %>% dplyr::filter(type %in% "Tumor") %>% .$barcode->tumor_barcode
   file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
     dplyr::select(symbol,tumor_barcode) %>% 
-    tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
+    tidyr::gather(key=barcode,value=expr,-c(symbol)) %>%
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 1, end = 16)) %>%
+    dplyr::select(symbol,barcode=type,expr) -> rebuild_file
   rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
   rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
     layout(
@@ -352,7 +367,7 @@ click_plot_TCGA_tumor <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "RSEM(log2)" ,showline = TRUE)
+      yaxis = list(title = "RSEM(log2)" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -368,7 +383,9 @@ click_plot_TCGA_normal <- function(.expr_clean) {
   cancertype %>% dplyr::filter(type %in% "Normal") %>% .$barcode->tumor_barcode
   file %>% dplyr::filter(symbol %in% input$select_mRNA_result) %>%
     dplyr::select(symbol,tumor_barcode) %>% 
-    tidyr::gather(key=barcode,value=expr,-c(symbol)) ->rebuild_file
+    tidyr::gather(key=barcode,value=expr,-c(symbol)) %>%
+    dplyr::mutate(type = stringr::str_sub(string = barcode, start = 1, end = 16)) %>%
+    dplyr::select(symbol,barcode=type,expr) ->rebuild_file
   rebuild_file %>% dplyr::arrange(expr) %>% .$barcode -> order
   rebuild_file %>% plot_ly(x = ~barcode, y = ~ log2(expr+1),type = "scatter",mode = "markers") %>%
     layout(
@@ -380,7 +397,7 @@ click_plot_TCGA_normal <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "RSEM(log2)" ,showline = TRUE)
+      yaxis = list(title = "RSEM(log2)" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -401,7 +418,7 @@ click_plot_GTEX <- function(.expr_clean){
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "FPKM" ,showline = TRUE)
+      yaxis = list(title = "FPKM" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -421,7 +438,7 @@ click_plot_CCLE <- function(.expr_clean){
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "FPKM" ,showline = TRUE)
+      yaxis = list(title = "FPKM" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 # ObserveEvent ------------------------------------------------------------
@@ -459,10 +476,14 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_plot
     TCGA_mRNA_table_result %>% 
       dplyr::filter(symbol %in% input$select_mRNA_result) -> TCGA_one_table
-    GTEX_mRNA_table_result %>% 
+    GTEX_mRNA_plot_result %>% 
       dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_plot
-    CCLE_mRNA_table_result %>% 
+    GTEX_mRNA_table_result %>% 
+      dplyr::filter(symbol %in% input$select_mRNA_result) -> GTEX_one_table
+    CCLE_mRNA_plot_result %>% 
       dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_plot
+    CCLE_mRNA_table_result %>% 
+      dplyr::filter(symbol %in% input$select_mRNA_result) -> CCLE_one_table
     if(length(TCGA_one_plot$cancer_types) + length(GTEX_one_plot$cancer_types) + length(CCLE_one_plot$cancer_types) > 0 ){
       choice$mRNA <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','')
       mRNA$TCGA_table <- paste(input$select_mRNA_result,status$mRNA_trigger) %>% stringr::str_replace_all(' ','') %>% paste(.,"TCGA_table",sep = "")
@@ -497,13 +518,13 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       }
       if(length(GTEX_one_plot$cancer_types) > 0){
         GTEX_plot <- expr_box_plot_mRNA(GTEX_one_plot,"GTEX")
-        output[[mRNA$GTEX_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_one_plot,"Normal Tissues (GTEx)")})
+        output[[mRNA$GTEX_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_one_table,"Normal Tissues (GTEx)")})
         output[[mRNA$GTEX_download]] <- downloadHandler(
           filename = function() {
             paste(Sys.Date(),"GTEx_single_mRNA.csv",sep = "_")
           },
           content = function(file) {
-            write.csv(GTEX_one_plot, file, row.names = TRUE)
+            write.csv(GTEX_one_table, file, row.names = TRUE)
           }
         )
         output$expr_dt_comparison_GTEX_mRNA <- downloadHandler(
@@ -518,13 +539,13 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       }
       if(length(CCLE_one_plot$cancer_types) > 0){
         CCLE_plot <- expr_box_plot_mRNA(CCLE_one_plot,"CCLE")
-        output[[mRNA$CCLE_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_one_plot,"Cell lines (CCLE)")})
+        output[[mRNA$CCLE_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(CCLE_one_table,"Cell lines (CCLE)")})
         output[[mRNA$CCLE_download]] <- downloadHandler(
           filename = function() {
             paste(Sys.Date(),"CCLE_single_mRNA.csv",sep = "_")
           },
           content = function(file) {
-            write.csv(CCLE_one_plot, file, row.names = TRUE)
+            write.csv(CCLE_one_table, file, row.names = TRUE)
           }
         )
         output$expr_dt_comparison_CCLE_mRNA <- downloadHandler(
