@@ -254,7 +254,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       ),
       yaxis = list(title = "RSEM(log2)" ,showline = TRUE,
                    zeroline = FALSE,hoverformat = '.2f'),
-      legend = list(orientation = 'h',x = 0.7, y = 1.05))
+      legend = list(orientation = 'h',x = 0.7, y = 1))
     ###add new
   }
   else{
@@ -268,6 +268,8 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         dplyr::select(SMTS=tmp,sd) %>% 
         dplyr::rename(cancer_types = SMTS) -> mRNA_GTEX_sd2
       t2 %>% dplyr::left_join(mRNA_GTEX_sd2,by="cancer_types") -> t2
+      t2 %>% dplyr::group_by(cancer_types) %>% 
+        dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#cbb255",source = "main", tickfont = list(size = 12),
@@ -278,7 +280,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         xaxis = list(
           title = "Normal Tissues (GTEx)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 
-          categoryarray = t2$cancer_types
+          categoryarray = order
         ),
         yaxis = list(title = "FPKM(log2)" ,showline = TRUE,
                      zeroline = FALSE,hoverformat = '.2f'))
@@ -289,6 +291,8 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         dplyr::select(tissue=tmp,sd) %>% 
         dplyr::rename(cancer_types = tissue) -> mRNA_GTEX_sd2
       t2 %>% dplyr::left_join(mRNA_GTEX_sd2,by="cancer_types") -> t2
+      t2 %>% dplyr::group_by(cancer_types) %>% 
+        dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#ffc0cb",source = "main", tickfont = list(size = 12),
@@ -298,7 +302,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         xaxis = list(
           title = "Cell lines (CCLE)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 
-          categoryarray = t2$cancer_types
+          categoryarray = order
         ),
         yaxis = list(title = "FPKM(log2)" ,showline = TRUE,
                      zeroline = FALSE,hoverformat = '.2f'))

@@ -385,6 +385,8 @@ expr_buble_plot_protein <-  function(.expr,.type){
         dplyr::select(tis=tmp,sd) %>% 
         dplyr::rename(cancer_types = tis) -> protein_MCLP_sd2
       t2 %>% dplyr::left_join(protein_MCLP_sd2,by="cancer_types") -> t2
+      t2 %>% dplyr::group_by(cancer_types) %>% 
+        dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ FPKM, type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#2cdbf9",source = "protein", tickfont = list(size = 12),
@@ -394,7 +396,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         xaxis = list(
           title = "Cell lines (MCLP)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 
-          categoryarray = t2$cancer_types
+          categoryarray = order
         ),
         yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f'))
     }
@@ -404,6 +406,8 @@ expr_buble_plot_protein <-  function(.expr,.type){
         dplyr::select(tissue=tmp,sd=expr) %>% 
         dplyr::rename(cancer_types = tissue) -> protein_CCLE_sd2
       t2 %>% dplyr::left_join(protein_CCLE_sd2,by="cancer_types") -> t2
+      t2 %>% dplyr::group_by(cancer_types) %>% 
+        dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ FPKM, type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#75a3e7",source = "protein", tickfont = list(size = 12),
@@ -412,7 +416,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         xaxis = list(
           title = "Cell lines (CCLE)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 
-          categoryarray = t2$cancer_types
+          categoryarray = order
         ),
         yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f'))
     }
