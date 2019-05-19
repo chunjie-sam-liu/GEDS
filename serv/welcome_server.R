@@ -58,6 +58,30 @@ output$table_multiple_mRNA <- renderUI({
   }
 })
 
+output$plot_result_mRNA <- renderUI({
+  if(plotmode$mRNA == 1){
+    fn_plot_result_mRNA1()
+  }
+  else if(plotmode$mRNA == 2){
+    fn_plot_result_mRNA2()
+  }
+  else if(plotmode$mRNA == 3){
+    fn_plot_result_mRNA3()
+  }
+  else if(plotmode$mRNA == 4){
+    fn_plot_result_mRNA4()
+  }
+  else if(plotmode$mRNA == 5){
+    fn_plot_result_mRNA5()
+  }
+  else if(plotmode$mRNA == 6){
+    fn_plot_result_mRNA6()
+  }
+  else if(plotmode$mRNA == 7){
+    fn_plot_result_mRNA7()
+  }
+})
+
 output$ui_protein_result <- renderUI({
   if(status$protein_result) {
     #if(multiple$protein){
@@ -75,6 +99,30 @@ output$plot_multiple_protein <- renderUI({
       fn_plot_multiple_protein(match$protein)
     #}
   }})
+
+output$plot_result_protein <- renderUI({
+  if(plotmode$protein == 1){
+    fn_plot_result_protein1()
+  }
+  else if(plotmode$protein == 2){
+    fn_plot_result_protein2()
+  }
+  else if(plotmode$protein == 3){
+    fn_plot_result_protein3()
+  }
+  else if(plotmode$protein == 4){
+    fn_plot_result_protein4()
+  }
+  else if(plotmode$protein == 5){
+    fn_plot_result_protein5()
+  }
+  else if(plotmode$protein == 6){
+    fn_plot_result_protein6()
+  }
+  else if(plotmode$protein == 7){
+    fn_plot_result_protein7()
+  }
+})
 
 output$ui_miRNA_result <- renderUI({
   if(status$miRNA_result) {
@@ -99,9 +147,9 @@ output$table_multiple_miRNA <- renderUI({
   }
 })
 
-output$protein_TCGA <- renderUI({if (protein$TCGA) { fn_protein_TCGA() }})
-output$protein_MCLP <- renderUI({if(protein$MCLP){fn_protein_MCLP()}})
-output$protein_CCLE <- renderUI({if(protein$CCLE){fn_protein_CCLE()}})
+output$TCGA_protein <- renderUI({if(protein$TCGA){fn_protein_TCGA()}})
+output$MCLP_protein <- renderUI({if(protein$MCLP){fn_protein_MCLP()}})
+output$CCLE_protein <- renderUI({if(protein$CCLE){fn_protein_CCLE()}})
 
 shinyjs::onclick(id = "detail", expr = shinyjs::js$openTab(id = "Document"))
 shinyjs::onclick(id = "detail2", expr = shinyjs::js$openTab(id = "Document"))

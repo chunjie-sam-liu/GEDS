@@ -240,7 +240,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       type = "box",
       split = ~ types,
       color = ~ types, colors = c("midnightblue", "red3"),
-      source = "main"
+      source = "mRNA_TCGA"
     ) %>% layout(
       title = t1$symbol[1],
       boxmode = "group",
@@ -272,7 +272,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
-        color = ~ symbol, colors = "#cbb255",source = "main", tickfont = list(size = 12),
+        color = ~ symbol, colors = "#cbb255",source = "mRNA_GTEX", tickfont = list(size = 12),
         name = "GTEX",showlegend = FALSE
       ) %>% layout(
         boxgap = 0,#boxgroupgap=0,
@@ -295,7 +295,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
         dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
-        color = ~ symbol, colors = "#ffc0cb",source = "main", tickfont = list(size = 12),
+        color = ~ symbol, colors = "#ffc0cb",source = "mRNA_CCLE", tickfont = list(size = 12),
         name = "CCLE",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
       ) %>% layout(
         title = t2$symbol[1],
@@ -470,8 +470,14 @@ observeEvent(status$mRNA_valid, {
 
 # observe -----------------------------------------------------------------
 observe(validate_input_mRNA_set())
-observeEvent(event_data("plotly_click", source = "main"), {
-  toggleModal(session, modalId = "mRNA_boxPopUp", toggle = "toggle")
+observeEvent(event_data("plotly_click", source = "mRNA_TCGA"), {
+  toggleModal(session, modalId = "mRNA_boxPopUp_TCGA", toggle = "toggle")
+})
+observeEvent(event_data("plotly_click", source = "mRNA_GTEX"), {
+  toggleModal(session, modalId = "mRNA_boxPopUp_GTEX", toggle = "toggle")
+})
+observeEvent(event_data("plotly_click", source = "mRNA_CCLE"), {
+  toggleModal(session, modalId = "mRNA_boxPopUp_CCLE", toggle = "toggle")
 })
 observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
   if(length(input$select_mRNA_result)>0 && status$mRNA_set){
@@ -501,6 +507,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       c <- 0
       if(length(TCGA_one_plot$cancer_types) > 0){
         TCGA_plot <- expr_box_plot_mRNA(TCGA_one_plot,"TCGA")
+        output$mRNA_TCGA <- renderPlotly({TCGA_plot})
         output[[mRNA$TCGA_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(TCGA_one_table,"Cancer Types (TCGA)")})
         output[[mRNA$TCGA_download]] <- downloadHandler(
           filename = function() {
@@ -522,6 +529,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       }
       if(length(GTEX_one_plot$cancer_types) > 0){
         GTEX_plot <- expr_box_plot_mRNA(GTEX_one_plot,"GTEX")
+        output$mRNA_GTEX <- renderPlotly({GTEX_plot})
         output[[mRNA$GTEX_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(GTEX_one_table,"Normal Tissues (GTEx)")})
         output[[mRNA$GTEX_download]] <- downloadHandler(
           filename = function() {
@@ -543,6 +551,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       }
       if(length(CCLE_one_plot$cancer_types) > 0){
         CCLE_plot <- expr_box_plot_mRNA(CCLE_one_plot,"CCLE")
+        output$mRNA_CCLE <- renderPlotly({CCLE_plot})
         output[[mRNA$CCLE_table]] <- DT::renderDataTable({expr_clean_datatable_mRNA(CCLE_one_table,"Cell lines (CCLE)")})
         output[[mRNA$CCLE_download]] <- downloadHandler(
           filename = function() {
@@ -570,7 +579,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           CCLE_plot,
           nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
         ) -> plot_result
-        plotmode <-  1
+        plotmode$mRNA <-  1
         output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if (t == 1 && g == 1){
@@ -578,7 +587,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           TCGA_plot,p3,GTEX_plot,
           nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
-        plotmode <-  2
+        plotmode$mRNA <-  2
         output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(g == 1 && c == 1){
@@ -586,7 +595,7 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           GTEX_plot,p3,CCLE_plot,
           nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
-        plotmode <-  3
+        plotmode$mRNA <-  3
         output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(t == 1 && c == 1){
@@ -594,82 +603,40 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
           TCGA_plot,p3,CCLE_plot,
           nrow = 3, heights = c(0.4,0.2,0.4)
         ) -> plot_result
-        plotmode <-  4
+        plotmode$mRNA <-  4
         output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(t == 1){
-        plotmode <-  5
+        plotmode$mRNA <-  5
         output[[choice$mRNA]] <- renderPlotly({TCGA_plot})
       }
       else if(g == 1){
-        plotmode <-  6
+        plotmode$mRNA <-  6
         output[[choice$mRNA]] <- renderPlotly({GTEX_plot})
       }
       else if(c == 1){
-        plotmode <-  7
+        plotmode$mRNA <-  7
         output[[choice$mRNA]] <- renderPlotly({CCLE_plot})
       }
-      output$mRNA_hover <- renderPlotly({
-        eventdat <- event_data('plotly_click', source="main") # get event data from source main
+      output$mRNA_hover_TCGA <- renderPlotly({
+        eventdat <- event_data('plotly_click', source="mRNA_TCGA") # get event data from source main
         if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
-        if(plotmode == 1){
-          if(eventdat$curveNumber[1] == 1){
-            click_plot_TCGA_tumor(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 0){
-            click_plot_TCGA_normal(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 3){
-            click_plot_GTEX(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 5){
-            click_plot_CCLE(eventdat$x[1])
-          }
+        if(eventdat$curveNumber[1] == 1){
+          click_plot_TCGA_tumor(eventdat$x[1])
         }
-        else if(plotmode == 2){
-          if(eventdat$curveNumber[1] == 1){
-            click_plot_TCGA_tumor(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 0){
-            click_plot_TCGA_normal(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 3){
-            click_plot_GTEX(eventdat$x[1])
-          }
+        else if(eventdat$curveNumber[1] == 0){
+          click_plot_TCGA_normal(eventdat$x[1])
         }
-        else if(plotmode == 3){
-          if(eventdat$curveNumber[1] == 0){
-            click_plot_GTEX(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 2){
-            click_plot_CCLE(eventdat$x[1])
-          }
-        }
-        else if(plotmode == 4){
-          if(eventdat$curveNumber[1] == 1){
-            click_plot_TCGA_tumor(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 0){
-            click_plot_TCGA_normal(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 3){
-            click_plot_CCLE(eventdat$x[1])
-          }
-        }
-        else if(plotmode == 5){
-          if(eventdat$curveNumber[1] == 1){
-            click_plot_TCGA_tumor(eventdat$x[1])
-          }
-          else if(eventdat$curveNumber[1] == 0){
-            click_plot_TCGA_normal(eventdat$x[1])
-          }
-        }
-        else if(plotmode == 6){
-          click_plot_GTEX(eventdat$x[1])
-        }
-        else if(plotmode == 7){
-          click_plot_CCLE(eventdat$x[1])
-        }
+      })
+      output$mRNA_hover_GTEX <- renderPlotly({
+        eventdat <- event_data('plotly_click', source="mRNA_GTEX") # get event data from source main
+        if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+        click_plot_GTEX(eventdat$x[1])
+      })
+      output$mRNA_hover_CCLE <- renderPlotly({
+        eventdat <- event_data('plotly_click', source="mRNA_CCLE") # get event data from source main
+        if(is.null(eventdat) == T) return(NULL)        # If NULL dont do anything
+        click_plot_CCLE(eventdat$x[1])
       })
       ###add new
     }

@@ -48,15 +48,15 @@ download_bt <- function(id){
   tagList(
     shinyWidgets::dropdownButton(
       tags$h3("Download Options"),
-      prettyRadioButtons(
-        inputId = ns("pictype"),
-        label = "Selcet format for your pictur",
-        choices = list("PDF" = "pdf", "PNG" = "png","EPS"="eps"),
-        inline = TRUE,
-        icon = icon("check"),
-        bigger = TRUE, status = "info",
-        animation = "jelly"
-      ),
+      #prettyRadioButtons(
+      #  inputId = ns("pictype"),
+      #  label = "Selcet format for your pictur",
+      #  choices = list("PDF" = "pdf", "PNG" = "png","EPS"="eps"),
+      #  inline = TRUE,
+      #  icon = icon("check"),
+      #  bigger = TRUE, status = "info",
+      #  animation = "jelly"
+      #),
       numericInput(
         inputId = ns("d_width"),
         label = "Width",

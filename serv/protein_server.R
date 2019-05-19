@@ -3,8 +3,14 @@
 
 # Clear input -------------------------------------------------------------
 ###add new
-observeEvent(event_data("plotly_click", source = "protein"), {
-  toggleModal(session, modalId = "protein_boxPopUp", toggle = "toggle")
+observeEvent(event_data("plotly_click", source = "protein_TCGA"), {
+  toggleModal(session, modalId = "protein_boxPopUp_TCGA", toggle = "toggle")
+})
+observeEvent(event_data("plotly_click", source = "protein_MCLP"), {
+  toggleModal(session, modalId = "protein_boxPopUp_MCLP", toggle = "toggle")
+})
+observeEvent(event_data("plotly_click", source = "protein_CCLE"), {
+  toggleModal(session, modalId = "protein_boxPopUp_CCLE", toggle = "toggle")
 })
 observeEvent(c(input$input_protein_set),{
     status$protein_result <- FALSE
@@ -26,6 +32,7 @@ observeEvent(c(input$input_protein_set),{
     if(length(TCGA_protein_plot_result) > 1){
       TCGA_protein_plot_result -> TCGA_one_plot
       TCGA_plot <- expr_buble_plot_protein(TCGA_one_plot,"TCGA")
+      output$protein_TCGA <- renderPlotly({TCGA_plot})
       protein$TCGA <- TRUE
       t <- 1
       status$protein_result <- TRUE
@@ -33,6 +40,7 @@ observeEvent(c(input$input_protein_set),{
     if(length(MCLP_protein_plot_result) > 1){
       MCLP_protein_plot_result -> MCLP_one_plot
       MCLP_plot <- expr_buble_plot_protein(MCLP_one_plot,"MCLP")
+      output$protein_MCLP <- renderPlotly({MCLP_plot})
       protein$MCLP <- TRUE
       m <- 1
       status$protein_result <- TRUE
@@ -40,6 +48,7 @@ observeEvent(c(input$input_protein_set),{
     if(length(CCLE_protein_plot_result) > 1){
       CCLE_protein_plot_result -> CCLE_one_plot
       CCLE_plot <- expr_buble_plot_protein(CCLE_one_plot,"CCLE")
+      output$protein_CCLE <- renderPlotly({CCLE_plot})
       protein$CCLE <- TRUE
       c <- 1
       status$protein_result <- TRUE
@@ -52,7 +61,7 @@ observeEvent(c(input$input_protein_set),{
         CCLE_plot,
         nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
       ) -> plot_result
-      plotmode <-  1
+      plotmode$protein <-  1
       output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(t == 1 && m == 1){
@@ -60,14 +69,14 @@ observeEvent(c(input$input_protein_set),{
         TCGA_plot,p3,MCLP_plot,
         nrow = 3, heights = c(0.4,0.2,0.4)
       ) -> plot_result
-      plotmode <-  2
+      plotmode$protein <-  2
       output[[match$protein]] <- renderPlotly({plot_result})
     }else if(t == 1 && c == 1){
       subplot(
         TCGA_plot,p3,CCLE_plot,
         nrow = 3, heights = c(0.4,0.2,0.4)
       ) -> plot_result
-      plotmode <-  3
+      plotmode$protein <-  3
       output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(m == 1 && c == 1){
@@ -75,68 +84,35 @@ observeEvent(c(input$input_protein_set),{
         MCLP_plot,p3,CCLE_plot,
         nrow = 3, heights = c(0.4,0.2,0.4)
       ) -> plot_result
-      plotmode <-  4
+      plotmode$protein <-  4
       output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(t == 1){
-      pplotmode <-  5
+      plotmode$protein <-  5
       output[[match$protein]] <- renderPlotly({TCGA_plot})
     }
     else if(m == 1){
-      plotmode <-  6
+      plotmode$protein <-  6
       output[[match$protein]] <- renderPlotly({MCLP_plot})
     }
     else if(c == 1){
-      plotmode <-  7
+      plotmode$protein <-  7
       output[[match$protein]] <- renderPlotly({CCLE_plot})
     }
-    output$protein_hover <- renderPlotly({
-      eventdat <- event_data('plotly_click', source="protein")
+    output$protein_hover_TCGA <- renderPlotly({
+      eventdat <- event_data('plotly_click', source="protein_TCGA")
       if(is.null(eventdat) == T) return(NULL)        
-      if(plotmode == 1){
-        if(eventdat$curveNumber[1] == 0){
-          click_plot_protein_TCGA(eventdat$x[1])
-        }
-        else if(eventdat$curveNumber[1] == 2){
-          click_plot_protein_MCLP(eventdat$x[1])
-        }
-        else if(eventdat$curveNumber[1] == 4){
-          click_plot_protein_CCLE(eventdat$x[1])
-        }
-      }
-      else if(plotmode == 2){
-        if(eventdat$curveNumber[1] == 0){
-          click_plot_protein_TCGA(eventdat$x[1])
-        }
-        else if(eventdat$curveNumber[1] == 2){
-          click_plot_protein_MCLP(eventdat$x[1])
-        }
-      }
-      else if(plotmode == 3){
-        if(eventdat$curveNumber[1] == 0){
-          click_plot_protein_TCGA(eventdat$x[1])
-        }
-        else if(eventdat$curveNumber[1] == 2){
-          click_plot_protein_CCLE(eventdat$x[1])
-        }
-      }
-      else if(plotmode == 4){
-        if(eventdat$curveNumber[1] == 0){
-          click_plot_protein_MCLP(eventdat$x[1])
-        }
-        else if(eventdat$curveNumber[1] == 2){
-          click_plot_protein_CCLE(eventdat$x[1])
-        }
-      }
-      else if(plotmode == 5){
-        click_plot_protein_TCGA(eventdat$x[1])
-      }
-      else if(plotmode == 6){
-        click_plot_protein_MCLP(eventdat$x[1])
-      }
-      else if(plotmode == 7){
-        click_plot_protein_CCLE(eventdat$x[1])
-      }
+      click_plot_protein_TCGA(eventdat$x[1])
+    })
+    output$protein_hover_MCLP <- renderPlotly({
+      eventdat <- event_data('plotly_click', source="protein_MCLP")
+      if(is.null(eventdat) == T) return(NULL)        
+      click_plot_protein_MCLP(eventdat$x[1])
+    })
+    output$protein_hover_CCLE <- renderPlotly({
+      eventdat <- event_data('plotly_click', source="protein_CCLE")
+      if(is.null(eventdat) == T) return(NULL)        
+      click_plot_protein_CCLE(eventdat$x[1])
     })
   }}
 )
@@ -356,8 +332,9 @@ expr_buble_plot_protein <-  function(.expr,.type){
       type = "box",
       split = ~ symbol,
       color = ~ symbol, colors = "red3",
-      source = "protein",showlegend = FALSE
+      source = "protein_TCGA",showlegend = FALSE
     ) %>% layout(
+      title = paste(t1$symbol[1],"(",t1$protein[1],")"),
       boxgap = 0,#boxgroupgap=0,
       boxmode = "group",
       xaxis = list(
@@ -389,7 +366,7 @@ expr_buble_plot_protein <-  function(.expr,.type){
         dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ FPKM, type = "box", split = ~ symbol, 
-        color = ~ symbol, colors = "#2cdbf9",source = "protein", tickfont = list(size = 12),
+        color = ~ symbol, colors = "#2cdbf9",source = "protein_MCLP", tickfont = list(size = 12),
         name = "MCLP",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
       ) %>% layout(
         title = paste(t2$symbol[1],"(",t2$protein[1],")"),
@@ -410,9 +387,10 @@ expr_buble_plot_protein <-  function(.expr,.type){
         dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ FPKM, type = "box", split = ~ symbol, 
-        color = ~ symbol, colors = "#75a3e7",source = "protein", tickfont = list(size = 12),
+        color = ~ symbol, colors = "#75a3e7",source = "protein_CCLE", tickfont = list(size = 12),
         name = "CCLE",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
       ) %>% layout(
+        title = paste(t2$symbol[1],"(",t2$protein[1],")"),
         xaxis = list(
           title = "Cell lines (CCLE)", showticklabels = TRUE,
           tickangle = 295, showline = TRUE, categoryorder = "array", 

@@ -119,6 +119,11 @@ mRNA <- reactiveValues(
   CCLE_download = NULL
 )
 
+plotmode  <- reactiveValues(
+  mRNA = FALSE,
+  protein = FALSE
+)
+
 protein <- reactiveValues(
   TCGA = FALSE,
   MCLP = FALSE,

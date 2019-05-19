@@ -116,9 +116,81 @@ fn_plot_multiple_mRNA <- function(choice){
     ),
     fluidRow(
     column(width=12,
-           plotlyOutput(outputId = choice, height = "1200px",inline=TRUE)
+           #plotlyOutput(outputId = choice, height = "1200px",inline=TRUE)
+           shiny::uiOutput(outputId = "plot_result_mRNA")
     ),
-    bsModal('mRNA_boxPopUp', '', '', plotlyOutput("mRNA_hover"))
+    bsModal('mRNA_boxPopUp_TCGA', '', '', plotlyOutput("mRNA_hover_TCGA")),
+    bsModal('mRNA_boxPopUp_GTEX', '', '', plotlyOutput("mRNA_hover_GTEX")),
+    bsModal('mRNA_boxPopUp_CCLE', '', '', plotlyOutput("mRNA_hover_CCLE"))
+    )
+  )
+}
+
+fn_plot_result_mRNA1 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "mRNA_TCGA", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "mRNA_GTEX", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "mRNA_CCLE", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_mRNA2 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "mRNA_TCGA", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "mRNA_GTEX", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_mRNA3 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "mRNA_GTEX", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "mRNA_CCLE", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_mRNA4 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "mRNA_TCGA", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "mRNA_CCLE", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_mRNA5 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "mRNA_TCGA", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_mRNA6 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "GTEX", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_mRNA7 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "CCLE", height = "400px",inline=TRUE)
+      )
     )
   )
 }

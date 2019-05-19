@@ -108,9 +108,9 @@ fn_protein_multi_result <- function(list){
               style = 'margin-top: 20px;color: #2196f3',
               shiny::tags$p("Tips: 1. Click the download button to download data in CSV format. 2. Type letters behind search to filter table. 3. Click the arrow in table header to sort the table.")
             ),
-            shiny::uiOutput(outputId = "protein_TCGA"),
-            shiny::uiOutput(outputId = "protein_MCLP"),
-            shiny::uiOutput(outputId = "protein_CCLE")
+            shiny::uiOutput(outputId = "TCGA_protein"),
+            shiny::uiOutput(outputId = "MCLP_protein"),
+            shiny::uiOutput(outputId = "CCLE_protein")
           )
         )
       )
@@ -126,9 +126,80 @@ fn_plot_multiple_protein <- function(choice){
     ),
     fluidRow(
     column(width = 12,
-           plotlyOutput(outputId = choice, height = "1200px",inline=TRUE)
+           shiny::uiOutput(outputId = "plot_result_protein")
     ),
-    bsModal('protein_boxPopUp', '', '', plotlyOutput("protein_hover"))
+    bsModal('protein_boxPopUp_TCGA', '', '', plotlyOutput("protein_hover_TCGA")),
+    bsModal('protein_boxPopUp_MCLP', '', '', plotlyOutput("protein_hover_MCLP")),
+    bsModal('protein_boxPopUp_CCLE', '', '', plotlyOutput("protein_hover_CCLE"))
+    )
+  )
+}
+
+fn_plot_result_protein1 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "protein_TCGA", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "protein_MCLP", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "protein_CCLE", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_protein2 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "protein_TCGA", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "protein_MCLP", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_protein3 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "protein_TCGA", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "protein_CCLE", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_protein4 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "protein_MCLP", height = "400px",inline=TRUE),
+             plotlyOutput(outputId = "protein_CCLE", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_protein5 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "protein_TCGA", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_protein6 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "protein_MCLP", height = "400px",inline=TRUE)
+      )
+    )
+  )
+}
+fn_plot_result_protein7 <- function(){
+  tagList(
+    fluidRow(
+      column(width=12,
+             plotlyOutput(outputId = "protein_CCLE", height = "400px",inline=TRUE)
+      )
     )
   )
 }
