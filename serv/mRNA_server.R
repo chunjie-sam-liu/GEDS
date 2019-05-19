@@ -573,50 +573,50 @@ observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
       }
       p3 <- plotly_empty(source = "main")
       if (t == 1 && g == 1 && c == 1){
-        subplot(
-          TCGA_plot, p3,
-          GTEX_plot, p3,
-          CCLE_plot,
-          nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
-        ) -> plot_result
+        #subplot(
+        #  TCGA_plot, p3,
+        #  GTEX_plot, p3,
+        #  CCLE_plot,
+        #  nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
+        #) -> plot_result
         plotmode$mRNA <-  1
-        output[[choice$mRNA]] <- renderPlotly({plot_result})
+        #output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if (t == 1 && g == 1){
-        subplot(
-          TCGA_plot,p3,GTEX_plot,
-          nrow = 3, heights = c(0.4,0.2,0.4)
-        ) -> plot_result
+        #subplot(
+        #  TCGA_plot,p3,GTEX_plot,
+        #  nrow = 3, heights = c(0.4,0.2,0.4)
+        #) -> plot_result
         plotmode$mRNA <-  2
-        output[[choice$mRNA]] <- renderPlotly({plot_result})
+        #output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(g == 1 && c == 1){
-        subplot(
-          GTEX_plot,p3,CCLE_plot,
-          nrow = 3, heights = c(0.4,0.2,0.4)
-        ) -> plot_result
+        #subplot(
+        #  GTEX_plot,p3,CCLE_plot,
+        #  nrow = 3, heights = c(0.4,0.2,0.4)
+        #) -> plot_result
         plotmode$mRNA <-  3
-        output[[choice$mRNA]] <- renderPlotly({plot_result})
+        #output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(t == 1 && c == 1){
-        subplot(
-          TCGA_plot,p3,CCLE_plot,
-          nrow = 3, heights = c(0.4,0.2,0.4)
-        ) -> plot_result
+        #subplot(
+        #  TCGA_plot,p3,CCLE_plot,
+        #  nrow = 3, heights = c(0.4,0.2,0.4)
+        #) -> plot_result
         plotmode$mRNA <-  4
-        output[[choice$mRNA]] <- renderPlotly({plot_result})
+        #output[[choice$mRNA]] <- renderPlotly({plot_result})
       }
       else if(t == 1){
         plotmode$mRNA <-  5
-        output[[choice$mRNA]] <- renderPlotly({TCGA_plot})
+        #output[[choice$mRNA]] <- renderPlotly({TCGA_plot})
       }
       else if(g == 1){
         plotmode$mRNA <-  6
-        output[[choice$mRNA]] <- renderPlotly({GTEX_plot})
+        #output[[choice$mRNA]] <- renderPlotly({GTEX_plot})
       }
       else if(c == 1){
         plotmode$mRNA <-  7
-        output[[choice$mRNA]] <- renderPlotly({CCLE_plot})
+        #output[[choice$mRNA]] <- renderPlotly({CCLE_plot})
       }
       output$mRNA_hover_TCGA <- renderPlotly({
         eventdat <- event_data('plotly_click', source="mRNA_TCGA") # get event data from source main
