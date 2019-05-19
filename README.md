@@ -13,7 +13,9 @@ miRNA expression is collected from TCGA with tumor and normal tissue in several 
 Quick search and visualization of specific gene expression in multiple cancer types or normal tissues can help researchers to focus on the certain cancer type, tissue or cell line. Then its protein level expression or phosphorylated protein expression can be examined in the cancer type or cell line. Besides, the miRNA expression can be explored to compare the tumor and normal expression. In a word, GEDS is an open access and intuitive web-based platform for searching, visualizing the mRNA, protein and miRNA expression in cancer tissue, cancer cell line and normal tissue. It is helpful for invetigator without bioinformatics skills.
 
 ## Logo
+
 ![GEDS logo](www/img/logo.png)
 
 ## Data set
+
 ![Data set](www/img/combine.png)
