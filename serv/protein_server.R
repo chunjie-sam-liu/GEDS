@@ -55,49 +55,49 @@ observeEvent(c(input$input_protein_set),{
     }
     p3 <- plotly_empty(source = "protein")
     if(t == 1 && m == 1 && c == 1){
-      subplot(
-        TCGA_plot, p3,
-        MCLP_plot, p3,
-        CCLE_plot,
-        nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
-      ) -> plot_result
-      plotmode$protein <-  1
+      #subplot(
+      #  TCGA_plot, p3,
+      #  MCLP_plot, p3,
+      #  CCLE_plot,
+      #  nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
+      #) -> plot_result
+      #plotmode$protein <-  1
       output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(t == 1 && m == 1){
-      subplot(
-        TCGA_plot,p3,MCLP_plot,
-        nrow = 3, heights = c(0.4,0.2,0.4)
-      ) -> plot_result
+      #subplot(
+      #  TCGA_plot,p3,MCLP_plot,
+      #  nrow = 3, heights = c(0.4,0.2,0.4)
+      #) -> plot_result
       plotmode$protein <-  2
-      output[[match$protein]] <- renderPlotly({plot_result})
+      #output[[match$protein]] <- renderPlotly({plot_result})
     }else if(t == 1 && c == 1){
-      subplot(
-        TCGA_plot,p3,CCLE_plot,
-        nrow = 3, heights = c(0.4,0.2,0.4)
-      ) -> plot_result
+      #subplot(
+      #  TCGA_plot,p3,CCLE_plot,
+      #  nrow = 3, heights = c(0.4,0.2,0.4)
+      #) -> plot_result
       plotmode$protein <-  3
-      output[[match$protein]] <- renderPlotly({plot_result})
+      #output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(m == 1 && c == 1){
-      subplot(
-        MCLP_plot,p3,CCLE_plot,
-        nrow = 3, heights = c(0.4,0.2,0.4)
-      ) -> plot_result
+      #subplot(
+      #  MCLP_plot,p3,CCLE_plot,
+      #  nrow = 3, heights = c(0.4,0.2,0.4)
+      #) -> plot_result
       plotmode$protein <-  4
-      output[[match$protein]] <- renderPlotly({plot_result})
+      #output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(t == 1){
       plotmode$protein <-  5
-      output[[match$protein]] <- renderPlotly({TCGA_plot})
+      #output[[match$protein]] <- renderPlotly({TCGA_plot})
     }
     else if(m == 1){
       plotmode$protein <-  6
-      output[[match$protein]] <- renderPlotly({MCLP_plot})
+      #output[[match$protein]] <- renderPlotly({MCLP_plot})
     }
     else if(c == 1){
       plotmode$protein <-  7
-      output[[match$protein]] <- renderPlotly({CCLE_plot})
+      #output[[match$protein]] <- renderPlotly({CCLE_plot})
     }
     output$protein_hover_TCGA <- renderPlotly({
       eventdat <- event_data('plotly_click', source="protein_TCGA")
