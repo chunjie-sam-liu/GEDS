@@ -2,7 +2,7 @@ library(shiny)
 library(plotly)
 library(shinyBS)
 
-example <- readr::read_rds("/home/xiamx/file_for_GEDS_test/example.rds.gz")
+example <- readr::read_rds("/home/xiamx/file_for_GEDS_test/TCGA_example.rds.gz")
 GTEX_example <- readr::read_rds("/home/xiamx/file_for_GEDS_test/GTEX_example.rds.gz")
 CCLE_example <- readr::read_rds("/home/xiamx/file_for_GEDS_test/CCLE_example.rds.gz")
 test.sd <- readr::read_rds("/home/xiamx/file_for_GEDS_test/sd_result/protein/CCLE_sd.rds.gz")
