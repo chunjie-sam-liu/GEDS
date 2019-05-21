@@ -36,7 +36,7 @@ page <- fluidPage(
               class = "img-responsvie",
               style = "height:55px !important; margin-top: -15px"
             )
-          )),
+              )),
                    tabPanel(
                      "Welcome",icon = icon("home"),
                      source(file = file.path(config$wd, "ui", "welcome_ui.R"), local = TRUE)$value
