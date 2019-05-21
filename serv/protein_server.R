@@ -61,8 +61,8 @@ observeEvent(c(input$input_protein_set),{
       #  CCLE_plot,
       #  nrows = 5, titleX = TRUE, titleY = TRUE , heights = c(0.25,0.125,0.25,0.125,0.25)
       #) -> plot_result
-      #plotmode$protein <-  1
-      output[[match$protein]] <- renderPlotly({plot_result})
+      plotmode$protein <-  1
+      #output[[match$protein]] <- renderPlotly({plot_result})
     }
     else if(t == 1 && m == 1){
       #subplot(
@@ -195,6 +195,7 @@ MCLP_protein_result <- function(){
   }
   else{
     MCLP_protein_table_result <<- "blank"
+    MCLP_protein_plot_result <- expr_clean
   }
   return(MCLP_protein_plot_result)
 }
@@ -241,6 +242,7 @@ CCLE_protein_result <- function(){
   }
   else{
     CCLE_protein_table_result <<- "blank"
+    CCLE_protein_plot_result <- expr_clean
   }
   return(CCLE_protein_plot_result)
 }
