@@ -274,7 +274,7 @@ click_plot_protein_TCGA <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "Protein expression (log2)" ,showline = TRUE,hoverformat = '.2f')
+      yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -295,7 +295,7 @@ click_plot_protein_MCLP <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "Protein expression (log2)" ,showline = TRUE,hoverformat = '.2f')
+      yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
@@ -315,7 +315,7 @@ click_plot_protein_CCLE <- function(.expr_clean) {
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "Protein expression (log2)" ,showline = TRUE,hoverformat = '.2f')
+      yaxis = list(title = "Protein expression" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 ###add new
