@@ -26,6 +26,9 @@ observeEvent(c(input$input_protein_set),{
     protein$TCGA <- FALSE
     protein$MCLP <- FALSE
     protein$CCLE <- FALSE
+    print(TCGA_protein_plot_result)
+    print(MCLP_protein_plot_result)
+    print(CCLE_protein_plot_result)
     t <- 0
     m <- 0
     c <- 0
@@ -194,8 +197,7 @@ MCLP_protein_result <- function(){
     )
   }
   else{
-    MCLP_protein_table_result <<- "blank"
-    MCLP_protein_plot_result <- expr_clean
+    MCLP_protein_plot_result <<- "blank"
   }
   return(MCLP_protein_plot_result)
 }
@@ -241,8 +243,7 @@ CCLE_protein_result <- function(){
     )
   }
   else{
-    CCLE_protein_table_result <<- "blank"
-    CCLE_protein_plot_result <- expr_clean
+    CCLE_protein_plot_result <<- "blank"
   }
   return(CCLE_protein_plot_result)
 }
