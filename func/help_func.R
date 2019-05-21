@@ -1,6 +1,5 @@
 # sourced by "help_server.R"
 
-
 # load data ---------------------------------------------------------------
 stat_data <- readr::read_rds(path = file.path(config$database, 'geds-data-stat.rds.gz'))
 
@@ -95,10 +94,11 @@ help_data_table <- function(source) {
 fn_document <- function() {
   column(
     width = 10, offset = 1,
+    # Basic description of GEDS.
     shiny::tags$h3(
       class = "text-left",
       shiny::icon(name = "angle-double-right", class = "fa-fw"),
-      "Document"
+      "Overview"
     ),
     shiny::tags$hr(),
     shiny::tags$p("GEDS is an integrative gene expression platform for human cancer tissues, cancer cell lines and normal tissues with mRNA level, protein level and miRNA."),
@@ -108,6 +108,17 @@ fn_document <- function() {
     shiny::tags$br(),
     shiny::tags$p("Quick search and visualization of specific gene expression in multiple cancer types or normal tissues can help researchers to focus on the certain cancer type, tissue or cell line. Then its protein level expression or phosphorylated protein expression can be examined in the cancer type or cell line. Besides, the miRNA expression can be explored to compare the tumor and normal expression. In a word, GEDS is an open access and intuitive web-based platform for searching, visualizing the mRNA, protein and miRNA expression in cancer tissue, cancer cell line and normal tissue. It is helpful for investigator without bioinformatics skills."),
     shiny::tags$br(),
+    # Method
+    shiny::tags$h4(shiny::icon(name = 'angle-right', class = 'fa-fw'), 'Method'),
+    shiny::tags$dl(
+      class = 'dl-horizon',
+      shiny::tags$p('RNA seq normalization'),
+      shiny::tags$dd(
+        'The intregrated in the GEDS are obtained from Public data. The TCGA data normalized by'
+      )
+    ),
+    shiny::tags$br(),
+    # TCGA data
     shiny::tags$h4(
       shiny::icon(name = "angle-right", class = "fa-fw"),
       "Cancer types (TCGA)"),
@@ -127,6 +138,7 @@ fn_document <- function() {
           )
         )
       )),
+    # GTEx data
     shiny::tags$h4(
       shiny::icon(name = "angle-right", class = "fa-fw"),
       "Normal Tissues data (GTEx)"),
@@ -134,6 +146,7 @@ fn_document <- function() {
       src = "./img/humanbody_low.png",
       class = "center-block img-responsive" ),
     shiny::tags$br(),
+    # Cell line
     shiny::tags$h4(
       shiny::icon(name = "angle-right", class = "fa-fw"),
       "Cell lines data (CCLE and MCLP)"),
