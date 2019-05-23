@@ -114,7 +114,7 @@ fn_document <- function() {
       class = 'dl-horizon',
       shiny::tags$p('RNA seq normalization'),
       shiny::tags$dd(
-        'The intregrated in the GEDS are obtained from Public data. The TCGA data normalized by'
+        'The intregrated in the GEDS are obtained from Public data. The TCGA data normalized by the group.'
       )
     ),
     shiny::tags$br(),
