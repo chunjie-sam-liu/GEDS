@@ -106,17 +106,7 @@ fn_document <- function() {
     shiny::tags$li("Protein level expression is quantified by reverse phase protein array (RPPA). It includes the cancer related ~300 protein and corresponding phosphorylated status. The data are from", shiny::tags$a("The Cancer Proteome Atlas (TCPA)", href = "https://tcpaportal.org/tcpa/", target = "_blank", style = "color:#008176"), "," , shiny::tags$a("MD Anderson Cell Lines Project (MCLP)", href = "https://tcpaportal.org/mclp/#/", target = "_blank", style = "color:#008176"), "and", shiny::tags$a("Cancer Cell Line Encyclopedia (CCLE)", href = "https://portals.broadinstitute.org/ccle", target = "_blank", style = "color:#008176") , "."),
     shiny::tags$li("miRNA expression is collected from", shiny::tags$a("TCGA", href = "https://cancergenome.nih.gov/", target = "_blank", style = "color:#008176"), "with tumor and normal tissue in several cancer types."),
     shiny::tags$br(),
-    shiny::tags$p("Quick search and visualization of specific gene expression in multiple cancer types or normal tissues can help researchers to focus on the certain cancer type, tissue or cell line. Then its protein level expression or phosphorylated protein expression can be examined in the cancer type or cell line. Besides, the miRNA expression can be explored to compare the tumor and normal expression. In a word, GEDS is an open access and intuitive web-based platform for searching, visualizing the mRNA, protein and miRNA expression in cancer tissue, cancer cell line and normal tissue. It is helpful for investigator without bioinformatics skills."),
-    shiny::tags$br(),
-    # Method
-    shiny::tags$h4(shiny::icon(name = 'angle-right', class = 'fa-fw'), 'Method'),
-    shiny::tags$dl(
-      class = 'dl-horizon',
-      shiny::tags$p('RNA seq normalization'),
-      shiny::tags$dd(
-        'The intregrated in the GEDS are obtained from Public data. The TCGA data normalized by the group.'
-      )
-    ),
+    shiny::tags$p("Quick search and visualization of specific gene expression in multiple cancer types or normal tissues can help researchers to focus on the certain cancer type, tissue or cell line. Then its protein level expression or phosphorylated protein expression can be examined in the cancer type or cell line. Besides, the miRNA expression can be explored to compare the tumor and normal expression. These multi-source and multi-platform expression data integrated in GEDS are normalized and removed batch effect across tissue and cell lines by its provider. Therefore the expression level can’t be compared its value directly between tissue and cell lines, but we can arrange tissues according to the expression level and see rank in tissues and cell lines. In a word, GEDS is an open access and intuitive web-based platform for searching, visualizing the mRNA, protein and miRNA expression in cancer tissue, cancer cell line and normal tissue. It is helpful for investigator without bioinformatics skills."),
     shiny::tags$br(),
     # TCGA data
     shiny::tags$h4(
