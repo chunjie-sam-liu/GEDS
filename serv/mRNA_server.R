@@ -282,7 +282,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = order
         ),
-        yaxis = list(title = "FPKM(log2)" ,showline = TRUE,
+        yaxis = list(title = "TPM(log2)" ,showline = TRUE,
                      zeroline = FALSE,hoverformat = '.2f'))
       }
     else{
@@ -422,7 +422,7 @@ click_plot_GTEX <- function(.expr_clean){
         categoryorder = "array", 
         categoryarray = order
       ),
-      yaxis = list(title = "FPKM(log2)" ,showline = TRUE,hoverformat = '.2f')
+      yaxis = list(title = "TPM(log2)" ,showline = TRUE,hoverformat = '.2f')
     )
 }
 
