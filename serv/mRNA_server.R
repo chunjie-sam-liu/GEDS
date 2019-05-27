@@ -233,28 +233,40 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       dplyr::mutate(types = stringr::str_to_title(types))  -> t1
     t1 %>% dplyr::filter(types %in% "Tumor") %>% dplyr::group_by(cancer_types) %>% 
       dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
-    plot_ly(
-      data = t1,
-      x = ~ cancer_types,
-      y = ~ FPKM,
-      type = "box",
-      split = ~ types,
-      color = ~ types, colors = c("midnightblue", "red3"),
-      source = "mRNA_TCGA"
-    ) %>% layout(
-      title = t1$symbol[1],
-      boxmode = "group",
-      xaxis = list(
-        title = "Cancer Types (TCGA)",
-        showticklabels = TRUE,
-        tickangle = 295, tickfont = list(size = 12),
-        showline = TRUE,
-        categoryorder = "array", 
-        categoryarray = order
-      ),
-      yaxis = list(title = "RSEM(log2)" ,showline = TRUE,
-                   zeroline = FALSE,hoverformat = '.2f'),
-      legend = list(orientation = 'h',x = 0.7, y = 1))
+    if(input$mRNA_log == "Log" || is.null(input$mRNA_log)){
+      plot_ly(
+        data = t1, x = ~ cancer_types, y = ~ FPKM,
+        type = "box", split = ~ types, color = ~ types, 
+        colors = c("midnightblue", "red3"), source = "mRNA_TCGA"
+      ) %>% layout(
+        title = t1$symbol[1],
+        boxmode = "group",
+        xaxis = list(
+          title = "Cancer Types (TCGA)", showticklabels = TRUE,
+          tickangle = 295, tickfont = list(size = 12), showline = TRUE,
+          categoryorder = "array", categoryarray = order
+        ),
+        yaxis = list(title = "RSEM (log2)" ,showline = TRUE,
+                     zeroline = FALSE,hoverformat = '.2f'),
+        legend = list(orientation = 'h',x = 0.7, y = 1))
+    }
+    else{
+      plot_ly(
+        data = t1, x = ~ cancer_types, y = ~ exp(FPKM*log(2)),
+        type = "box", split = ~ types, color = ~ types, 
+        colors = c("midnightblue", "red3"), source = "mRNA_TCGA"
+      ) %>% layout(
+        title = t1$symbol[1],
+        boxmode = "group",
+        xaxis = list(
+          title = "Cancer Types (TCGA)", showticklabels = TRUE,
+          tickangle = 295, tickfont = list(size = 12), showline = TRUE,
+          categoryorder = "array", categoryarray = order
+        ),
+        yaxis = list(title = "RSEM" ,showline = TRUE,
+                     zeroline = FALSE,hoverformat = '.2f'),
+        legend = list(orientation = 'h',x = 0.7, y = 1))
+    }
     ###add new
   }
   else{
@@ -270,6 +282,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       t2 %>% dplyr::left_join(mRNA_GTEX_sd2,by="cancer_types") -> t2
       t2 %>% dplyr::group_by(cancer_types) %>% 
         dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
+      if(input$mRNA_log == "Log" || is.null(input$mRNA_log)){
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#cbb255",source = "mRNA_GTEX", tickfont = list(size = 12),
@@ -282,8 +295,25 @@ expr_box_plot_mRNA <-  function(.expr,.type){
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = order
         ),
-        yaxis = list(title = "TPM(log2)" ,showline = TRUE,
+        yaxis = list(title = "TPM (log2)" ,showline = TRUE,
                      zeroline = FALSE,hoverformat = '.2f'))
+      }
+      else{
+        plot_ly(
+          data = t2, x = ~ cancer_types, y = ~ FPKM, type = "box", split = ~ symbol, 
+          color = ~ symbol, colors = "#cbb255",source = "mRNA_GTEX", tickfont = list(size = 12),
+          name = "GTEX",showlegend = FALSE
+        ) %>% layout(
+          boxgap = 0,#boxgroupgap=0,
+          title = t2$symbol[1],
+          xaxis = list(
+            title = "Normal Tissues (GTEx)", showticklabels = TRUE,
+            tickangle = 295, showline = TRUE, categoryorder = "array", 
+            categoryarray = order
+          ),
+          yaxis = list(title = "TPM" ,showline = TRUE,
+                       zeroline = FALSE,hoverformat = '.2f'))
+      }
       }
     else{
       mRNA_CCLE_sd %>% dplyr::filter(symbol %in% t2$symbol[1]) %>% 
@@ -293,6 +323,7 @@ expr_box_plot_mRNA <-  function(.expr,.type){
       t2 %>% dplyr::left_join(mRNA_GTEX_sd2,by="cancer_types") -> t2
       t2 %>% dplyr::group_by(cancer_types) %>% 
         dplyr::slice(3) %>% dplyr::arrange(desc(FPKM)) %>% .$cancer_types -> order
+      if(input$mRNA_log == "Log" || is.null(input$mRNA_log)){
       plot_ly(
         data = t2, x = ~ cancer_types, y = ~ log2(FPKM+1), type = "box", split = ~ symbol, 
         color = ~ symbol, colors = "#ffc0cb",source = "mRNA_CCLE", tickfont = list(size = 12),
@@ -304,8 +335,24 @@ expr_box_plot_mRNA <-  function(.expr,.type){
           tickangle = 295, showline = TRUE, categoryorder = "array", 
           categoryarray = order
         ),
-        yaxis = list(title = "FPKM(log2)" ,showline = TRUE,
+        yaxis = list(title = "FPKM (log2)" ,showline = TRUE,
                      zeroline = FALSE,hoverformat = '.2f'))
+      }
+      else{
+        plot_ly(
+          data = t2, x = ~ cancer_types, y = ~ FPKM, type = "box", split = ~ symbol, 
+          color = ~ symbol, colors = "#ffc0cb",source = "mRNA_CCLE", tickfont = list(size = 12),
+          name = "CCLE",showlegend = FALSE#,error_y = ~list(array = sd,color = '#000000')
+        ) %>% layout(
+          title = t2$symbol[1],
+          xaxis = list(
+            title = "Cell lines (CCLE)", showticklabels = TRUE,
+            tickangle = 295, showline = TRUE, categoryorder = "array", 
+            categoryarray = order
+          ),
+          yaxis = list(title = "FPKM" ,showline = TRUE,
+                       zeroline = FALSE,hoverformat = '.2f'))
+      }
     }
     ###add new
   }
@@ -479,7 +526,7 @@ observeEvent(event_data("plotly_click", source = "mRNA_GTEX"), {
 observeEvent(event_data("plotly_click", source = "mRNA_CCLE"), {
   toggleModal(session, modalId = "mRNA_boxPopUp_CCLE", toggle = "toggle")
 })
-observeEvent(c(input$select_mRNA_result,status$mRNA_trigger), {
+observeEvent(c(input$select_mRNA_result,status$mRNA_trigger,input$mRNA_log), {
   if(length(input$select_mRNA_result)>0 && status$mRNA_set){
     ###add new
     TCGA_mRNA_plot_result %>% 

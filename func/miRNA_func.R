@@ -124,7 +124,16 @@ fn_plot_multiple_miRNA <- function(choice){
   tagList(
     fluidRow(
       style = 'margin-top: 20px',
-      column(width = 12,
+      column(width = 2,
+             radioGroupButtons(
+               inputId = "miRNA_log",#width = "50%" ,
+               label = "Scale", size = "sm",
+               choices = c("Log", "Linear"),
+               checkIcon = list(yes = icon("ok", lib = "glyphicon"),
+                 no = icon("remove",lib = "glyphicon"))
+             )
+      ),
+      column(width = 10,
            shiny::tags$p(shiny::tags$a("Tips: Click this tip to view full name of cancer types in document.", id = "detail"))
       )
     ),

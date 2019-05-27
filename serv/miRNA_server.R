@@ -157,27 +157,36 @@ expr_box_plot_mirna <-  function(.expr){
     dplyr::mutate(types = stringr::str_to_title(types))  -> t1
   t1 %>% dplyr::filter(types %in% "Tumor") %>% dplyr::group_by(cancer_types) %>% 
     dplyr::slice(3) %>% dplyr::arrange(desc(TPM)) %>% .$cancer_types -> order
+  if(input$miRNA_log == "Log" || is.null(input$miRNA_log)){
   plot_ly(
-    data = t1,
-    x = ~ cancer_types,
-    y = ~ TPM,
-    type = "box",
-    split = ~ types,
-    color = ~ types, colors = c("midnightblue", "red3"),
-    source = "miRNA"
+    data = t1, x = ~ cancer_types, y = ~ TPM, type = "box", split = ~ types, 
+    color = ~ types, colors = c("midnightblue", "red3"), source = "miRNA"
   ) %>% layout(
     title = t1$symbol[1],
     boxmode = "group",
     xaxis = list(
-      title = "Cancer Types (TCGA)",
-      showticklabels = TRUE,
-      tickangle = 295, tickfont = list(size = 12),
-      showline = TRUE,
-      categoryorder = "array", 
-      categoryarray = order
+      title = "Cancer Types (TCGA)", showticklabels = TRUE,
+      tickangle = 295, tickfont = list(size = 12), showline = TRUE,
+      categoryorder = "array", categoryarray = order
     ),
     yaxis = list(title = "RSEM(log2)" ,showline = TRUE,hoverformat = '.2f'),
     legend = list(orientation = 'h',x = 0.7, y = 1.2))
+  }
+  else{
+    plot_ly(
+      data = t1, x = ~ cancer_types, y = ~ exp(TPM*log(2)), type = "box", split = ~ types, 
+      color = ~ types, colors = c("midnightblue", "red3"), source = "miRNA"
+    ) %>% layout(
+      title = t1$symbol[1],
+      boxmode = "group",
+      xaxis = list(
+        title = "Cancer Types (TCGA)", showticklabels = TRUE,
+        tickangle = 295, tickfont = list(size = 12), showline = TRUE,
+        categoryorder = "array", categoryarray = order
+      ),
+      yaxis = list(title = "RSEM" ,showline = TRUE,hoverformat = '.2f'),
+      legend = list(orientation = 'h',x = 0.7, y = 1.2))
+  }
 }
 expr_clean_datatable_mirna <- function(.expr_clean,.title) {
   DT::datatable(
@@ -289,7 +298,7 @@ observe(validate_input_miRNA_set())
 observeEvent(event_data("plotly_click", source = "miRNA"), {
   toggleModal(session, modalId = "miRNA_boxPopUp", toggle = "toggle")
 })
-observeEvent(c(input$select_miRNA_result,status$miRNA_trigger), {
+observeEvent(c(input$select_miRNA_result,status$miRNA_trigger,input$miRNA_log), {
   if(length(input$select_miRNA_result) > 0 && status$miRNA_valid){
     choice$miRNA <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene
     miRNA$TCGA_table <- total_miRNA_symbol %>% dplyr::filter(symbol %in% input$select_miRNA_result)  %>% .$gene %>% paste(.,"table",sep = "")
