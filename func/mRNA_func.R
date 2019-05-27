@@ -113,7 +113,7 @@ fn_plot_multiple_mRNA <- function(choice){
     column(width = 2,
            radioGroupButtons(
              inputId = "mRNA_log",#width = "50%" ,
-             label = "Scale", 
+             label = "Scale", size = "sm",
              choices = c("Log", "Linear"),
              checkIcon = list(yes = icon("ok", lib = "glyphicon"),
                               no = icon("remove",lib = "glyphicon"))
