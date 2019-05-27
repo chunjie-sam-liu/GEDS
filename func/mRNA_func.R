@@ -111,7 +111,7 @@ fn_plot_multiple_mRNA <- function(choice){
     fluidRow(
     style = 'margin-top: 20px',
     column(width = 2,
-           sliderTextInput(
+           radioGroupButtons(
              inputId = "mRNA_log",#width = "50%" ,
              label = "Scale", 
              choices = c("Log", "Linear"),
