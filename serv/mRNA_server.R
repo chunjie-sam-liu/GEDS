@@ -466,6 +466,7 @@ click_plot_GTEX <- function(.expr_clean){
       xaxis = list(
         title = "Normal Tissues",
         showticklabels = FALSE,
+        showline= TRUE,
         categoryorder = "array", 
         categoryarray = order
       ),
@@ -486,6 +487,7 @@ click_plot_CCLE <- function(.expr_clean){
       xaxis = list(
         title = "Cell lines",
         showticklabels = FALSE,
+        showline= TRUE,
         categoryorder = "array", 
         categoryarray = order
       ),

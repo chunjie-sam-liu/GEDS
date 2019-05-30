@@ -140,7 +140,9 @@ fn_plot_result_protein1 <- function(){
     fluidRow(
       column(width=12,
              plotlyOutput(outputId = "protein_TCGA", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "protein_MCLP", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "protein_CCLE", height = "400px",inline=TRUE)
       )
     )
@@ -151,6 +153,7 @@ fn_plot_result_protein2 <- function(){
     fluidRow(
       column(width=12,
              plotlyOutput(outputId = "protein_TCGA", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "protein_MCLP", height = "400px",inline=TRUE)
       )
     )
@@ -161,6 +164,7 @@ fn_plot_result_protein3 <- function(){
     fluidRow(
       column(width=12,
              plotlyOutput(outputId = "protein_TCGA", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "protein_CCLE", height = "400px",inline=TRUE)
       )
     )
@@ -171,6 +175,7 @@ fn_plot_result_protein4 <- function(){
     fluidRow(
       column(width=12,
              plotlyOutput(outputId = "protein_MCLP", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "protein_CCLE", height = "400px",inline=TRUE)
       )
     )

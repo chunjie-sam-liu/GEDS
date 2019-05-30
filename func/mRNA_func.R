@@ -140,7 +140,9 @@ fn_plot_result_mRNA1 <- function(){
     fluidRow(
       column(width=12,
              plotlyOutput(outputId = "mRNA_TCGA", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "mRNA_GTEX", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "mRNA_CCLE", height = "400px",inline=TRUE)
       )
     )
@@ -151,6 +153,7 @@ fn_plot_result_mRNA2 <- function(){
     fluidRow(
       column(width=12,
              plotlyOutput(outputId = "mRNA_TCGA", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "mRNA_GTEX", height = "400px",inline=TRUE)
       )
     )
@@ -161,6 +164,7 @@ fn_plot_result_mRNA3 <- function(){
     fluidRow(
       column(width=12,
              plotlyOutput(outputId = "mRNA_GTEX", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "mRNA_CCLE", height = "400px",inline=TRUE)
       )
     )
@@ -171,6 +175,7 @@ fn_plot_result_mRNA4 <- function(){
     fluidRow(
       column(width=12,
              plotlyOutput(outputId = "mRNA_TCGA", height = "400px",inline=TRUE),
+             shiny::tags$hr(),
              plotlyOutput(outputId = "mRNA_CCLE", height = "400px",inline=TRUE)
       )
     )
