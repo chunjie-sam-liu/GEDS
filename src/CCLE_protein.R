@@ -42,6 +42,20 @@ tissue %>% dplyr::mutate(
         .x = tissue,
         .f = function(.x){
             CCLE_new %>% dplyr::filter(tissue %in% .x) %>% dplyr::select(-tissue) %>% 
+                tidyr::gather(key=protein,value=expr,-Cell_line) %>% 
+                dplyr::rename(antibody=protein) %>% 
+                dplyr::left_join(new_info_final,by="antibody") %>% 
+                dplyr::select(Cell_line,symbol,protein,expr)
+        }
+      )
+    ) %>% dplyr::mutate(tissue = tolower(tissue)) -> new
+new %>% readr::write_rds("CCLE_protein_expr.rds.gz",compress="gz")
+
+tissue %>% dplyr::mutate(
+      expr = purrr::map(
+        .x = tissue,
+        .f = function(.x){
+            CCLE_new %>% dplyr::filter(tissue %in% .x) %>% dplyr::select(-tissue) %>% 
             tidyr::gather(key=protein,value=expr,-Cell_line) %>% dplyr::select(-Cell_line) -> a
             a %>% dplyr::select(protein) %>% dplyr::distinct() %>% dplyr::rename(antibody=protein) -> antibody
             antibody %>% dplyr::mutate(

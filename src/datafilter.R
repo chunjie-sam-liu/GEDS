@@ -2,7 +2,7 @@ TCGA %>% dplyr::mutate(
     expr = purrr::map(
       .x = expr,
       .f = function(.x) {
-        .x %>% dplyr::filter(symbol %in% a$symbol) -> .xx
+        .x %>% dplyr::filter(symbol != "?") -> .xx
         .xx %>% names %>% .[c(-1,-2)] -> .barcode
         .xx %>% dplyr::mutate(tmp = mRNA_symbol$symbol) %>% dplyr::select(symbol = tmp ,entrez_id, .barcode)
       }
