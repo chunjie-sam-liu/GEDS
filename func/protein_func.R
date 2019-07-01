@@ -17,7 +17,7 @@ fn_panel_protein <- function(.choice){
     width = 10,offset = 1,
     shiny::tags$p(
       style = "font-size: 15px; color: red",
-      "Protein level expression is quantified by reverse phase protein array (RPPA). It includes the cancer related ~200 protein and corresponding phosphorylated status."
+      "Protein level expression is quantified by reverse phase protein array (RPPA). It includes the cancer related ~300 protein and corresponding phosphorylated status."
     )
   ))
 }
